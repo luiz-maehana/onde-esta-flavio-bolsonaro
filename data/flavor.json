@@ -1,0 +1,75 @@
+{
+  "locations": {
+    "aeroporto": { "name": "Aeroporto", "role": "Comissária de bordo", "outfit": { "clothes": "uniform", "colors": ["#1D3557", "#F4F1EA", "#C8102E"], "hair": "bun", "prop": "name_tag" } },
+    "hotel": { "name": "Hotel", "role": "Recepcionista", "outfit": { "clothes": "vest", "colors": ["#6D1A36", "#F4F1EA"], "prop": "name_tag" } },
+    "banco": { "name": "Banco", "role": "Gerente do banco", "outfit": { "clothes": "suit", "colors": ["#2B2D42", "#F4F1EA", "#8D99AE"], "glasses": 0.6, "prop": "pin" } },
+    "mercado": { "name": "Mercado", "role": "Feirante", "outfit": { "clothes": "apron", "colors": ["#2A9D8F", "#E9C46A"], "headwear": "driver_cap", "headwear_colors": ["#3A5A40", "#24361F"] } },
+    "museu": { "name": "Museu", "role": "Guia do museu", "outfit": { "clothes": "cardigan", "colors": ["#6D597A", "#F4F1EA", "#C8102E"], "prop": "lanyard", "glasses": 0.4 } },
+    "porto": { "name": "Porto", "role": "Marinheiro", "outfit": { "clothes": "striped", "colors": ["#F4F1EA", "#1D3557"], "headwear": "sailor_cap", "headwear_colors": ["#F4F1EA", "#141414"] } },
+    "restaurante": { "name": "Restaurante", "role": "Garçom", "outfit": { "clothes": "vest", "colors": ["#141414", "#F4F1EA"], "prop": "bowtie" } },
+    "biblioteca": { "name": "Biblioteca", "role": "Bibliotecária", "outfit": { "clothes": "cardigan", "colors": ["#A3B18A", "#F4F1EA"], "glasses": 1.0, "hair": "bun", "min_age": 1 } },
+    "shopping": { "name": "Shopping", "role": "Vendedor de loja", "outfit": { "clothes": "polo", "colors": ["#E76F51", "#F4F1EA"], "prop": "name_tag" } },
+    "embaixada": { "name": "Embaixada", "role": "Diplomata", "outfit": { "clothes": "suit", "colors": ["#14213D", "#F4F1EA", "#FCA311"], "prop": "pin" } },
+    "cartorio": { "name": "Cartório", "role": "Tabelião", "outfit": { "clothes": "suit", "colors": ["#3D405B", "#F4F1EA", "#81B29A"], "glasses": 0.8, "min_age": 2 } },
+    "taxi": { "name": "Ponto de Táxi", "role": "Taxista", "outfit": { "clothes": "shirt", "colors": ["#F4D35E", "#F4F1EA"], "headwear": "driver_cap", "headwear_colors": ["#3D405B", "#22253A"] } }
+  },
+  "cold_trail": [
+    "Senador? Aqui? Não vi ninguém de sobretudo vermelho, não.",
+    "Desculpe, nenhum brasileiro fugindo de microfone passou por aqui hoje.",
+    "Hmm... não. O único político que vi aqui hoje foi num outdoor.",
+    "Ninguém com esse perfil por aqui. Tem certeza de que é a cidade certa?",
+    "Nunca vi esse homem. E olha que eu vejo de tudo."
+  ],
+  "near": [
+    "Cuidado! Um sujeito de chapéu e sobretudo passou correndo agorinha!",
+    "Ele está na cidade, tenho certeza. Ouvi alguém dizendo 'sem comentários' ali perto.",
+    "Ele está aqui! Vi um assessor carregando uma mala cheia de panetones.",
+    "Está pertinho! Deixou cair um bilhete escrito 'Zero Um' no chão.",
+    "Se eu fosse você, me apressava. Ele perguntou onde fica a saída mais próxima."
+  ],
+  "taunts": [
+    "Bilhete deixado no balcão: 'Vocês nunca vão me pegar! Ass.: 01'",
+    "Rabiscado num guardanapo: 'Sem comentários. — F.'",
+    "Recado na secretária eletrônica: 'Ô, repórter, desiste! Kkkkk'",
+    "Post-it amarelo: 'Fui ali e já volto (não volto).'"
+  ],
+  "gags": [
+    { "text": "Um assessor te ofereceu um cafezinho. Durou duas horas.", "hours": 2 },
+    { "text": "Você foi adicionado a um grupo de WhatsApp da família e perdeu uma hora lendo correntes.", "hours": 1 },
+    { "text": "Uma motociata bloqueou a rua. Você esperou uma hora para atravessar.", "hours": 1 },
+    { "text": "Alguém te mandou um link de live de quatro horas. Você assistiu só uma.", "hours": 1 },
+    { "text": "Um carro preto com vidros escuros te seguiu e você deu uma volta enorme para despistar.", "hours": 2 },
+    { "text": "Um advogado te entregou uma notificação extrajudicial de 80 páginas. Você leu tudo.", "hours": 2 }
+  ],
+  "sleep": [
+    "Já passa das onze. Você dorme num hotel barato até as 7h.",
+    "Exausto, você cochila num banco de rodoviária até de manhã.",
+    "Hora de dormir. A redação só paga diária até as 23h."
+  ],
+  "ranks": [
+    { "title": "Estagiário(a)", "min_cases": 0, "route_len": 4 },
+    { "title": "Repórter Júnior", "min_cases": 1, "route_len": 5 },
+    { "title": "Repórter", "min_cases": 3, "route_len": 5 },
+    { "title": "Repórter Sênior", "min_cases": 5, "route_len": 6 },
+    { "title": "Editor(a)-Chefe", "min_cases": 8, "route_len": 7 }
+  ],
+  "headlines": {
+    "win": [
+      "FURO! {player} encontra Flávio em {city} e finalmente faz a pergunta",
+      "PEGO NO FLAGRA: senador é achado {spot} em {city}",
+      "EXCLUSIVO: {player} arranca 'sem comentários' cara a cara em {city}"
+    ],
+    "no_pauta": [
+      "ESCAPOU! Sem pauta aprovada, {player} vê o senador fugir em {city}",
+      "DE NOVO NÃO: Flávio escorrega pelos dedos da imprensa em {city}"
+    ],
+    "wrong_pauta": [
+      "VEXAME! {player} entrevista o disfarce errado e o senador foge em {city}",
+      "BARRIGA: jornal publica foto do sósia errado em {city}"
+    ],
+    "timeout": [
+      "PRAZO ESGOTADO: edição de domingo sai sem o furo de {player}",
+      "SUMIU DE VEZ: rastro do senador esfria após uma semana de buscas"
+    ]
+  }
+}

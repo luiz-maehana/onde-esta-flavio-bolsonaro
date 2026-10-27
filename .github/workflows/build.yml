@@ -1,0 +1,108 @@
+name: Build e publicação
+
+# Push na main: testa, exporta Web + Windows e publica a versão Web no
+# GitHub Pages. Tag v* (ex.: v1.0.0): também cria uma Release com o .exe.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.7.2
+  GODOT_URL: https://github.com/godotengine/godot/releases/download/4.7.2-stable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache do Godot e templates
+        id: cache-godot
+        uses: actions/cache@v4
+        with:
+          path: ~/godot-cache
+          key: godot-${{ env.GODOT_VERSION }}
+
+      - name: Baixar Godot e templates
+        if: steps.cache-godot.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot-cache
+          cd ~/godot-cache
+          curl -sSL -o godot.zip "$GODOT_URL/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip && rm godot.zip
+          curl -sSL -o templates.tpz "$GODOT_URL/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q templates.tpz && rm templates.tpz
+          # só os templates usados aqui (o pacote completo tem 1,3 GB)
+          find templates -type f ! -name 'web_nothreads_*' ! -name 'windows_*_x86_64*' ! -name 'version.txt' -delete
+
+      - name: Instalar Godot
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          cp ~/godot-cache/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+          ln -s ~/godot-cache/Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
+
+      - name: Importar assets
+        run: godot --headless --path . --import
+
+      - name: Testes
+        run: godot --headless --path . --script res://tests/run_tests.gd
+
+      - name: Exportar Web
+        run: |
+          mkdir -p build/web
+          godot --headless --path . --export-release "Web" build/web/index.html
+          test -f build/web/index.html
+
+      - name: Exportar Windows
+        run: |
+          mkdir -p build/windows
+          godot --headless --path . --export-release "Windows Desktop" build/windows/OndeEstaFlavio.exe
+          test -f build/windows/OndeEstaFlavio.exe
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: OndeEstaFlavio-windows
+          path: build/windows/OndeEstaFlavio.exe
+
+  deploy:
+    # o ambiente github-pages só aceita deploy da main por padrão
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: OndeEstaFlavio-windows
+      - name: Criar release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" OndeEstaFlavio.exe \
+            --repo "$GITHUB_REPOSITORY" --title "${GITHUB_REF_NAME}" \
+            --notes "Versão Windows: baixe OndeEstaFlavio.exe e abra. Para jogar no navegador: https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/"

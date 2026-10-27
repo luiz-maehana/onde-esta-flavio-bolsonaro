@@ -1,0 +1,288 @@
+[
+  {
+    "id": "brasilia", "name": "Brasília", "country": "Brasil",
+    "lon": -47.9, "lat": -15.8, "coastal": false, "landmark": "twin",
+    "palette": ["#7EC8E3", "#E8E2D0", "#009C3B"],
+    "description": "A capital planejada em forma de avião. Duas torres gêmeas, duas cúpulas e muito ar seco — e um gabinete no Senado com a luz apagada.",
+    "clues": [
+      "Ele disse que precisava voltar para o Planalto Central antes que notassem a cadeira vazia.",
+      "Perguntou se ainda dava para pegar o Eixo Monumental sem trânsito.",
+      "Comentou que lá o ar é tão seco que até a assessoria desidrata.",
+      "Queria saber onde ficam as duas torres gêmeas do Congresso, projetadas por Niemeyer.",
+      "Falou que ia para a cidade com formato de avião, com bandeira verde e amarela na mala."
+    ]
+  },
+  {
+    "id": "rio", "name": "Rio de Janeiro", "country": "Brasil",
+    "lon": -43.2, "lat": -22.9, "coastal": true, "landmark": "statue_arms",
+    "palette": ["#59B7E8", "#F2C14E", "#2E8B57"],
+    "description": "Cidade Maravilhosa, terra natal do Zero Um. Cristo de braços abertos, praia lotada e um biscoito que ninguém chama de bolacha.",
+    "clues": [
+      "Disse que estava com saudade de casa e de um biscoito de polvilho na praia.",
+      "Perguntou se o Cristo Redentor ainda estava de braços abertos para ele.",
+      "Queria saber o horário do bondinho do Pão de Açúcar.",
+      "Falou que ia passar na Barra da Tijuca para 'resolver umas coisas'.",
+      "Pediu dicas de bloco de carnaval sem fotógrafo."
+    ]
+  },
+  {
+    "id": "saopaulo", "name": "São Paulo", "country": "Brasil",
+    "lon": -46.6, "lat": -23.5, "coastal": false, "landmark": "spire",
+    "palette": ["#9BB0C1", "#6D6D6D", "#C8102E"],
+    "description": "A selva de pedra que nunca dorme. Trânsito infinito, pastel de feira e um prédio vermelho suspenso sobre a Avenida Paulista.",
+    "clues": [
+      "Perguntou onde fica o museu vermelho pendurado sobre a Avenida Paulista.",
+      "Reclamou que ia pegar trânsito na Marginal de novo.",
+      "Queria comer um pastel na feira e tomar caldo de cana.",
+      "Disse que ia para a maior cidade do Brasil, onde 'ninguém repara em ninguém'.",
+      "Comentou que ia de garoa e de casaco, bem paulistano."
+    ]
+  },
+  {
+    "id": "miami", "name": "Miami", "country": "Estados Unidos",
+    "lon": -80.2, "lat": 25.8, "coastal": true, "landmark": "palms",
+    "palette": ["#FF9EC7", "#F7E7CE", "#00B2A9"],
+    "description": "Prédios art déco em tons pastel, palmeiras e mais brasileiro por metro quadrado do que em muita capital nacional.",
+    "clues": [
+      "Disse que ia para onde todo brasileiro vai fazer compras com dólar.",
+      "Perguntou se em South Beach ainda tinha prédio art déco cor-de-rosa.",
+      "Queria saber se lá na Flórida aceitam Pix.",
+      "Comentou que ia encontrar uns amigos que 'se mudaram por motivos de força maior'.",
+      "Falou que precisava de bermuda florida e protetor solar fator 100."
+    ]
+  },
+  {
+    "id": "orlando", "name": "Orlando", "country": "Estados Unidos",
+    "lon": -81.4, "lat": 28.5, "coastal": false, "landmark": "castle",
+    "palette": ["#87CEEB", "#E6E0F8", "#4169E1"],
+    "description": "Capital mundial dos parques temáticos. Filas de duas horas, orelhas de rato e um castelo de conto de fadas.",
+    "clues": [
+      "Perguntou quanto tempo de fila tem para tirar foto com o rato mais famoso do mundo.",
+      "Disse que ia para os parques temáticos na Flórida 'para relaxar'.",
+      "Queria saber se o castelo da princesa tinha saída de emergência.",
+      "Comprou um par de orelhas de rato e pagou em dólar.",
+      "Falou que ia numa montanha-russa para fugir das perguntas difíceis."
+    ]
+  },
+  {
+    "id": "newyork", "name": "Nova York", "country": "Estados Unidos",
+    "lon": -74.0, "lat": 40.7, "coastal": true, "landmark": "statue_torch",
+    "palette": ["#A7C7E7", "#5A5A6E", "#3CB371"],
+    "description": "A Big Apple. Arranha-céus, táxis amarelos e uma estátua verde segurando uma tocha no porto.",
+    "clues": [
+      "Perguntou como chegar na estátua verde que segura uma tocha.",
+      "Queria um táxi amarelo e um cachorro-quente na Times Square.",
+      "Disse que ia para a Big Apple, mas que não come maçã.",
+      "Comentou que precisava passar em Wall Street 'para ver umas aplicações'.",
+      "Queria saber se no Central Park dá para se esconder atrás de uma árvore."
+    ]
+  },
+  {
+    "id": "washington", "name": "Washington", "country": "Estados Unidos",
+    "lon": -77.0, "lat": 38.9, "coastal": false, "landmark": "dome",
+    "palette": ["#B0D4F1", "#F5F5F5", "#B22234"],
+    "description": "Capital dos Estados Unidos. Cúpula branca do Capitólio, um obelisco gigante e muita gente de terno falando em código.",
+    "clues": [
+      "Disse que ia para a capital dos Estados Unidos pedir um conselho a uns amigos de terno.",
+      "Perguntou se dava para visitar a Casa Branca sem agendar.",
+      "Queria ver o Capitólio, aquele prédio com cúpula branca.",
+      "Falou em bandeira de listras vermelhas e brancas com estrelas num canto azul.",
+      "Comentou que lá também tem Senado, 'mas com menos emoção'."
+    ]
+  },
+  {
+    "id": "mexico", "name": "Cidade do México", "country": "México",
+    "lon": -99.1, "lat": 19.4, "coastal": false, "landmark": "pyramid_step",
+    "palette": ["#F4A261", "#E9C46A", "#2A9D8F"],
+    "description": "Metrópole construída sobre a antiga Tenochtitlán. Pirâmides astecas, mariachis e taco no café da manhã.",
+    "clues": [
+      "Perguntou onde comprar um sombrero gigante e quanto custa em pesos mexicanos.",
+      "Queria subir a Pirâmide do Sol em Teotihuacán.",
+      "Disse que ia para a capital dos mariachis.",
+      "Falou de uma bandeira verde, branca e vermelha com uma águia comendo uma cobra.",
+      "Comentou que ia provar taco al pastor e tequila."
+    ]
+  },
+  {
+    "id": "buenosaires", "name": "Buenos Aires", "country": "Argentina",
+    "lon": -58.4, "lat": -34.6, "coastal": true, "landmark": "obelisk",
+    "palette": ["#74ACDF", "#F6F4EE", "#F6B40E"],
+    "description": "A Paris da América do Sul. Tango em San Telmo, bife de chorizo e um obelisco branco no meio da avenida mais larga do mundo.",
+    "clues": [
+      "Queria trocar reais por pesos argentinos — 'pelo blue, de preferência'.",
+      "Perguntou onde aprender tango em San Telmo.",
+      "Falou de uma bandeira azul-celeste e branca com um sol no meio.",
+      "Disse que ia comer bife de chorizo com doce de leite de sobremesa.",
+      "Queria tirar foto no Obelisco da Avenida 9 de Julho."
+    ]
+  },
+  {
+    "id": "lisboa", "name": "Lisboa", "country": "Portugal",
+    "lon": -9.1, "lat": 38.7, "coastal": true, "landmark": "bridge",
+    "palette": ["#FFE0B5", "#F4F1EA", "#C1440E"],
+    "description": "Sete colinas, bonde amarelo, fado e uma ponte vermelha sobre o Tejo que parece prima da Golden Gate.",
+    "clues": [
+      "Perguntou se pastel de Belém é igual a pastel de feira (não é).",
+      "Disse que ia para a terra do fado e do bacalhau.",
+      "Queria pegar o elétrico 28 nas colinas.",
+      "Falou em euros e numa bandeira verde e vermelha com um escudo.",
+      "Comentou que lá 'pelo menos falam português, mas com outro sotaque'."
+    ]
+  },
+  {
+    "id": "madri", "name": "Madri", "country": "Espanha",
+    "lon": -3.7, "lat": 40.4, "coastal": false, "landmark": "arch",
+    "palette": ["#FFD39B", "#F0E6D2", "#AA151B"],
+    "description": "Capital espanhola de jantares às onze da noite, museus de pintura e um portão monumental no meio da praça.",
+    "clues": [
+      "Perguntou a que horas se janta por lá — 'onze da noite está bom'.",
+      "Queria visitar o Museu do Prado.",
+      "Falou de uma bandeira vermelha e amarela.",
+      "Disse que ia comer churros com chocolate e paella.",
+      "Comentou que precisava de umas aulas de flamenco."
+    ]
+  },
+  {
+    "id": "paris", "name": "Paris", "country": "França",
+    "lon": 2.35, "lat": 48.85, "coastal": false, "landmark": "tower",
+    "palette": ["#C9D6EA", "#E8DCCB", "#7B6D8D"],
+    "description": "Cidade-luz. Torre de ferro, croissant amanteigado e garçons que fingem não entender seu francês.",
+    "clues": [
+      "Perguntou como se diz 'sem comentários' em francês.",
+      "Queria subir na torre de ferro mais famosa do mundo.",
+      "Falou de uma bandeira azul, branca e vermelha em listras verticais.",
+      "Disse que ia comer croissant e ver a Mona Lisa no Louvre.",
+      "Comentou que ia passear de barco pelo Sena."
+    ]
+  },
+  {
+    "id": "londres", "name": "Londres", "country": "Reino Unido",
+    "lon": -0.12, "lat": 51.5, "coastal": false, "landmark": "clock",
+    "palette": ["#B8C4CC", "#8B8378", "#C8102E"],
+    "description": "Chá das cinco, ônibus vermelho de dois andares e uma torre de relógio que nunca atrasa (ao contrário das respostas do senador).",
+    "clues": [
+      "Queria trocar dinheiro por libras esterlinas.",
+      "Perguntou a que horas é o chá das cinco.",
+      "Disse que ia ver o Big Ben e andar de ônibus vermelho de dois andares.",
+      "Falou numa bandeira com cruzes azul, branca e vermelha.",
+      "Comentou que ia levar guarda-chuva porque lá chove sempre."
+    ]
+  },
+  {
+    "id": "roma", "name": "Roma", "country": "Itália",
+    "lon": 12.5, "lat": 41.9, "coastal": false, "landmark": "colosseum",
+    "palette": ["#FFDAB9", "#E3C9A8", "#B5651D"],
+    "description": "A Cidade Eterna. Coliseu, fontes onde se jogam moedas e massa al dente em toda esquina.",
+    "clues": [
+      "Perguntou se jogar moeda na Fontana di Trevi resolve problema na Justiça.",
+      "Queria ver o Coliseu e os gladiadores fantasiados.",
+      "Falou de uma bandeira verde, branca e vermelha em listras verticais.",
+      "Disse que ia comer carbonara 'sem creme de leite, senão os italianos brigam'.",
+      "Comentou que ia passar no Vaticano pedir uma bênção."
+    ]
+  },
+  {
+    "id": "budapeste", "name": "Budapeste", "country": "Hungria",
+    "lon": 19.04, "lat": 47.5, "coastal": false, "landmark": "dome",
+    "palette": ["#C6D8E8", "#EDE3D1", "#CD2A3E"],
+    "description": "Pérola do Danúbio. Parlamento neogótico às margens do rio, banhos termais e um governo que o senador admira.",
+    "clues": [
+      "Perguntou o câmbio de real para florim húngaro.",
+      "Disse que ia visitar o Parlamento à beira do Danúbio.",
+      "Queria tomar banho nas termas de Széchenyi.",
+      "Falou de uma bandeira vermelha, branca e verde em listras horizontais.",
+      "Comentou que ia visitar 'um primeiro-ministro amigo da família'."
+    ]
+  },
+  {
+    "id": "jerusalem", "name": "Jerusalém", "country": "Israel",
+    "lon": 35.2, "lat": 31.8, "coastal": false, "landmark": "golden_dome",
+    "palette": ["#F5DEB3", "#E8D9B5", "#D4AF37"],
+    "description": "Cidade milenar de muralhas de pedra clara e uma cúpula dourada que brilha ao sol.",
+    "clues": [
+      "Disse que ia para a Cidade Velha, cercada de muralhas de pedra.",
+      "Perguntou o câmbio do shekel.",
+      "Queria ver a cúpula dourada que brilha ao sol.",
+      "Falou de uma bandeira branca com duas faixas azuis e uma estrela no meio.",
+      "Comentou que ia boiar no Mar Morto, 'que de morto não tem nada'."
+    ]
+  },
+  {
+    "id": "dubai", "name": "Dubai", "country": "Emirados Árabes Unidos",
+    "lon": 55.3, "lat": 25.2, "coastal": true, "landmark": "burj",
+    "palette": ["#FFC97A", "#E8D4B0", "#C0A062"],
+    "description": "Arranha-céus no deserto, ilhas em forma de palmeira e o prédio mais alto do mundo apontando para o céu.",
+    "clues": [
+      "Perguntou quanto vale um dirham em real.",
+      "Queria subir no prédio mais alto do mundo.",
+      "Disse que ia esquiar num shopping no meio do deserto.",
+      "Falou de uma bandeira verde, branca e preta com uma faixa vermelha.",
+      "Comentou que ia ver as ilhas artificiais em forma de palmeira."
+    ]
+  },
+  {
+    "id": "cairo", "name": "Cairo", "country": "Egito",
+    "lon": 31.2, "lat": 30.0, "coastal": false, "landmark": "pyramid",
+    "palette": ["#FAD6A5", "#E0B872", "#8B5A2B"],
+    "description": "Às margens do Nilo, a cidade das pirâmides de Gizé e da Esfinge, que guarda segredos melhor que qualquer assessoria.",
+    "clues": [
+      "Perguntou onde alugar um camelo para ver as pirâmides de Gizé.",
+      "Disse que ia passear de barco pelo rio Nilo.",
+      "Queria perguntar à Esfinge como ficar calado por milênios.",
+      "Falou em libras egípcias e numa bandeira vermelha, branca e preta com uma águia.",
+      "Comentou que ia visitar as múmias do museu."
+    ]
+  },
+  {
+    "id": "toquio", "name": "Tóquio", "country": "Japão",
+    "lon": 139.7, "lat": 35.7, "coastal": true, "landmark": "pagoda",
+    "palette": ["#FFC0CB", "#EDE7E3", "#BC002D"],
+    "description": "Neon, sushi de esteira, trens-bala pontuais e templos de vários andares entre cerejeiras.",
+    "clues": [
+      "Queria trocar dinheiro por ienes.",
+      "Perguntou se o trem-bala atrasa (não atrasa).",
+      "Falou de uma bandeira branca com uma bola vermelha no meio.",
+      "Disse que ia comer sushi de esteira e cantar num karaokê de verdade.",
+      "Comentou que ia ver as cerejeiras e o Monte Fuji."
+    ]
+  },
+  {
+    "id": "sydney", "name": "Sydney", "country": "Austrália",
+    "lon": 151.2, "lat": -33.9, "coastal": true, "landmark": "sails",
+    "palette": ["#7FD1F7", "#F7F7F7", "#00843D"],
+    "description": "Cangurus, praias de surfe e uma ópera em forma de velas brancas na baía.",
+    "clues": [
+      "Perguntou se dá para fazer carinho num canguru.",
+      "Queria ver a Ópera com telhado em forma de velas.",
+      "Disse que ia para o outro lado do mundo, onde é verão no Natal.",
+      "Falou em dólar australiano e numa bandeira azul com estrelas do Cruzeiro do Sul.",
+      "Comentou que ia surfar em Bondi Beach."
+    ]
+  },
+  {
+    "id": "moscou", "name": "Moscou", "country": "Rússia",
+    "lon": 37.6, "lat": 55.75, "coastal": false, "landmark": "onion",
+    "palette": ["#D6E4F0", "#F2F2F2", "#C8102E"],
+    "description": "Praça Vermelha, cúpulas coloridas em forma de cebola e um inverno que congela até declaração oficial.",
+    "clues": [
+      "Perguntou quanto vale um rublo.",
+      "Queria ver as cúpulas coloridas em forma de cebola na Praça Vermelha.",
+      "Disse que ia precisar de um casaco de pele e um gorro bem grande.",
+      "Falou de uma bandeira branca, azul e vermelha em listras horizontais.",
+      "Comentou que ia comprar uma matrioska, 'boneca dentro de boneca, igual inquérito'."
+    ]
+  },
+  {
+    "id": "cidadedocabo", "name": "Cidade do Cabo", "country": "África do Sul",
+    "lon": 18.4, "lat": -33.9, "coastal": true, "landmark": "mesa",
+    "palette": ["#9AD0EC", "#E7DCC8", "#007749"],
+    "description": "Pinguins na praia, vinhedos e uma montanha de topo reto como uma mesa coberta por uma toalha de nuvens.",
+    "clues": [
+      "Queria ver pinguins numa praia africana.",
+      "Perguntou como subir a Table Mountain, aquela de topo reto.",
+      "Disse que ia até o Cabo da Boa Esperança — 'esperança é o que não falta'.",
+      "Falou em rand sul-africano e numa bandeira com um Y deitado colorido.",
+      "Comentou que ia provar vinho em Stellenbosch."
+    ]
+  }
+]

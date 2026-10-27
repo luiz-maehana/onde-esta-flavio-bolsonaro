@@ -1,0 +1,166 @@
+extends SceneTree
+## Testes da lógica pura (RNF04). Roda com:
+##   godot --headless --path . --script res://tests/run_tests.gd
+## Sai com código 1 se algo falhar.
+
+var _failures := 0
+var _checks := 0
+
+func _initialize() -> void:
+	_test_content()
+	_test_clock()
+	_test_dossier()
+	_test_generation()
+	_test_playthroughs()
+	_test_career()
+	_test_portraits()
+	print("\n%d verificações, %d falhas" % [_checks, _failures])
+	quit(1 if _failures > 0 else 0)
+
+func _check(cond: bool, msg: String) -> void:
+	_checks += 1
+	if not cond:
+		_failures += 1
+		printerr("FALHOU: ", msg)
+
+func _test_content() -> void:
+	var errors := GameData.validate()
+	for e in errors:
+		printerr("  conteúdo: ", e)
+	_check(errors.is_empty(), "conteúdo JSON válido")
+	_check(GameData.cities().size() >= 15, "pelo menos 15 cidades")
+	_check(GameData.scandals().size() >= 5, "pelo menos 5 escândalos")
+	var used := {}
+	for seed in 200:
+		var r := RandomNumberGenerator.new()
+		r.seed = seed
+		used[CaseGenerator.generate(r, 4).scandal["id"]] = true
+	_check(used.size() == GameData.scandals().size(), "todos os escândalos aparecem em 200 casos")
+	for c in GameData.cities():
+		_check(SkylineLandmarks.has(c["landmark"]), "marco '%s' de %s tem desenho" % [c["landmark"], c["id"]])
+	# draw_colored_polygon não desenha nada se o polígono não triangula
+	# (contorno se cruzando), então isso pega erro de digitação no mapa.
+	for i in WorldShapes.LANDS.size():
+		var pts := PackedVector2Array()
+		for p in WorldShapes.LANDS[i]:
+			pts.append(Vector2(p[0], -p[1]))
+		_check(not Geometry2D.triangulate_polygon(pts).is_empty(), "continente %d triangula" % i)
+
+func _test_clock() -> void:
+	var clock := GameClock.new()
+	_check(clock.time_text() == "Segunda 09:00", "relógio começa segunda 09:00")
+	_check(not clock.advance(2) and clock.hours == 11, "avanço simples sem dormir")
+	clock.hours = 21
+	_check(clock.advance(3), "passar das 23h dorme")
+	_check(clock.hours == 24 + 7, "acorda 07:00 do dia seguinte")
+	clock.hours = 22
+	_check(clock.advance(7), "cair de madrugada dorme")
+	_check(clock.hours == 24 + 7, "madrugada também acorda 07:00 do mesmo dia")
+	clock.hours = GameClock.DEADLINE
+	_check(not clock.is_expired(), "no limite ainda não expirou")
+	clock.advance(1)
+	_check(clock.is_expired(), "depois do limite expira")
+
+func _test_dossier() -> void:
+	_check(Dossier.matching({}).size() == GameData.disguises().size(), "sem marcação, todos batem")
+	var order := GameData.trait_order()
+	for d in GameData.disguises():
+		for i in order.size():
+			for j in range(i + 1, order.size()):
+				var sel := {order[i]: d[order[i]], order[j]: d[order[j]]}
+				var m := Dossier.matching(sel)
+				_check(m.size() == 1 and m[0]["id"] == d["id"], "2 traços identificam %s (%s,%s)" % [d["id"], order[i], order[j]])
+
+func _test_generation() -> void:
+	for seed in 500:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = seed
+		var route_len := 4 + seed % 4
+		var s := CaseGenerator.generate(rng, route_len)
+		_check(s.route.size() == route_len, "rota com tamanho certo (seed %d)" % seed)
+		var uniq := {}
+		for c in s.route:
+			uniq[c] = true
+		_check(uniq.size() == route_len, "rota sem repetir cidade (seed %d)" % seed)
+		for i in route_len:
+			for d in s.decoys[i]:
+				_check(not s.route.has(d), "isca fora da rota (seed %d)" % seed)
+			var locs: Array = s.city_locations[s.route[i]]
+			_check(locs.size() == 3, "3 locais por cidade")
+			if locs.has("porto"):
+				_check(GameData.city(s.route[i])["coastal"], "porto só em cidade costeira")
+		var revealed := {}
+		for stop in s.trait_plan:
+			var t: String = s.trait_plan[stop]["trait"]
+			revealed[t] = s.disguise[t]
+		_check(revealed.size() >= 2, "pelo menos 2 traços revelados (seed %d)" % seed)
+		_check(Dossier.matching(revealed).size() == 1, "traços revelados identificam o disfarce (seed %d)" % seed)
+		_check(s.travel_options().has(s.route[1]), "opções de viagem incluem a próxima cidade")
+		_check(s.travel_options().size() == 4, "4 opções de viagem na trilha")
+		_check(not s.scandal.is_empty(), "caso tem escândalo (seed %d)" % seed)
+		_check(s.scandal["reasons"].has(s.reason), "motivo da fuga vem do escândalo")
+		_check(s.scandal["found_spots"].has(s.found_spot), "esconderijo vem do escândalo")
+		for key in ["taunts", "gags", "near"]:
+			var pool := s.flavor_pool(key)
+			_check(pool.size() == GameData.flavor()[key].size() + s.scandal[key].size(), "pool %s mistura genérico + escândalo" % key)
+
+## Joga casos inteiros: perfeito (vence), sem pauta, pauta errada, desvio.
+func _test_playthroughs() -> void:
+	for seed in 200:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 10000 + seed
+		var route_len := 4 + seed % 4
+		var mode := seed % 3
+		var s := CaseGenerator.generate(rng, route_len)
+		if mode == 0:
+			s.set_pauta(s.disguise["id"])
+		elif mode == 1:
+			for d in GameData.disguises():
+				if d["id"] != s.disguise["id"]:
+					s.set_pauta(d["id"])
+					break
+		# desvio proposital numa cidade errada e volta
+		var wrong: String = s.decoys[0][0]
+		s.travel(wrong)
+		_check(not s.is_on_trail(), "isca tira da trilha")
+		var r := s.investigate(s.locations_here()[0])
+		_check(r["kind"] == "cold", "cidade errada dá pista fria")
+		_check(s.travel_options().has(s.route[0]), "da cidade errada dá pra voltar")
+		s.travel(s.route[0])
+		_check(s.is_on_trail(), "voltou pra trilha")
+		while not s.is_final_stop():
+			var res := s.investigate(s.locations_here()[0])
+			_check(res["kind"] == "clue", "cidade certa dá pista")
+			s.travel(s.route[s.stop_index + 1])
+		var res := s.investigate(s.locations_here()[s.hideout_slot])
+		_check(res["kind"] == "found", "achou no esconderijo")
+		var expected: int = [CaseState.Outcome.WIN, CaseState.Outcome.WRONG_PAUTA, CaseState.Outcome.NO_PAUTA][mode]
+		_check(s.outcome == expected, "desfecho %d esperado %d (seed %d, horas %d)" % [s.outcome, expected, seed, s.clock.hours])
+
+func _test_portraits() -> void:
+	for d in GameData.disguises():
+		_check(d.has("portrait"), "disfarce %s tem figurino" % d["id"])
+		_check(_painted(PortraitFactory.paint(PortraitFactory.flavio_spec(d.get("portrait", {})))), "retrato de %s gera imagem" % d["id"])
+	for loc_id in GameData.flavor()["locations"]:
+		var outfit: Dictionary = GameData.location_info(loc_id).get("outfit", {})
+		_check(not outfit.is_empty(), "local %s tem figurino" % loc_id)
+		var rng := RandomNumberGenerator.new()
+		rng.seed = hash(loc_id)
+		_check(_painted(PortraitFactory.paint(PortraitFactory.witness_spec(rng, outfit))), "testemunha de %s gera imagem" % loc_id)
+	_check(_painted(PortraitFactory.paint(PortraitFactory.flavio_official_spec())), "foto oficial gera imagem")
+
+## Retrato "de verdade": boa parte da imagem pintada e contorno presente.
+func _painted(img: Image) -> bool:
+	var filled := 0
+	for y in img.get_height():
+		for x in img.get_width():
+			if img.get_pixel(x, y).a > 0.0:
+				filled += 1
+	return filled > img.get_width() * img.get_height() / 3
+
+func _test_career() -> void:
+	_check(Career.rank_for(0)["title"].begins_with("Estagi"), "começa estagiário")
+	_check(Career.rank_for(8)["route_len"] == 7, "editor-chefe tem rota de 7")
+	var c := Career.from_dict({"player_name": "Ana", "cases_solved": 3})
+	_check(c.rank()["title"] == "Repórter", "3 casos = Repórter")
+	_check(Career.from_dict(c.to_dict()).player_name == "Ana", "ida e volta do save")

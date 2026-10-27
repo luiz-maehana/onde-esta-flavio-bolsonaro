@@ -1,0 +1,61 @@
+{
+  "trait_order": ["hat", "ride", "hobby", "snack"],
+  "trait_labels": {
+    "hat": "Na cabeça",
+    "ride": "Transporte",
+    "hobby": "Passatempo",
+    "snack": "Lanche"
+  },
+  "traits": {
+    "hat": {
+      "bone": { "label": "Boné", "witness": ["Usava um boné verde e amarelo meio torto.", "Estava de boné, daqueles de campanha."] },
+      "panama": { "label": "Chapéu-panamá", "witness": ["Tinha um chapéu-panamá chiquérrimo.", "Usava um chapéu de palha bem fino, tipo panamá."] },
+      "capacete": { "label": "Capacete", "witness": ["Não tirou o capacete nem para falar comigo.", "Andava de capacete o tempo todo, até dentro do prédio."] },
+      "peruca": { "label": "Peruca loira", "witness": ["Tinha um cabelo loiro esquisito... acho que era peruca.", "A franja loira dele estava meio torta, sabe?"] }
+    },
+    "ride": {
+      "jetski": { "label": "Jet ski", "witness": ["Perguntou onde alugar um jet ski.", "Disse que só anda de jet ski agora."] },
+      "moto": { "label": "Motociata", "witness": ["Chegou numa moto barulhenta, buzinando.", "Falou que ia de moto, 'em comboio, como nos velhos tempos'."] },
+      "iate": { "label": "Iate", "witness": ["Comentou que o iate dele estava ancorado ali perto.", "Perguntou onde atracar um iate."] },
+      "patinete": { "label": "Patinete", "witness": ["Saiu daqui de patinete elétrico.", "Pediu um patinete pelo aplicativo."] }
+    },
+    "hobby": {
+      "jiujitsu": { "label": "Jiu-jitsu", "witness": ["Ficou mostrando golpe de jiu-jitsu para o segurança.", "Perguntou se tinha academia de jiu-jitsu por perto."] },
+      "karaoke": { "label": "Karaokê", "witness": ["Cantou sertanejo no karaokê até o microfone pedir arrego.", "Perguntou onde tinha um karaokê aberto."] },
+      "golfe": { "label": "Golfe", "witness": ["Carregava uma bolsa de tacos de golfe.", "Só falava de buraco, par e birdie — golfe, sabe?"] },
+      "selfie": { "label": "Selfie", "witness": ["Tirou umas trezentas selfies em dez minutos.", "Andava com um pau de selfie gigante."] }
+    },
+    "snack": {
+      "leite": { "label": "Pão c/ leite condensado", "witness": ["Pediu pão francês com leite condensado. De novo.", "Perguntou se tinha leite condensado para passar no pão."] },
+      "panetone": { "label": "Panetone", "witness": ["Comprou três panetones, mesmo fora de época.", "Estava com a boca cheia de panetone."] },
+      "chocolate": { "label": "Bombom", "witness": ["Encheu os bolsos de bombom de chocolate.", "Pagou com uma caixa de bombons, acredita?"] },
+      "pastel": { "label": "Pastel", "witness": ["Pediu um pastel de queijo e um caldo de cana.", "Estava com a mão cheia de óleo de pastel."] }
+    }
+  },
+  "disguises": [
+    { "id": "turista", "name": "Turista de Pochete", "hat": "bone", "ride": "patinete", "hobby": "selfie", "snack": "pastel",
+      "reveal": "de pochete, meia branca com sandália e um pau de selfie na mão",
+      "portrait": { "clothes": "floral", "colors": ["#2A9D8F", "#FFD100", "#E76F51"], "headwear": "cap", "headwear_colors": ["#009C3B", "#FFD100"], "prop": "selfie_stick", "mouth": "smile" } },
+    { "id": "motoboy", "name": "Motoboy de Aplicativo", "hat": "capacete", "ride": "moto", "hobby": "karaoke", "snack": "leite",
+      "reveal": "de colete refletivo e mochilão térmico, cantarolando sertanejo",
+      "portrait": { "clothes": "hivis", "colors": ["#FF7A00", "#2B2D42"], "headwear": "helmet", "headwear_colors": ["#1B1B1B", "#5A6A8A"], "prop": "thermal_bag" } },
+    { "id": "surfista", "name": "Surfista Bronzeado", "hat": "peruca", "ride": "jetski", "hobby": "jiujitsu", "snack": "chocolate",
+      "reveal": "de bermuda, peruca loira e um bronzeado claramente de spray",
+      "portrait": { "skin": "#D08A5A", "hair": "wig_long", "hair_color": "#F2D16B", "clothes": "tank", "colors": ["#00B2A9"], "prop": "shell_necklace", "mouth": "smile" } },
+    { "id": "magnata", "name": "Magnata do Golfe", "hat": "panama", "ride": "iate", "hobby": "golfe", "snack": "panetone",
+      "reveal": "de calça xadrez, chapéu-panamá e um taco de golfe dourado",
+      "portrait": { "clothes": "polo", "colors": ["#F4F1EA", "#C8102E"], "headwear": "panama", "headwear_colors": ["#E8D9A8", "#1F2A44"], "glasses": "sun", "prop": "golf_club" } },
+    { "id": "influencer", "name": "Influencer Fitness", "hat": "bone", "ride": "moto", "hobby": "jiujitsu", "snack": "panetone",
+      "reveal": "de regata, boné virado para trás e gravando story",
+      "portrait": { "clothes": "tank", "colors": ["#141414"], "headwear": "cap_back", "headwear_colors": ["#E63946", "#F4F1EA"], "prop": "phone", "mouth": "smile" } },
+    { "id": "pagodeiro", "name": "Pagodeiro de Terno Branco", "hat": "panama", "ride": "patinete", "hobby": "karaoke", "snack": "chocolate",
+      "reveal": "de terno branco, chapéu-panamá e um pandeiro debaixo do braço",
+      "portrait": { "clothes": "white_suit", "colors": ["#F4F1EA", "#141414"], "headwear": "panama", "headwear_colors": ["#F4F1EA", "#141414"], "prop": "pandeiro", "mouth": "smile" } },
+    { "id": "piloto", "name": "Piloto de Jet Ski", "hat": "capacete", "ride": "jetski", "hobby": "selfie", "snack": "panetone",
+      "reveal": "de colete salva-vidas laranja e capacete com câmera acoplada",
+      "portrait": { "clothes": "lifejacket", "colors": ["#FF7A00", "#1D3557"], "headwear": "helmet_cam", "headwear_colors": ["#F4F1EA", "#1D3557"] } },
+    { "id": "diva", "name": "Diva do Cruzeiro", "hat": "peruca", "ride": "iate", "hobby": "karaoke", "snack": "pastel",
+      "reveal": "de peruca loira volumosa, vestido de paetê e microfone na mão",
+      "portrait": { "hair": "wig_volume", "hair_color": "#F2D16B", "clothes": "sequins", "colors": ["#B5179E"], "lips": "#C8102E", "earrings": true, "prop": "microphone", "mouth": "smile" } }
+  ]
+}

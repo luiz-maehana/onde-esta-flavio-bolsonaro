@@ -1,0 +1,162 @@
+[
+  {
+    "id": "rachadinha",
+    "title": "As rachadinhas da Alerj",
+    "summary": "O MP-RJ acusou o então deputado estadual de recolher parte dos salários de assessores do gabinete na Alerj, num esquema que teria Fabrício Queiroz como operador. Em 2021 o STJ anulou as quebras de sigilo do caso e, em 2022, o TJ-RJ arquivou a denúncia. O senador sempre negou irregularidades.",
+    "status": "Denúncia arquivada em 2022 após anulação de provas; houve pedido de reabertura ao MP-RJ em setembro de 2026.",
+    "outlet": "InfoMoney, Revista Fórum",
+    "sources": [
+      "https://www.infomoney.com.br/politica/tj-do-rio-arquiva-denuncia-do-mp-contra-flavio-bolsonaro-em-caso-das-rachadinhas/",
+      "https://revistaforum.com.br/politica/flavio-bolsonaro-investigacoes/"
+    ],
+    "reasons": [
+      "saiu correndo quando um repórter pediu para 'rachar a conta' do cafezinho",
+      "sumiu no meio da coletiva logo depois que alguém perguntou pelo Queiroz"
+    ],
+    "found_spots": [
+      "dividindo um misto-quente em doze pedaços iguais com a assessoria",
+      "atrás de uma pilha de contracheques"
+    ],
+    "taunts": [
+      "Bilhete: 'Aqui a gente racha tudo, até a gorjeta. — 01'",
+      "Recado: 'Cadê o Queiroz? Pergunta pra ele, não pra mim!'"
+    ],
+    "gags": [
+      { "text": "Doze assessores apareceram para dividir sua conta do almoço. O cálculo levou duas horas.", "hours": 2 }
+    ],
+    "near": [
+      "Ele está aqui! Pediu doze notas fiscais separadas para um único pão de queijo."
+    ],
+    "headlines_win": [
+      "SEM RACHADINHA: {player} fica com o furo inteiro em {city}"
+    ]
+  },
+  {
+    "id": "chocolate",
+    "title": "A loja de chocolates",
+    "summary": "Em 2019 o MP-RJ fez busca numa franquia Kopenhagen que o senador tinha em sociedade na Barra da Tijuca, apontando a loja como possível meio de lavagem no caso das rachadinhas. Ele devolveu a franquia em 2020. A acusação fazia parte da denúncia das rachadinhas, arquivada em 2022.",
+    "status": "Apuração incluída na denúncia das rachadinhas, arquivada em 2022.",
+    "outlet": "Poder360, Exame",
+    "sources": [
+      "https://www.poder360.com.br/brasil/flavio-bolsonaro-entrega-loja-de-chocolates-investigada-pelo-mp/",
+      "https://exame.com/brasil/loja-de-chocolate-de-flavio-bolsonaro-foi-alvo-de-operacao-sobre-queiroz"
+    ],
+    "reasons": [
+      "escapou da coletiva pela porta dos fundos de uma loja de chocolates",
+      "fugiu levando uma caixa de bombons 'para presente' debaixo do braço"
+    ],
+    "found_spots": [
+      "atrás de uma pilha de caixas de bombom",
+      "dentro de um ovo de Páscoa gigante"
+    ],
+    "taunts": [
+      "Embrulho de bombom com um recado: 'Esse aqui já vem lavado. — 01'",
+      "Bilhete melado de chocolate: 'Doce é a vida de quem não dá entrevista.'"
+    ],
+    "gags": [
+      { "text": "Uma vendedora te ofereceu degustação de 40 sabores de bombom. Você provou todos.", "hours": 1 }
+    ],
+    "near": [
+      "Ele está por perto! Tem um rastro de papel de bombom indo naquela direção."
+    ],
+    "headlines_win": [
+      "DOCE FURO: {player} acha o senador em {city} com a boca suja de chocolate"
+    ]
+  },
+  {
+    "id": "mansao",
+    "title": "A mansão do Lago Sul",
+    "summary": "Em 2021 o senador comprou uma casa de cerca de R$ 6 milhões no Lago Sul, em Brasília, com financiamento de R$ 3,1 milhões do BRB a juros abaixo da média praticada pelo banco, segundo reportagens. A PF passou a apurar as condições do empréstimo no contexto do caso Banco Master. O financiamento foi quitado antes do prazo.",
+    "status": "Em apuração pela PF (outubro de 2026); não há decisão judicial sobre o caso.",
+    "outlet": "Diário de Pernambuco, Congresso em Foco",
+    "sources": [
+      "https://www.diariodepernambuco.com.br/politica/2026/10/11725606-pf-apura-condicoes-de-financiamento-do-brb-a-flavio-bolsonaro-para-mansao-de-rs-6-milhoes.html",
+      "https://www.congressoemfoco.com.br/noticia/29101/flavio-bolsonaro-quita-mansao-com-seis-pagamentos-extras-de-r-34-milhoes"
+    ],
+    "reasons": [
+      "saiu para 'dar uma olhadinha na piscina' e não voltou mais",
+      "fugiu da coletiva quando perguntaram a taxa de juros do financiamento"
+    ],
+    "found_spots": [
+      "boiando numa piscina em formato de cifrão",
+      "escondido no closet de uma mansão de doze suítes"
+    ],
+    "taunts": [
+      "Folheto de imobiliária com um recado: 'Juros baixinhos, viu? — 01'",
+      "Bilhete: 'Fui ver um imóvel. Só R$ 6 milhões, uma pechincha.'"
+    ],
+    "gags": [
+      { "text": "Um corretor te mostrou um apartamento 'com juros especiais'. A visita durou duas horas.", "hours": 2 }
+    ],
+    "near": [
+      "Ele está aqui! Perguntou ao porteiro onde fica a agência de banco mais próxima."
+    ],
+    "headlines_win": [
+      "FURO DE R$ 6 MILHÕES: {player} encontra o senador em {city}"
+    ]
+  },
+  {
+    "id": "darkhorse",
+    "title": "O filme Dark Horse",
+    "summary": "Em maio de 2026 reportagens revelaram que o senador negociou patrocínio do banqueiro Daniel Vorcaro, do Banco Master, para o filme 'Dark Horse', sobre Jair Bolsonaro. Ele admitiu ter buscado o patrocínio privado, mas negou oferecer vantagens ou usar dinheiro público. A produtora nega ter recebido recursos do banqueiro.",
+    "status": "Caso sob investigação no STF; não há denúncia nem condenação.",
+    "outlet": "Intercept Brasil, Poder360, CartaCapital",
+    "sources": [
+      "https://en.wikipedia.org/wiki/Dark_Horse_(2026_film)",
+      "https://revistaforum.com.br/politica/flavio-bolsonaro-investigacoes/"
+    ],
+    "reasons": [
+      "saiu da coletiva dizendo que ia 'gravar uma cena' e sumiu",
+      "fugiu pela porta do cinema no meio da pré-estreia"
+    ],
+    "found_spots": [
+      "atrás de uma claquete gigante num set de filmagem",
+      "escondido na cabine de projeção de um cinema"
+    ],
+    "taunts": [
+      "Ingresso de cinema com um recado: 'Patrocínio? Que patrocínio? — 01'",
+      "Bilhete: 'Esse caso ainda vai virar filme. Ops.'"
+    ],
+    "gags": [
+      { "text": "Te convidaram para assistir a um trailer. Eram duas horas de trailer.", "hours": 2 }
+    ],
+    "near": [
+      "Ele está aqui! Pediu pipoca e perguntou se aceitavam patrocínio de banco."
+    ],
+    "headlines_win": [
+      "FIM DO FILME: {player} encontra o senador em {city} e rola os créditos"
+    ]
+  },
+  {
+    "id": "apostas",
+    "title": "A bet do amigo",
+    "summary": "Em outubro de 2026 a PF levou ao STF a apuração sobre se o senador seria sócio oculto da BestBet, ligada ao advogado e amigo Willer Tomaz; investigadores apontam que ele tinha acesso de 'usuário master' a uma conta de uma holding de Tomaz. O senador nega ter conta conjunta ou participação em empresas ligadas à bet; Tomaz também nega irregularidades.",
+    "status": "Inquérito aberto no STF em outubro de 2026; não há denúncia nem condenação.",
+    "outlet": "Piauí, Revista Oeste, Folha de S.Paulo",
+    "sources": [
+      "https://diariodocomercio.com.br/politica/pf-investiga-flavio-bolsonaro-bet/",
+      "https://www.revistaoeste.com/politica/inquerito-flavio-bolsonaro-stf/"
+    ],
+    "reasons": [
+      "apostou com a assessoria que ninguém o encontraria e sumiu",
+      "fugiu da coletiva quando perguntaram o que é um 'usuário master'"
+    ],
+    "found_spots": [
+      "conferindo o placar de um jogo atrás de uma máquina de apostas",
+      "escondido no camarote de um jatinho executivo"
+    ],
+    "taunts": [
+      "Bilhete de aposta: 'Odd 100 pra 1 que você não me acha. — 01'",
+      "Recado: 'Sócio oculto? Oculto mesmo é eu agora!'"
+    ],
+    "gags": [
+      { "text": "Um anúncio de bet tocou no seu celular sem parar. Você perdeu uma hora tentando fechar.", "hours": 1 }
+    ],
+    "near": [
+      "Ele está aqui! Perguntou qual é a odd de um repórter achá-lo hoje."
+    ],
+    "headlines_win": [
+      "APOSTA PERDIDA: {player} encontra o senador em {city}"
+    ]
+  }
+]
