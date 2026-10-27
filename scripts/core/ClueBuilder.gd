@@ -19,12 +19,16 @@ static func build(state: CaseState, slot: int) -> Dictionary:
 
 	var lines: Array = [state.route_clues[state.stop_index][slot]]
 	var plan: Dictionary = state.trait_plan.get(state.stop_index, {})
+	var revealed := ""
 	if not plan.is_empty() and plan["slot"] == slot:
 		lines.append(trait_line(state, plan["trait"]))
+		revealed = plan["trait"]
 	var text := " ".join(lines)
 	if state.taunt_plan.get(state.stop_index, -1) == slot:
 		text += "\n\n" + _pick(state, state.flavor_pool("taunts"))
-	return _speech(role, text, "clue")
+	var speech := _speech(role, text, "clue")
+	speech["trait"] = revealed
+	return speech
 
 static func trait_line(state: CaseState, trait_key: String) -> String:
 	var info := GameData.trait_value_info(trait_key, state.disguise[trait_key])

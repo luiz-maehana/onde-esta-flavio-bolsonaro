@@ -62,6 +62,11 @@ func _ready() -> void:
 	_buttons.append(stay)
 	UiTheme.focus_first(_buttons)
 
+	var tips := TipBox.new()
+	tips.closed.connect(func(): UiTheme.focus_first(_buttons))
+	add_child(tips)
+	tips.try_show("travel")
+
 func _highlight(id: String) -> void:
 	_map.highlighted_id = id
 

@@ -1,4 +1,13 @@
 {
+  "tips": {
+    "briefing": "Leia o box ENTENDA O CASO: é o escândalo real por trás deste caso. O prazo aparece na sua pauta — o relógio só anda quando você investiga ou viaja.",
+    "city": "Cada cidade tem 3 locais. Investigar custa horas (2h, 3h, 4h). As testemunhas falam da PRÓXIMA cidade do senador: bandeira, moeda, idioma, pontos turísticos.",
+    "clue": "Anote mentalmente a pista e abra VIAJAR: escolha o destino que combina com ela. Tudo que as testemunhas disseram fica em ANOTAÇÕES.",
+    "trait": "Essa testemunha descreveu o DISFARCE! Abra o DOSSIÊ e marque. Com 2 características você já identifica o disfarce e pode emitir a PAUTA.",
+    "travel": "Passe o mouse (ou toque) nas cidades do mapa para ver o país. Cada destino mostra as horas de voo.",
+    "cold": "Ninguém viu o senador aqui: cidade errada! Volte pelo VIAJAR — a cidade de onde você veio está entre as opções.",
+    "near": "Ele está nesta cidade! Um dos locais esconde o senador. Confira se a PAUTA certa já foi emitida antes de abordá-lo."
+  },
   "locations": {
     "aeroporto": { "name": "Aeroporto", "role": "Comissária de bordo", "outfit": { "clothes": "uniform", "colors": ["#1D3557", "#F4F1EA", "#C8102E"], "hair": "bun", "prop": "name_tag" } },
     "hotel": { "name": "Hotel", "role": "Recepcionista", "outfit": { "clothes": "vest", "colors": ["#6D1A36", "#F4F1EA"], "prop": "name_tag" } },
@@ -47,11 +56,11 @@
     "Hora de dormir. A redação só paga diária até as 23h."
   ],
   "ranks": [
-    { "title": "Estagiário(a)", "min_cases": 0, "route_len": 4 },
-    { "title": "Repórter Júnior", "min_cases": 1, "route_len": 5 },
-    { "title": "Repórter", "min_cases": 3, "route_len": 5 },
-    { "title": "Repórter Sênior", "min_cases": 5, "route_len": 6 },
-    { "title": "Editor(a)-Chefe", "min_cases": 8, "route_len": 7 }
+    { "title": "Estagiário(a)", "min_cases": 0, "route_len": 4, "deadline": 161, "decoys": "random", "trait_clues": 4 },
+    { "title": "Repórter Júnior", "min_cases": 1, "route_len": 5, "deadline": 161, "decoys": "random", "trait_clues": 4 },
+    { "title": "Repórter", "min_cases": 3, "route_len": 5, "deadline": 137, "decoys": "near", "trait_clues": 3 },
+    { "title": "Repórter Sênior", "min_cases": 5, "route_len": 6, "deadline": 153, "decoys": "near", "trait_clues": 3 },
+    { "title": "Editor(a)-Chefe", "min_cases": 8, "route_len": 7, "deadline": 161, "decoys": "near", "trait_clues": 2 }
   ],
   "headlines": {
     "win": [

@@ -12,6 +12,10 @@ const SFX_POOL := 4
 
 ## Atalhos usados por UiTheme etc.
 const SFX_CLICK := "click"
+## Barramentos criados em tempo de execução: volume de música e de efeitos
+## independentes (RF23), ambos passando pelo Master (mudo geral).
+const MUSIC_BUS := "Music"
+const SFX_BUS := "SFX"
 
 var _music_player: AudioStreamPlayer
 var _sfx_players: Array[AudioStreamPlayer] = []
@@ -21,12 +25,16 @@ var _current_music := ""
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_ensure_bus(MUSIC_BUS)
+	_ensure_bus(SFX_BUS)
 	_music_player = AudioStreamPlayer.new()
 	_music_player.volume_db = -12.0
+	_music_player.bus = MUSIC_BUS
 	add_child(_music_player)
 	for i in SFX_POOL:
 		var p := AudioStreamPlayer.new()
 		p.volume_db = -6.0
+		p.bus = SFX_BUS
 		add_child(p)
 		_sfx_players.append(p)
 	for m in MUSIC:
@@ -69,3 +77,22 @@ func play_sfx(sfx_name: String, volume_db: float = -6.0) -> void:
 	p.stream = stream
 	p.volume_db = volume_db
 	p.play()
+
+func _ensure_bus(bus_name: String) -> void:
+	if AudioServer.get_bus_index(bus_name) != -1:
+		return
+	AudioServer.add_bus()
+	var idx := AudioServer.bus_count - 1
+	AudioServer.set_bus_name(idx, bus_name)
+	AudioServer.set_bus_send(idx, "Master")
+
+## Volumes 0..1 viram dB; 0 silencia o barramento (linear_to_db(0) = -inf).
+func apply_settings(settings: Settings) -> void:
+	_set_bus_volume(MUSIC_BUS, settings.music_volume)
+	_set_bus_volume(SFX_BUS, settings.sfx_volume)
+	AudioServer.set_bus_mute(AudioServer.get_bus_index("Master"), settings.muted)
+
+func _set_bus_volume(bus_name: String, volume: float) -> void:
+	var idx := AudioServer.get_bus_index(bus_name)
+	AudioServer.set_bus_mute(idx, volume <= 0.0)
+	AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(volume, 0.0001)))

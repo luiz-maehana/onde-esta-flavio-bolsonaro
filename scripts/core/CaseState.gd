@@ -1,8 +1,14 @@
 class_name CaseState
 extends RefCounted
 ## Estado mutável de um caso em andamento + as regras de ação (investigar,
-## viajar, emitir pauta). Montado por CaseGenerator; as telas só chamam os
-## métodos públicos e leem o resultado — nenhuma regra mora na UI.
+## viajar, emitir pauta, marcar dossiê). Montado por CaseGenerator; as telas
+## só chamam os métodos públicos e leem o resultado — nenhuma regra mora na UI.
+##
+## Save (RF27): toda ação válida entra em `actions`; o save guarda só
+## semente + configuração + ações, e from_save() refaz o caso. Pra isso o rng
+## compartilhado só é consumido por ações (investigar); o que a UI calcula
+## sob demanda (locais/destinos de cidade fora da rota) usa rng derivado da
+## semente, independente da ordem em que a tela pede.
 
 enum Outcome { NONE, WIN, NO_PAUTA, WRONG_PAUTA, TIMEOUT }
 
@@ -13,9 +19,14 @@ const GAG_CHANCE := 0.15
 const MIN_TRAVEL_HOURS := 2
 const MAX_TRAVEL_HOURS := 7
 const KM_PER_HOUR := 1600.0
+const SAVE_VERSION := 1
+## Um caso inteiro não chega perto disso; acima é save adulterado.
+const MAX_ACTIONS := 1000
 
 var rng := RandomNumberGenerator.new()
 var clock := GameClock.new()
+var case_seed := 0
+var config: Dictionary = {}
 
 ## --- Definido pelo gerador ------------------------------------------------
 var route: Array = []
@@ -44,6 +55,12 @@ var dossier: Dictionary = {}
 var outcome := Outcome.NONE
 var visited: Dictionary = {}
 var notes: Array = []
+## Ações válidas na ordem: ["i", local] / ["t", cidade] / ["p", disfarce] /
+## ["d", característica, valor].
+var actions: Array = []
+## Pra estatísticas e conquistas (RF28/RF29).
+var wrong_cities := 0
+var nights := 0
 var _witness_cache: Dictionary = {}
 var _travel_cache: Dictionary = {}
 
@@ -62,9 +79,20 @@ func is_final_stop() -> bool:
 func is_over() -> bool:
 	return outcome != Outcome.NONE
 
+## Horas gastas desde o começo do caso.
+func hours_used() -> int:
+	return clock.hours - GameClock.START_HOUR
+
+## Rng próprio de um assunto (ex.: "loc:paris"), derivado da semente: o
+## resultado não depende de quando a tela pediu.
+func _sub_rng(topic: String) -> RandomNumberGenerator:
+	var r := RandomNumberGenerator.new()
+	r.seed = hash("%d:%s" % [case_seed, topic])
+	return r
+
 func locations_here() -> Array:
 	if not city_locations.has(current_city):
-		city_locations[current_city] = CaseGenerator.pick_locations(rng, current_city_data())
+		city_locations[current_city] = CaseGenerator.pick_locations(_sub_rng("loc:" + current_city), current_city_data())
 	return city_locations[current_city]
 
 func was_visited(loc_id: String) -> bool:
@@ -76,9 +104,16 @@ func investigate_cost(loc_id: String) -> int:
 	var count: int = visited.get(current_city, []).size()
 	return INVESTIGATE_COSTS[mini(count, INVESTIGATE_COSTS.size() - 1)]
 
+func can_investigate(loc_id: String) -> bool:
+	return not is_over() and locations_here().has(loc_id)
+
 ## Visita um local da cidade atual. Retorna {role, text, kind, hours, slept,
-## gag} — `kind` é "clue", "cold", "near" ou "found" (ver ClueBuilder).
+## gag, trait} — `kind` é "clue", "cold", "near" ou "found" (ver
+## ClueBuilder); {} se a ação for inválida.
 func investigate(loc_id: String) -> Dictionary:
+	if not can_investigate(loc_id):
+		return {}
+	actions.append(["i", loc_id])
 	var hours := investigate_cost(loc_id)
 	var first_visit := not was_visited(loc_id)
 	if first_visit:
@@ -101,6 +136,8 @@ func investigate(loc_id: String) -> Dictionary:
 	result["hours"] = hours
 	result["gag"] = gag
 	result["slept"] = clock.advance(hours)
+	if result["slept"]:
+		nights += 1
 	if first_visit and result["kind"] != "found":
 		notes.append({"city": current_city_data()["name"], "role": result["role"], "text": result["text"]})
 
@@ -118,10 +155,13 @@ func _capture_outcome() -> Outcome:
 	return Outcome.WIN
 
 ## Destinos oferecidos a partir da cidade atual (RF07), estáveis enquanto o
-## jogador estiver nela (abrir o mapa de novo não reembaralha).
+## jogador estiver nela. A chave inclui a parada: voltar mais tarde à mesma
+## cidade errada tem que oferecer a cidade certa *atual*, não a antiga.
 func travel_options() -> Array:
-	if _travel_cache.has(current_city):
-		return _travel_cache[current_city]
+	var key := "%s@%d" % [current_city, stop_index]
+	if _travel_cache.has(key):
+		return _travel_cache[key]
+	var r := _sub_rng("travel:" + key)
 	var options: Array = []
 	if is_on_trail():
 		options = decoys[stop_index].duplicate()
@@ -129,22 +169,32 @@ func travel_options() -> Array:
 			options.append(route[stop_index + 1])
 	else:
 		options.append(route[stop_index])
-		options.append_array(CaseGenerator.pick_decoys(rng, route + [current_city], 2))
-	CaseGenerator.shuffle(rng, options)
-	_travel_cache[current_city] = options
+		options.append_array(CaseGenerator.pick_decoys(r, route + [current_city], 2))
+	CaseGenerator.shuffle(r, options)
+	_travel_cache[key] = options
 	return options
 
 func travel_hours(to_id: String) -> int:
 	var km := CaseGenerator.distance_km(current_city_data(), GameData.city(to_id))
 	return clampi(int(ceil(km / KM_PER_HOUR)) + 1, MIN_TRAVEL_HOURS, MAX_TRAVEL_HOURS)
 
-## Viaja e retorna {hours, slept}.
+func can_travel(to_id: String) -> bool:
+	return not is_over() and travel_options().has(to_id)
+
+## Viaja e retorna {hours, slept}; {} se o destino não foi oferecido.
 func travel(to_id: String) -> Dictionary:
+	if not can_travel(to_id):
+		return {}
+	actions.append(["t", to_id])
 	var hours := travel_hours(to_id)
 	if is_on_trail() and not is_final_stop() and to_id == route[stop_index + 1]:
 		stop_index += 1
 	current_city = to_id
+	if not is_on_trail():
+		wrong_cities += 1
 	var slept := clock.advance(hours)
+	if slept:
+		nights += 1
 	if clock.is_expired():
 		outcome = Outcome.TIMEOUT
 	return {"hours": hours, "slept": slept}
@@ -157,5 +207,81 @@ func flavor_pool(key: String) -> Array:
 	pool.append_array(scandal.get(key, []))
 	return pool
 
-func set_pauta(disguise_id: String) -> void:
+func set_pauta(disguise_id: String) -> bool:
+	if is_over() or GameData.disguise(disguise_id).is_empty():
+		return false
 	pauta = disguise_id
+	actions.append(["p", disguise_id])
+	return true
+
+func set_dossier(trait_key: String, value: String) -> bool:
+	if not GameData.trait_order().has(trait_key):
+		return false
+	if value != "" and not GameData.trait_values(trait_key).has(value):
+		return false
+	dossier[trait_key] = value
+	actions.append(["d", trait_key, value])
+	return true
+
+## --- Save (RF27) ---------------------------------------------------------------
+
+func to_save() -> Dictionary:
+	return {"version": SAVE_VERSION, "seed": case_seed, "config": config, "actions": actions}
+
+## Refaz o caso a partir do save. Devolve null se o save for inválido ou se
+## qualquer ação não puder ser refeita (save adulterado/de outra versão).
+static func from_save(data: Dictionary) -> CaseState:
+	if int(data.get("version", 0)) != SAVE_VERSION:
+		return null
+	var saved_actions = data.get("actions", [])
+	var saved_config = data.get("config", {})
+	var saved_seed = data.get("seed", null)
+	if typeof(saved_actions) != TYPE_ARRAY or typeof(saved_config) != TYPE_DICTIONARY:
+		return null
+	if typeof(saved_seed) != TYPE_INT and typeof(saved_seed) != TYPE_FLOAT:
+		return null
+	if saved_actions.size() > MAX_ACTIONS:
+		return null
+	var config := _sanitize_config(saved_config)
+	if config.is_empty():
+		return null
+	var r := RandomNumberGenerator.new()
+	r.seed = int(saved_seed)
+	var state := CaseGenerator.generate(r, config)
+	for a in saved_actions:
+		if not state._replay(a):
+			return null
+	return state
+
+func _replay(a: Variant) -> bool:
+	if typeof(a) != TYPE_ARRAY or a.is_empty():
+		return false
+	for part in a:
+		if typeof(part) != TYPE_STRING:
+			return false
+	match a[0]:
+		"i":
+			return a.size() == 2 and not investigate(a[1]).is_empty()
+		"t":
+			return a.size() == 2 and not travel(a[1]).is_empty()
+		"p":
+			return a.size() == 2 and set_pauta(a[1])
+		"d":
+			return a.size() == 3 and set_dossier(a[1], a[2])
+	return false
+
+## Só aceita configuração dentro dos limites que o jogo mesmo gera.
+static func _sanitize_config(c: Dictionary) -> Dictionary:
+	var route_len = c.get("route_len")
+	var deadline = c.get("deadline")
+	var traits = c.get("trait_clues")
+	for v in [route_len, deadline, traits]:
+		if typeof(v) != TYPE_INT and typeof(v) != TYPE_FLOAT:
+			return {}
+	if int(route_len) < 3 or int(route_len) > 8:
+		return {}
+	if int(deadline) < 48 or int(deadline) > GameClock.DEADLINE:
+		return {}
+	if not c.get("decoys") in ["random", "near"]:
+		return {}
+	return {"route_len": int(route_len), "deadline": int(deadline), "decoys": c["decoys"], "trait_clues": clampi(int(traits), 2, 4)}

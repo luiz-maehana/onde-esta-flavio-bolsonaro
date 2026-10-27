@@ -12,11 +12,16 @@ const SAVE_PATH := "user://onde_esta_flavio_career.json"
 const LEGACY_PATH := "user://career.json"
 ## Save legítimo tem ~100 bytes; acima disso é lixo/adulteração.
 const MAX_BYTES := 4096
+## Ferramentas (prévia de telas) ligam isso pra nunca gravar por cima dos
+## saves reais do jogador.
+static var read_only := false
 
 static func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH) or FileAccess.file_exists(LEGACY_PATH)
 
 static func save(career: Career) -> void:
+	if read_only:
+		return
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
 		push_error("SaveService: não conseguiu gravar %s" % SAVE_PATH)
@@ -36,3 +41,35 @@ static func load() -> Career:
 	if path == LEGACY_PATH:
 		save(career)
 	return career
+
+## --- Caso em andamento (RF27) ---------------------------------------------------
+## Só semente + configuração + ações (ver CaseState.to_save/from_save).
+
+const CASE_PATH := "user://onde_esta_flavio_case.json"
+const CASE_MAX_BYTES := 65536
+
+static func save_case(state: CaseState) -> void:
+	if read_only:
+		return
+	var file := FileAccess.open(CASE_PATH, FileAccess.WRITE)
+	if file:
+		file.store_string(JSON.stringify(state.to_save()))
+
+## Caso salvo refeito, ou null se não houver ou for inválido.
+static func load_case() -> CaseState:
+	var file := FileAccess.open(CASE_PATH, FileAccess.READ)
+	if file == null or file.get_length() > CASE_MAX_BYTES:
+		return null
+	var data = JSON.parse_string(file.get_as_text())
+	if typeof(data) != TYPE_DICTIONARY:
+		return null
+	var state := CaseState.from_save(data)
+	if state == null or state.is_over():
+		return null
+	return state
+
+static func clear_case() -> void:
+	if read_only:
+		return
+	if FileAccess.file_exists(CASE_PATH):
+		DirAccess.remove_absolute(CASE_PATH)

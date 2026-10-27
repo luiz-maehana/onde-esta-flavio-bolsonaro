@@ -80,6 +80,18 @@ static func _build_theme() -> Theme:
 	t.set_stylebox("grabber", "VScrollBar", grab)
 	t.set_stylebox("grabber_highlight", "VScrollBar", grab)
 	t.set_stylebox("grabber_pressed", "VScrollBar", grab)
+
+	var track := StyleBoxFlat.new()
+	track.bg_color = Palette.INK
+	track.content_margin_top = 4
+	track.content_margin_bottom = 4
+	t.set_stylebox("slider", "HSlider", track)
+	var filled := StyleBoxFlat.new()
+	filled.bg_color = Palette.RED
+	filled.content_margin_top = 4
+	filled.content_margin_bottom = 4
+	t.set_stylebox("grabber_area", "HSlider", filled)
+	t.set_stylebox("grabber_area_highlight", "HSlider", filled)
 	return t
 
 ## Caixa padrão: fundo chapado, borda de tinta, sombra dura.
@@ -118,9 +130,15 @@ static func body(text: String, size: int = BODY_SIZE, color: Color = Palette.INK
 	l.add_theme_color_override("font_color", color)
 	return l
 
+## Em tela de toque os botões crescem (RF34) — o jogo é desenhado em 1280x720
+## e num celular deitado tudo encolhe junto.
+const TOUCH_SCALE := 1.25
+
 static func button(text: String, min_size: Vector2 = Vector2(0, 52)) -> Button:
 	var b := Button.new()
 	b.text = text
+	if DisplayServer.is_touchscreen_available():
+		min_size.y = maxf(min_size.y * TOUCH_SCALE, 60.0)
 	b.custom_minimum_size = min_size
 	b.focus_mode = Control.FOCUS_ALL
 	b.pressed.connect(func(): AudioManager.play_sfx(AudioManager.SFX_CLICK))
@@ -161,3 +179,27 @@ static func logo(text: String, size: int, color: Color = Palette.INK) -> Label:
 	l.add_theme_font_size_override("font_size", size)
 	l.add_theme_color_override("font_color", color)
 	return l
+
+## Ação destrutiva em dois toques: o primeiro troca o texto pra pedir
+## confirmação; o segundo executa. Sair do foco cancela.
+static func make_confirm(btn: Button, confirm_text: String, action: Callable) -> void:
+	var original := btn.text
+	btn.pressed.connect(func():
+		if btn.text == confirm_text:
+			action.call()
+		else:
+			btn.text = confirm_text)
+	btn.focus_exited.connect(func(): btn.text = original)
+	btn.mouse_exited.connect(func():
+		if not btn.has_focus():
+			btn.text = original)
+
+## Botão liga/desliga com texto próprio pra cada estado.
+static func toggle(on_text: String, off_text: String, initial: bool, on_change: Callable, min_size: Vector2 = Vector2(220, 48)) -> Button:
+	var b := button(on_text if initial else off_text, min_size)
+	b.toggle_mode = true
+	b.button_pressed = initial
+	b.toggled.connect(func(on: bool):
+		b.text = on_text if on else off_text
+		on_change.call(on))
+	return b

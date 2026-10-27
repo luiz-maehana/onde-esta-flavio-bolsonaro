@@ -31,11 +31,15 @@ func _ready() -> void:
 	add_child(page)
 	page.set_texts("EDIÇÃO ESPECIAL · %s" % case.clock.time_text(), headline.to_upper())
 	for p in _story(case, career, city):
-		page.add_paragraph(p, 28)
+		page.add_paragraph(p, 25)
 
 	if won and Career.rank_for(career.cases_solved - 1)["title"] != career.rank()["title"]:
 		var promo := page.add_paragraph("PROMOÇÃO! A redação te nomeou %s." % career.rank()["title"].to_upper(), 30)
 		promo.add_theme_color_override("font_color", Palette.GREEN)
+	for id in GameManager.last_unlocked:
+		var info := Achievements.info(id)
+		var badge := page.add_paragraph("CONQUISTA: %s — %s" % [info.get("title", id).to_upper(), info.get("description", "")], 23)
+		badge.add_theme_color_override("font_color", Palette.RED_DARK)
 
 	if case.outcome == CaseState.Outcome.TIMEOUT:
 		page.add_photo(PixelPortrait.flavio_official(), "Flávio Bolsonaro — paradeiro desconhecido")
@@ -49,6 +53,9 @@ func _ready() -> void:
 	title.pressed.connect(GameManager.go_to_title)
 	var again := UiTheme.button("NOVO CASO", Vector2(220, 60))
 	again.pressed.connect(GameManager.start_new_case)
+	var career_btn := UiTheme.button("CARREIRA", Vector2(180, 60))
+	career_btn.pressed.connect(GameManager.open_career)
+	page.actions.add_child(career_btn)
 	page.actions.add_child(title)
 	page.actions.add_child(again)
 	again.call_deferred("grab_focus")

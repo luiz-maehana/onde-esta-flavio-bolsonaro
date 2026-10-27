@@ -13,10 +13,17 @@ var origin_id := ""
 var option_ids: Array = []
 var highlighted_id := ""
 var trail_ids: Array = []
+## Cidade sob o mouse/toque (RF33): mostra nome e país.
+var hovered_id := ""
+
+const HOVER_RADIUS := 14.0
+const FLAG_SIZE := Vector2(30, 20)
 
 var _flight_to := ""
 var _flight_t := -1.0
 var _pulse := 0.0
+## Etiquetas já desenhadas neste quadro — as seguintes desviam delas.
+var _placed: Array[Rect2] = []
 
 func _ready() -> void:
 	clip_contents = true
@@ -43,6 +50,7 @@ func _city_pos(id: String) -> Vector2:
 	return project(float(c["lon"]), float(c["lat"]))
 
 func _draw() -> void:
+	_placed.clear()
 	draw_rect(Rect2(Vector2.ZERO, size), Palette.OCEAN)
 	for lon in range(-180, 181, 30):
 		var x := project(lon, 0).x
@@ -74,25 +82,62 @@ func _draw() -> void:
 			draw_circle(pos, 10 + sin(_pulse) * 3, Color(Palette.YELLOW, 0.35))
 		draw_circle(pos, 6, Palette.YELLOW if focused else Palette.RED)
 		draw_arc(pos, 6, 0, TAU, 16, Palette.INK, 2)
-		_draw_tag(font, pos, GameData.city(id)["name"], focused)
+		_draw_tag(font, pos, GameData.city(id), focused, true)
 
 	if origin_id != "":
 		var o := _city_pos(origin_id)
 		draw_rect(Rect2(o - Vector2(6, 6), Vector2(12, 12)), Palette.RED)
 		draw_rect(Rect2(o - Vector2(6, 6), Vector2(12, 12)), Palette.INK, false, 2)
 
+	if hovered_id != "" and not option_ids.has(hovered_id):
+		var hp := _city_pos(hovered_id)
+		draw_circle(hp, 5, Palette.YELLOW)
+		_draw_tag(font, hp, GameData.city(hovered_id), false, false)
+
 	if _flight_t >= 0.0:
 		_draw_plane()
 
-func _draw_tag(font: Font, pos: Vector2, text: String, focused: bool) -> void:
+## Etiqueta da cidade; destinos oferecidos levam a bandeira, o rótulo de
+## hover leva o país.
+func _draw_tag(font: Font, pos: Vector2, city: Dictionary, focused: bool, with_flag: bool) -> void:
 	var fs := 24
+	var text: String = city["name"] if with_flag else "%s — %s" % [city["name"], city["country"]]
 	var tw := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-	var r := Rect2(pos + Vector2(10, -24), Vector2(tw + 10, 24))
+	var flag_w := FLAG_SIZE.x + 6 if with_flag else 0.0
+	var r := Rect2(pos + Vector2(10, -26), Vector2(tw + 12 + flag_w, 28))
 	if r.end.x > size.x:
 		r.position.x = pos.x - 10 - r.size.x
+	if r.position.y < 0:
+		r.position.y = pos.y + 10
+	for i in 6:
+		var hit := false
+		for other in _placed:
+			if other.grow(2).intersects(r):
+				hit = true
+				r.position.y = other.end.y + 3
+		if not hit:
+			break
+	_placed.append(r)
 	draw_rect(r, Palette.YELLOW if focused else Palette.PAPER)
 	draw_rect(r, Palette.INK, false, 2)
-	draw_string(font, r.position + Vector2(5, 19), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Palette.INK)
+	if with_flag:
+		FlagPainter.draw(self, Rect2(r.position + Vector2(4, 4), FLAG_SIZE), city.get("flag", {}))
+	draw_string(font, r.position + Vector2(6 + flag_w, 21), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Palette.INK)
+
+func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseMotion or (event is InputEventMouseButton and event.pressed) or event is InputEventScreenTouch:
+		hovered_id = _city_at(event.position)
+
+## Cidade mais próxima do ponto, dentro do raio de toque.
+func _city_at(point: Vector2) -> String:
+	var best := ""
+	var best_d := HOVER_RADIUS
+	for c in GameData.cities():
+		var d := _city_pos(c["id"]).distance_to(point)
+		if d < best_d:
+			best_d = d
+			best = c["id"]
+	return best
 
 func _draw_dashed(a: Vector2, b: Vector2, col: Color) -> void:
 	draw_dashed_line(a, b, col, 3, 10)

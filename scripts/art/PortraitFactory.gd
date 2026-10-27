@@ -221,6 +221,26 @@ static func _clothes(p: PortraitPainter, kind: String, c: Array, skin: Color) ->
 			p.poly([[41, 48], [40, 38], [36, 35], [30, 33], [25, 45], [25, 48]], c1)
 			p.poly([[20, 33], [24, 35], [20, 37]], INK)
 			p.poly([[28, 33], [24, 35], [28, 37]], INK)
+		"plaid":
+			_torso(p, c1)
+			for y in range(34, 48):
+				for x in range(5, 44):
+					if (x / 3 + y / 3) % 2 == 0 and p.is_filled(x, y):
+						p.px(x, y, c1.darkened(0.3))
+			p.poly([[18, 33], [23, 33], [21, 38]], c2)
+			p.poly([[30, 33], [25, 33], [27, 38]], c2)
+			p.rect(21, 45, 7, 3, Color("#E0B000"))
+		"poncho":
+			p.poly([[3, 48], [8, 37], [16, 33], [32, 33], [40, 37], [45, 48]], c1)
+			for y in [39, 43]:
+				p.hline(5, 43, y, c2)
+			p.poly([[19, 33], [29, 33], [24, 40]], Color("#F4F1EA"))
+			p.poly([[21, 34], [27, 34], [24, 38]], c2)
+		"wetsuit":
+			_torso(p, c1)
+			p.line(24, 34, 24, 47, c2)
+			p.hline(9, 14, 40, c2)
+			p.hline(34, 39, 40, c2)
 		"cardigan":
 			_torso(p, c1)
 			p.poly([[20, 33], [28, 33], [27, 48], [21, 48]], c2)
@@ -428,6 +448,25 @@ static func _headwear(p: PortraitPainter, kind: String, hc: Array, rx: float) ->
 				p.rect(21, 0, 7, 4, INK)
 				p.rect(23, 1, 3, 2, Color("#5A5A5A"))
 				p.px(24, 1, Color("#9AD0EC"))
+		"cowboy":
+			p.poly([[6, 12], [10, 10], [16, 12], [32, 12], [38, 10], [42, 12], [38, 14], [10, 14]], c1.darkened(0.1))
+			p.poly([[15, 12], [16, 5], [20, 2.5], [24, 4.5], [28, 2.5], [32, 5], [33, 12]], c1)
+			p.rect(15, 9, 19, 2, c2)
+			p.darken_region(28, 2, 6, 10, 0.18)
+		"diving":
+			for y in range(0, 33):
+				for x in range(6, 43):
+					if not PortraitPainter.in_ellipse(x, y, CX, 17, rx + 6, 16.5):
+						continue
+					if PortraitPainter.in_ellipse(x, y, CX, 20, rx - 0.5, 9.5):
+						p.px(x, y, p.get_px(x, y).lerp(c2, 0.25))
+					elif PortraitPainter.in_ellipse(x, y, CX, 20, rx + 1.5, 11.5):
+						p.px(x, y, c1.darkened(0.3))
+					else:
+						p.px(x, y, c1 if x < CX + 7 else c1.darkened(0.2))
+			for bolt in [[CX - rx - 3, 14], [CX + rx + 2, 14], [CX - rx - 3, 26], [CX + rx + 2, 26]]:
+				p.px(int(bolt[0]), int(bolt[1]), Color("#FFF1A8"))
+			p.px(19, 13, Color.WHITE)
 		"sailor_cap":
 			for y in range(5, 12):
 				for x in range(13, 36):
@@ -515,6 +554,17 @@ static func _prop(p: PortraitPainter, kind: String, skin: Color, cols: Array) ->
 			p.rect(22, 43, 2, 2, Color("#8C8576"))
 		"pin":
 			p.rect(31, 38, 2, 2, Color("#E0B000"))
+		"skewer":
+			p.line(36, 46, 44, 10, Color("#C0C0C0"))
+			for i in 4:
+				p.rect(39 + i * 1, 13 + i * 6, 4, 4, Color("#8B2E1C") if i % 2 == 0 else Color("#C0552D"))
+			_hand(p, 36.5, 44.5, skin)
+		"cheese_bread":
+			p.rect(30, 36, 12, 11, Color("#F4F1EA"))
+			p.hline(30, 41, 36, Color("#C9B79C"))
+			for b in [[33, 34], [37, 33], [35, 31]]:
+				p.shaded_ellipse(b[0], b[1], 2.6, 2.4, Color("#E8B04A"))
+			_hand(p, 31, 45, skin)
 		"bowtie":
 			p.poly([[20, 33], [24, 35], [20, 37]], INK)
 			p.poly([[28, 33], [24, 35], [28, 37]], INK)

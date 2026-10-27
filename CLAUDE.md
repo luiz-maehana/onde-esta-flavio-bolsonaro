@@ -25,12 +25,21 @@ godot --headless --path . --script res://tests/run_tests.gd # testes da lógica
 godot --headless --path . --script res://tools/build_audio.gd  # regera música/SFX
 godot --headless --path . --script res://tools/build_icon.gd   # regera ícone
 godot --headless --path . --script res://tools/build_portrait_sheet.gd  # build/portraits.png com todos os retratos
+godot --headless --path . --script res://tools/build_og.gd    # imagem de compartilhamento (assets/web/og.jpg)
 godot --path . res://tools/RenderPreview.tscn              # PNG de cada tela em build/preview/
 godot --headless --path . --export-release "Windows Desktop" build/OndeEstaFlavio.exe
 ```
 
 Scripts com `extends SceneTree` (`--script`) não enxergam autoloads; quem
 precisa de `GameManager`/`AudioManager` roda como cena (ver RenderPreview).
+Ferramentas que rodam o jogo devem ligar `SaveService.read_only = true` pra
+não gravar por cima dos saves reais. Edite arquivos com as ferramentas de
+arquivo ou bash — o PowerShell 5 corrompe UTF-8 (há teste que acusa).
+
+Persistência: carreira, opções e caso em andamento ficam em `user://`
+(`onde_esta_flavio_*.json`); o caso é salvo como semente + ações e refeito
+por replay (`CaseState.to_save/from_save`), então todo rng consumido fora
+de ação tem que usar `_sub_rng()`.
 
 ## 3. Arquitetura (resumo — detalhe em plan.md)
 

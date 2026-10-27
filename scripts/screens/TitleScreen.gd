@@ -12,6 +12,8 @@ var _name_dialog: Control
 var _name_edit: LineEdit
 var _name_cancel: Button
 var _name_warning: Label
+var _options_overlay: Overlay
+var _options: OptionsPanel
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -27,6 +29,7 @@ func _ready() -> void:
 
 	_build_bottom_bar()
 	_build_name_dialog()
+	_build_options()
 	_refresh()
 	if GameManager.has_player():
 		UiTheme.focus_first(_menu_buttons)
@@ -43,7 +46,7 @@ func _build_bottom_bar() -> void:
 	sb.set_content_margin_all(18)
 	bar.add_theme_stylebox_override("panel", sb)
 	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	bar.offset_top = -170
+	bar.offset_top = -200
 	add_child(bar)
 
 	var col := VBoxContainer.new()
@@ -54,21 +57,37 @@ func _build_bottom_bar() -> void:
 	row.add_theme_constant_override("separation", 18)
 	col.add_child(row)
 
-	_career_label = UiTheme.body("", 30, Palette.PAPER)
+	_career_label = UiTheme.body("", 26, Palette.PAPER)
 	_career_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(_career_label)
 
-	var new_case := UiTheme.button("NOVO CASO", Vector2(210, 64))
-	new_case.pressed.connect(GameManager.start_new_case)
-	var change := UiTheme.button("TROCAR REPÓRTER", Vector2(270, 64))
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 12)
+	row.add_child(grid)
+	var has_saved := GameManager.has_saved_case()
+	var resume := UiTheme.button("CONTINUAR CASO", Vector2(230, 56))
+	resume.pressed.connect(GameManager.continue_case)
+	resume.visible = has_saved
+	var new_case := UiTheme.button("NOVO CASO", Vector2(230, 56))
+	if has_saved:
+		UiTheme.make_confirm(new_case, "DESCARTAR O SALVO?", GameManager.start_new_case)
+	else:
+		new_case.pressed.connect(GameManager.start_new_case)
+	var career := UiTheme.button("CARREIRA", Vector2(230, 56))
+	career.pressed.connect(GameManager.open_career)
+	var options := UiTheme.button("OPÇÕES", Vector2(230, 56))
+	options.pressed.connect(_open_options)
+	var change := UiTheme.button("TROCAR REPÓRTER", Vector2(230, 56))
 	change.pressed.connect(_open_name_dialog)
-	var quit := UiTheme.button("SAIR", Vector2(120, 64))
+	var quit := UiTheme.button("SAIR", Vector2(230, 56))
 	quit.pressed.connect(func(): get_tree().quit())
 	## No navegador "sair" não fecha nada — só some com o botão.
 	quit.visible = not OS.has_feature("web")
-	_menu_buttons = [new_case, change, quit]
+	_menu_buttons = [resume, new_case, career, options, change, quit]
 	for b in _menu_buttons:
-		row.add_child(b)
+		grid.add_child(b)
 
 	col.add_child(UiTheme.body(DISCLAIMER, 22, Palette.GREY))
 
@@ -139,9 +158,28 @@ func _refresh() -> void:
 	_career_label.text = "%s — %s\n%d de %d casos resolvidos · %s" % [c.player_name, c.rank()["title"], c.cases_solved, c.cases_played, progress]
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel") and _name_dialog.visible and _name_cancel.visible:
+	if not event.is_action_pressed("ui_cancel"):
+		return
+	if _options_overlay.visible:
+		_options_overlay.visible = false
+		UiTheme.focus_first(_menu_buttons)
+		get_viewport().set_input_as_handled()
+	elif _name_dialog.visible and _name_cancel.visible:
 		_close_name_dialog()
 		get_viewport().set_input_as_handled()
 
 func _missing_text(cases: int) -> String:
 	return "falta 1 p/ promoção" if cases == 1 else "faltam %d p/ promoção" % cases
+
+func _build_options() -> void:
+	_options_overlay = Overlay.new()
+	add_child(_options_overlay)
+	_options = OptionsPanel.new()
+	_options.closed.connect(func():
+		_options_overlay.visible = false
+		UiTheme.focus_first(_menu_buttons))
+	_options_overlay.center.add_child(_options)
+
+func _open_options() -> void:
+	_options_overlay.visible = true
+	_options.open()

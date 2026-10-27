@@ -52,7 +52,8 @@ func _build() -> void:
 			b.button_pressed = _case.dossier.get(trait_key, "") == value
 			b.toggled.connect(func(on: bool):
 				if on:
-					_case.dossier[trait_key] = value
+					_case.set_dossier(trait_key, value)
+					GameManager.save_case()
 					_refresh())
 			row.add_child(b)
 			if _first_button == null:
@@ -92,6 +93,8 @@ func _on_issue() -> void:
 	var matches := Dossier.matching(_case.dossier)
 	if matches.size() != 1:
 		return
-	_case.set_pauta(matches[0]["id"])
+	if not _case.set_pauta(matches[0]["id"]):
+		return
+	GameManager.save_case()
 	AudioManager.play_sfx("pauta")
 	_refresh()

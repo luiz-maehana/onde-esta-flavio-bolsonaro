@@ -21,15 +21,15 @@ func _init() -> void:
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right"]:
 		margin.add_theme_constant_override("margin_" + side, 56)
-	margin.add_theme_constant_override("margin_top", 28)
-	margin.add_theme_constant_override("margin_bottom", 28)
+	margin.add_theme_constant_override("margin_top", 18)
+	margin.add_theme_constant_override("margin_bottom", 22)
 	add_child(margin)
 
 	var page := VBoxContainer.new()
-	page.add_theme_constant_override("separation", 12)
+	page.add_theme_constant_override("separation", 10)
 	margin.add_child(page)
 
-	var masthead := UiTheme.logo("O FURO", 56)
+	var masthead := UiTheme.logo("O FURO", 44)
 	masthead.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	page.add_child(masthead)
 	_edition = UiTheme.body("", 24, Palette.GREY)

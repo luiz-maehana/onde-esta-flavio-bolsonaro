@@ -15,6 +15,10 @@ func _initialize() -> void:
 	_test_career()
 	_test_portraits()
 	_test_security()
+	_test_case_save()
+	_test_difficulty()
+	_test_settings_and_career()
+	_test_encoding()
 	print("\n%d verificações, %d falhas" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -29,16 +33,18 @@ func _test_content() -> void:
 	for e in errors:
 		printerr("  conteúdo: ", e)
 	_check(errors.is_empty(), "conteúdo JSON válido")
-	_check(GameData.cities().size() >= 15, "pelo menos 15 cidades")
+	_check(GameData.cities().size() >= 30, "pelo menos 30 cidades")
+	_check(GameData.disguises().size() >= 14, "pelo menos 14 disfarces")
 	_check(GameData.scandals().size() >= 5, "pelo menos 5 escândalos")
 	var used := {}
 	for seed in 200:
 		var r := RandomNumberGenerator.new()
 		r.seed = seed
-		used[CaseGenerator.generate(r, 4).scandal["id"]] = true
+		used[CaseGenerator.generate(r, {"route_len": 4}).scandal["id"]] = true
 	_check(used.size() == GameData.scandals().size(), "todos os escândalos aparecem em 200 casos")
 	for c in GameData.cities():
 		_check(SkylineLandmarks.has(c["landmark"]), "marco '%s' de %s tem desenho" % [c["landmark"], c["id"]])
+		_check(["h", "v", "disc", "hdisc", "diamond", "canton", "cross", "side", "star", "crescent"].has(c.get("flag", {}).get("type", "")), "bandeira de %s válida" % c["id"])
 	# draw_colored_polygon não desenha nada se o polígono não triangula
 	# (contorno se cruzando), então isso pega erro de digitação no mapa.
 	for i in WorldShapes.LANDS.size():
@@ -77,7 +83,7 @@ func _test_generation() -> void:
 		var rng := RandomNumberGenerator.new()
 		rng.seed = seed
 		var route_len := 4 + seed % 4
-		var s := CaseGenerator.generate(rng, route_len)
+		var s := CaseGenerator.generate(rng, {"route_len": route_len})
 		_check(s.route.size() == route_len, "rota com tamanho certo (seed %d)" % seed)
 		var uniq := {}
 		for c in s.route:
@@ -112,7 +118,7 @@ func _test_playthroughs() -> void:
 		rng.seed = 10000 + seed
 		var route_len := 4 + seed % 4
 		var mode := seed % 3
-		var s := CaseGenerator.generate(rng, route_len)
+		var s := CaseGenerator.generate(rng, {"route_len": route_len})
 		if mode == 0:
 			s.set_pauta(s.disguise["id"])
 		elif mode == 1:
@@ -185,3 +191,170 @@ func _test_career() -> void:
 	var c := Career.from_dict({"player_name": "Ana", "cases_solved": 3})
 	_check(c.rank()["title"] == "Repórter", "3 casos = Repórter")
 	_check(Career.from_dict(c.to_dict()).player_name == "Ana", "ida e volta do save")
+
+## Joga ações aleatórias válidas (investigar, viajar, dossiê, pauta).
+func _random_play(s: CaseState, r: RandomNumberGenerator, steps: int) -> void:
+	for i in steps:
+		if s.is_over():
+			return
+		var roll := r.randf()
+		if roll < 0.5:
+			var locs := s.locations_here()
+			s.investigate(locs[r.randi_range(0, locs.size() - 1)])
+		elif roll < 0.8:
+			var opts := s.travel_options()
+			s.travel(opts[r.randi_range(0, opts.size() - 1)])
+		elif roll < 0.9:
+			var t: String = GameData.trait_order()[r.randi_range(0, 3)]
+			var vals := GameData.trait_values(t)
+			s.set_dossier(t, vals[r.randi_range(0, vals.size() - 1)])
+		else:
+			var ds := GameData.disguises()
+			s.set_pauta(ds[r.randi_range(0, ds.size() - 1)]["id"])
+
+## RF27: save = semente + ações; refazer dá exatamente o mesmo caso, mesmo
+## depois de passar pelo JSON; save adulterado é recusado.
+func _test_case_save() -> void:
+	for seed in 150:
+		var r := RandomNumberGenerator.new()
+		r.seed = 5000 + seed
+		var config := CaseGenerator.config_for_rank(GameData.flavor()["ranks"][seed % 5])
+		var g := RandomNumberGenerator.new()
+		g.seed = 1 + seed * 7919
+		var s := CaseGenerator.generate(g, config)
+		_random_play(s, r, 25)
+		var json := JSON.stringify(s.to_save())
+		var back := CaseState.from_save(JSON.parse_string(json))
+		_check(back != null, "save refeito (seed %d)" % seed)
+		if back == null:
+			continue
+		_check(back.current_city == s.current_city and back.stop_index == s.stop_index, "mesma cidade/parada (seed %d)" % seed)
+		_check(back.clock.hours == s.clock.hours and back.outcome == s.outcome, "mesmo relógio/desfecho (seed %d)" % seed)
+		_check(back.notes.size() == s.notes.size() and back.pauta == s.pauta and back.dossier == s.dossier, "mesmas anotações/pauta/dossiê (seed %d)" % seed)
+		_check(back.wrong_cities == s.wrong_cities and back.nights == s.nights, "mesmos contadores (seed %d)" % seed)
+	# adulterações
+	var g2 := RandomNumberGenerator.new()
+	g2.seed = 42
+	var base := CaseGenerator.generate(g2, CaseGenerator.config_for_rank(GameData.flavor()["ranks"][0]))
+	base.investigate(base.locations_here()[0])
+	var good: Dictionary = JSON.parse_string(JSON.stringify(base.to_save()))
+	var evil := [
+		{"version": 99},
+		{"version": 1, "seed": "x", "config": good["config"], "actions": []},
+		{"version": 1, "seed": 1, "config": {"route_len": 50, "deadline": 161, "decoys": "near", "trait_clues": 2}, "actions": []},
+		{"version": 1, "seed": 1, "config": {"route_len": 5, "deadline": 99999, "decoys": "near", "trait_clues": 2}, "actions": []},
+		{"version": 1, "seed": 1, "config": {"route_len": 5, "deadline": 161, "decoys": "hack", "trait_clues": 2}, "actions": []},
+		{"version": 1, "seed": good["seed"], "config": good["config"], "actions": [["t", "cidade_que_nao_existe"]]},
+		{"version": 1, "seed": good["seed"], "config": good["config"], "actions": [["i", "cofre_do_banco"]]},
+		{"version": 1, "seed": good["seed"], "config": good["config"], "actions": [["p", "disfarce_falso"]]},
+		{"version": 1, "seed": good["seed"], "config": good["config"], "actions": [["x"], 7]},
+		{"version": 1, "seed": good["seed"], "config": good["config"], "actions": "não é lista"},
+	]
+	for e in evil:
+		_check(CaseState.from_save(e) == null, "save adulterado recusado: %s" % str(e).left(60))
+
+	# bug corrigido: voltar mais tarde a uma cidade errada oferece a cidade certa ATUAL
+	var g3 := RandomNumberGenerator.new()
+	g3.seed = 77
+	var s3 := CaseGenerator.generate(g3, {"route_len": 7})
+	var wrong: String = s3.decoys[0][0]
+	s3.travel(wrong)
+	s3.travel(s3.route[0])
+	s3.travel(s3.route[1])
+	s3.travel(s3.route[2])
+	if s3.decoys[2].has(wrong):
+		s3.travel(wrong)
+		_check(s3.travel_options().has(s3.route[2]), "cidade errada revisitada oferece a parada atual")
+
+## Taxa de vitória jogando "cuidadoso" (os 3 locais de cada cidade) com
+## `errors` desvios por cidades erradas.
+func _win_rate(config: Dictionary, errors: int, runs: int) -> float:
+	var wins := 0
+	for seed in runs:
+		var g := RandomNumberGenerator.new()
+		g.seed = 90000 + seed
+		var s := CaseGenerator.generate(g, config)
+		s.set_pauta(s.disguise["id"])
+		var left := errors
+		while not s.is_over():
+			if s.is_final_stop():
+				for loc in s.locations_here():
+					s.investigate(loc)
+					if s.is_over():
+						break
+				break
+			for loc in s.locations_here():
+				s.investigate(loc)
+			if left > 0 and not s.is_over():
+				left -= 1
+				var opts: Array = s.travel_options().filter(func(c): return c != s.route[s.stop_index + 1])
+				s.travel(opts[0])
+				s.investigate(s.locations_here()[0])
+				s.travel(s.route[s.stop_index])
+			s.travel(s.route[s.stop_index + 1])
+		if s.outcome == CaseState.Outcome.WIN:
+			wins += 1
+	return float(wins) / runs
+
+## RF26: curva de dificuldade por cargo.
+func _test_difficulty() -> void:
+	var ranks: Array = GameData.flavor()["ranks"]
+	var intern := CaseGenerator.config_for_rank(ranks[0])
+	var editor := CaseGenerator.config_for_rank(ranks[-1])
+	var r1 := _win_rate(intern, 3, 200)
+	var r2 := _win_rate(editor, 0, 200)
+	var r3 := _win_rate(editor, 2, 200)
+	print("dificuldade: estagiário+3 erros %.0f%% | editor sem erro %.0f%% | editor+2 erros %.0f%%" % [r1 * 100, r2 * 100, r3 * 100])
+	_check(r1 >= 0.85, "estagiário vence com 3 cidades erradas")
+	_check(r2 >= 0.85, "editor-chefe vence sem errar")
+	_check(r3 <= 0.35, "editor-chefe perde na maioria com 2 erros")
+	for r in ranks:
+		var c := CaseGenerator.config_for_rank(r)
+		_check(c["deadline"] <= GameClock.DEADLINE and c["route_len"] >= 4, "cargo %s com configuração válida" % r["title"])
+
+func _test_settings_and_career() -> void:
+	var s := Settings.from_dict({"music_volume": 7, "sfx_volume": NAN, "text_speed": "turbo", "muted": "sim", "seen_tips": ["a", 3, "a", "x".repeat(99)]})
+	_check(s.music_volume == 1.0 and s.sfx_volume == 0.9, "volumes limitados/padrão")
+	_check(s.text_speed == "normal" and s.muted == false, "valores inválidos ignorados")
+	_check(s.seen_tips == ["a"], "dicas vistas sanitizadas")
+	var c := Career.from_dict({"disguises_caught": ["turista", 5, "turista"], "achievements": "hack", "clean_wins": 50, "cases_solved": 2})
+	_check(c.disguises_caught == ["turista"] and c.achievements.is_empty() and c.clean_wins == 2, "listas e contadores da carreira sanitizados")
+	# conquistas num caso vencido sem erro
+	var g := RandomNumberGenerator.new()
+	g.seed = 3
+	var case := CaseGenerator.generate(g, {"route_len": 4})
+	case.set_pauta(case.disguise["id"])
+	while not case.is_final_stop():
+		case.investigate(case.locations_here()[0])
+		case.travel(case.route[case.stop_index + 1])
+	case.investigate(case.locations_here()[case.hideout_slot])
+	var fresh := Career.new()
+	var got := fresh.record_case(case)
+	_check(got.has("primeiro_furo") and got.has("sem_errar"), "conquistas de primeiro caso limpo")
+	_check(fresh.disguises_caught.has(case.disguise["id"]) and fresh.best_hours > 0, "estatísticas registradas")
+	for a in Achievements.all():
+		_check(a.has("title") and a.has("description"), "conquista %s com textos" % a["id"])
+
+## Texto duplamente codificado (UTF-8 lido como ANSI e regravado) — já
+## aconteceu numa edição; padrões que nunca aparecem em português correto.
+func _test_encoding() -> void:
+	# montados por código pra este arquivo não se acusar
+	var bad: Array = [String.chr(0xFEFF), String.chr(0xE2) + String.chr(0x20AC)]
+	for second in [0xB3, 0xA9, 0xA1, 0xA7, 0xA3, 0xB5, 0xAA, 0xAD, 0xBA, 0xA2]:
+		bad.append(String.chr(0xC3) + String.chr(second))
+	for dir in ["res://scripts", "res://data", "res://tests"]:
+		for path in _files(dir):
+			var text := FileAccess.get_file_as_string(path)
+			for b in bad:
+				if text.contains(b):
+					_check(false, "texto corrompido (%s) em %s" % [b.c_escape(), path])
+					break
+
+func _files(dir: String) -> Array:
+	var out: Array = []
+	for f in DirAccess.get_files_at(dir):
+		if f.ends_with(".gd") or f.ends_with(".json"):
+			out.append(dir + "/" + f)
+	for d in DirAccess.get_directories_at(dir):
+		out.append_array(_files(dir + "/" + d))
+	return out

@@ -11,6 +11,8 @@ const WAKE_HOUR := 7
 const DAY_NAMES := ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
 
 var hours := START_HOUR
+## Prazo em horas desde segunda 00:00 — muda com o cargo (spec 005-B).
+var deadline := DEADLINE
 
 ## Avança `amount` horas. Retorna true se o repórter teve que dormir.
 func advance(amount: int) -> bool:
@@ -25,10 +27,10 @@ func advance(amount: int) -> bool:
 	return false
 
 func is_expired() -> bool:
-	return hours > DEADLINE
+	return hours > deadline
 
 func hours_left() -> int:
-	return maxi(0, DEADLINE - hours)
+	return maxi(0, deadline - hours)
 
 func hour_of_day() -> int:
 	return hours % 24
@@ -39,6 +41,10 @@ func day_name() -> String:
 func time_text() -> String:
 	return "%s %02d:00" % [day_name(), hour_of_day()]
 
+## Texto do prazo ("Domingo 17:00") pro briefing.
+func deadline_text() -> String:
+	return "%s %02d:00" % [DAY_NAMES[clampi(deadline / 24, 0, DAY_NAMES.size() - 1)], deadline % 24]
+
 ## 0..1 do quanto do prazo já foi consumido (barra do HUD).
 func progress() -> float:
-	return clampf(float(hours - START_HOUR) / float(DEADLINE - START_HOUR), 0.0, 1.0)
+	return clampf(float(hours - START_HOUR) / float(deadline - START_HOUR), 0.0, 1.0)

@@ -1,0 +1,13 @@
+[
+  { "id": "primeiro_furo", "title": "Primeiro furo", "description": "Resolva seu primeiro caso." },
+  { "id": "sem_errar", "title": "GPS humano", "description": "Resolva um caso sem pisar em nenhuma cidade errada." },
+  { "id": "relampago", "title": "Plantão relâmpago", "description": "Resolva um caso usando no máximo 72 horas." },
+  { "id": "colecionador", "title": "Álbum de disfarces", "description": "Flagre o senador em todos os disfarces." },
+  { "id": "todos_escandalos", "title": "Cobertura completa", "description": "Resolva um caso de cada escândalo." },
+  { "id": "globetrotter", "title": "Milhas acumuladas", "description": "Visite 20 cidades diferentes ao longo da carreira." },
+  { "id": "editor_chefe", "title": "Chefe da redação", "description": "Chegue ao cargo de Editor(a)-Chefe." },
+  { "id": "persistente", "title": "Pauta fixa", "description": "Jogue 10 casos." },
+  { "id": "insone", "title": "Café na veia", "description": "Durma 5 noites num mesmo caso." },
+  { "id": "vexame", "title": "Barriga", "description": "Aborde o senador com a pauta do disfarce errado." },
+  { "id": "sem_pauta", "title": "Esqueci o crachá", "description": "Encontre o senador sem ter emitido a pauta." }
+]

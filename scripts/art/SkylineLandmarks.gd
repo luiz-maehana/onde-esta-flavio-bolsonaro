@@ -10,6 +10,7 @@ const KINDS := [
 	"tower", "dome", "golden_dome", "pyramid", "pyramid_step", "statue_arms",
 	"statue_torch", "wheel", "spire", "palms", "castle", "obelisk", "bridge",
 	"arch", "clock", "colosseum", "burj", "pagoda", "sails", "onion", "mesa", "twin",
+	"needle", "mosque", "temple", "canal",
 ]
 
 static func has(kind: String) -> bool:
@@ -40,6 +41,10 @@ static func draw(ci: CanvasItem, kind: String, center_x: float, ground_y: float,
 		"onion": _draw_onion(p, col, accent)
 		"mesa": _draw_mesa(p, col, accent)
 		"twin": _draw_twin(p, col, accent)
+		"needle": _draw_needle(p, col, accent)
+		"mosque": _draw_mosque(p, col, accent)
+		"temple": _draw_temple(p, col, accent)
+		"canal": _draw_canal(p, col, accent)
 
 ## Caneta com a conversão unidade -> pixel, pra cada marco escrever só as
 ## formas em unidades.
@@ -247,3 +252,43 @@ static func _draw_twin(p: _Pen, c: Color, a: Color) -> void:
 	p.poly([[-63, 30], [-27, 30], [-45, 12]], c.lightened(0.2))
 	p.circle(45, 14, 12, c.lightened(0.2))
 	p.rect(-90, 0, 180, 3, a)
+
+static func _draw_needle(p: _Pen, c: Color, a: Color) -> void:
+	p.poly([[-6, 0], [6, 0], [2.5, 75], [-2.5, 75]], c.lightened(0.15))
+	p.rect(-9, 72, 18, 7, c)
+	p.rect(-6, 79, 12, 4, a)
+	p.rect(-1.2, 83, 2.4, 40, c.lightened(0.1))
+	p.rect(-30, 0, 14, 22, c.darkened(0.15))
+	p.rect(18, 0, 16, 30, c.darkened(0.1))
+
+static func _draw_mosque(p: _Pen, c: Color, a: Color) -> void:
+	p.rect(-40, 0, 80, 18, c)
+	p.circle(0, 24, 20, a.darkened(0.1))
+	p.rect(-22, 18, 44, 6, c)
+	p.circle(-24, 20, 8, a)
+	p.circle(24, 20, 8, a)
+	p.line(0, 44, 0, 52, c, 1)
+	for x in [-48, 48, -36, 36]:
+		p.rect(x - 2, 0, 4, 60 if absi(x) == 48 else 48, c.lightened(0.15))
+		p.poly([[x - 2, 60 if absi(x) == 48 else 48], [x + 2, 60 if absi(x) == 48 else 48], [x, 70 if absi(x) == 48 else 56]], a)
+
+static func _draw_temple(p: _Pen, c: Color, a: Color) -> void:
+	p.poly([[-70, 0], [-30, 22], [30, 22], [70, 0]], c.darkened(0.35))
+	p.rect(-42, 22, 84, 4, c.lightened(0.3))
+	for i in 8:
+		p.rect(-39 + i * 11, 26, 4, 22, c.lightened(0.35))
+	p.rect(-44, 48, 88, 5, c.lightened(0.3))
+	p.poly([[-44, 53], [44, 53], [0, 64]], c.lightened(0.25))
+
+static func _draw_canal(p: _Pen, c: Color, a: Color) -> void:
+	var colors := [Color("#8B4513"), Color("#A0522D"), Color("#5C3A21"), Color("#B5651D"), Color("#7A4A2A")]
+	for i in 5:
+		var x := -55.0 + i * 22.0
+		var h := 40.0 + (i % 3) * 6.0
+		p.rect(x, 8, 20, h, colors[i])
+		p.poly([[x, 8 + h], [x + 20, 8 + h], [x + 10, 18 + h]], colors[i].darkened(0.2))
+		for wy in [16, 28]:
+			p.rect(x + 4, wy, 4, 6, Color("#F4F1EA"))
+			p.rect(x + 12, wy, 4, 6, Color("#F4F1EA"))
+	p.rect(-80, 0, 160, 8, Color("#2F6DB5"))
+	p.rect(-30, 3, 18, 3, a)

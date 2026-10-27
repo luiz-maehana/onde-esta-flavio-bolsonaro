@@ -15,8 +15,12 @@ var _dossier: DossierPanel
 var _notes: NotesPanel
 var _scene_area: VBoxContainer
 var _actions: Array = []
+var _pause: PauseMenu
+var _tips: TipBox
 ## Falas ainda na fila depois da atual (imprevisto, sono...).
 var _speech_queue: Array = []
+## Último resultado de investigação (pra dica certa ao fim da fala).
+var _last_result: Dictionary = {}
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -26,6 +30,7 @@ func _ready() -> void:
 	_show_info(GameManager.arrival_messages)
 	GameManager.arrival_messages = []
 	UiTheme.focus_first(_actions)
+	_tips.try_show("city")
 
 func _build() -> void:
 	var bg := ColorRect.new()
@@ -120,16 +125,23 @@ func _build() -> void:
 	face.tooltip_text = "Procurado para entrevista"
 	portrait_frame.add_child(face)
 	actions.add_child(portrait_frame)
-	var quit := UiTheme.button("ABANDONAR CASO", Vector2(0, 44))
-	quit.add_theme_font_size_override("font_size", UiTheme.scaled(10))
-	quit.pressed.connect(GameManager.go_to_title)
-	actions.add_child(quit)
-	_actions.append(quit)
+	var menu := UiTheme.button("MENU (ESC)", Vector2(0, 44))
+	menu.add_theme_font_size_override("font_size", UiTheme.scaled(10))
+	menu.pressed.connect(_open_pause)
+	actions.add_child(menu)
+	_actions.append(menu)
 
 	_investigate.visible = false
 	_witness.visible = false
 	_dossier.visible = false
 	_notes.visible = false
+
+	_pause = PauseMenu.new()
+	_pause.resumed.connect(func(): UiTheme.focus_first(_actions))
+	add_child(_pause)
+	_tips = TipBox.new()
+	_tips.closed.connect(func(): UiTheme.focus_first(_actions + [_witness]))
+	add_child(_tips)
 
 func _refresh() -> void:
 	var city := _case.current_city_data()
@@ -176,6 +188,11 @@ func _on_location_chosen(loc_id: String) -> void:
 	_investigate.visible = false
 	_set_actions_enabled(false)
 	var result := _case.investigate(loc_id)
+	if result.is_empty():
+		_back_to_actions()
+		return
+	GameManager.save_case()
+	_last_result = result
 	_refresh()
 
 	var portrait: Texture2D = PixelPortrait.witness("%s:%s" % [_case.current_city, loc_id], loc_id)
@@ -209,6 +226,22 @@ func _on_speech_finished() -> void:
 		return
 	_set_actions_enabled(true)
 	_open_investigate()
+	_show_tip_for(_last_result)
+
+## Dica conforme o que a testemunha acabou de dizer (RF32).
+func _show_tip_for(result: Dictionary) -> void:
+	if result.get("trait", "") != "" and _tips.try_show("trait"):
+		return
+	match result.get("kind", ""):
+		"clue":
+			_tips.try_show("clue")
+		"cold":
+			_tips.try_show("cold")
+		"near":
+			_tips.try_show("near")
+
+func _open_pause() -> void:
+	_pause.open()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
@@ -218,4 +251,6 @@ func _unhandled_input(event: InputEvent) -> void:
 			_back_to_actions()
 		elif _investigate.visible:
 			_back_to_actions()
+		elif not _witness.visible:
+			_open_pause()
 		get_viewport().set_input_as_handled()

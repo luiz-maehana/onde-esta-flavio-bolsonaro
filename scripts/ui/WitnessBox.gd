@@ -7,8 +7,6 @@ extends PanelContainer
 
 signal finished
 
-const CHARS_PER_SECOND := 60.0
-
 var _portrait: TextureRect
 var _role: Label
 var _text: Label
@@ -53,11 +51,13 @@ func show_speech(role: String, text: String, portrait: Texture2D) -> void:
 	_typing = true
 	visible = true
 	_continue.grab_focus()
+	if GameManager.settings.chars_per_second() <= 0.0:
+		_finish_typing()
 
 func _process(delta: float) -> void:
 	if not _typing:
 		return
-	_shown += delta * CHARS_PER_SECOND
+	_shown += delta * GameManager.settings.chars_per_second()
 	_text.visible_characters = int(_shown)
 	_type_tick += 1
 	if _type_tick % 4 == 0:
