@@ -19,6 +19,7 @@ func _initialize() -> void:
 	_test_difficulty()
 	_test_settings_and_career()
 	_test_encoding()
+	_test_platform_config()
 	print("\n%d verificações, %d falhas" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -240,15 +241,15 @@ func _test_case_save() -> void:
 	var good: Dictionary = JSON.parse_string(JSON.stringify(base.to_save()))
 	var evil := [
 		{"version": 99},
-		{"version": 1, "seed": "x", "config": good["config"], "actions": []},
-		{"version": 1, "seed": 1, "config": {"route_len": 50, "deadline": 161, "decoys": "near", "trait_clues": 2}, "actions": []},
-		{"version": 1, "seed": 1, "config": {"route_len": 5, "deadline": 99999, "decoys": "near", "trait_clues": 2}, "actions": []},
-		{"version": 1, "seed": 1, "config": {"route_len": 5, "deadline": 161, "decoys": "hack", "trait_clues": 2}, "actions": []},
-		{"version": 1, "seed": good["seed"], "config": good["config"], "actions": [["t", "cidade_que_nao_existe"]]},
-		{"version": 1, "seed": good["seed"], "config": good["config"], "actions": [["i", "cofre_do_banco"]]},
-		{"version": 1, "seed": good["seed"], "config": good["config"], "actions": [["p", "disfarce_falso"]]},
-		{"version": 1, "seed": good["seed"], "config": good["config"], "actions": [["x"], 7]},
-		{"version": 1, "seed": good["seed"], "config": good["config"], "actions": "não é lista"},
+		{"version": 2, "seed": "x", "config": good["config"], "actions": []},
+		{"version": 2, "seed": 1, "config": {"route_len": 50, "deadline": 161, "decoys": "near", "trait_clues": 2}, "actions": []},
+		{"version": 2, "seed": 1, "config": {"route_len": 5, "deadline": 99999, "decoys": "near", "trait_clues": 2}, "actions": []},
+		{"version": 2, "seed": 1, "config": {"route_len": 5, "deadline": 161, "decoys": "hack", "trait_clues": 2}, "actions": []},
+		{"version": 2, "seed": good["seed"], "config": good["config"], "actions": [["t", "cidade_que_nao_existe"]]},
+		{"version": 2, "seed": good["seed"], "config": good["config"], "actions": [["i", "cofre_do_banco"]]},
+		{"version": 2, "seed": good["seed"], "config": good["config"], "actions": [["p", "disfarce_falso"]]},
+		{"version": 2, "seed": good["seed"], "config": good["config"], "actions": [["x"], 7]},
+		{"version": 2, "seed": good["seed"], "config": good["config"], "actions": "não é lista"},
 	]
 	for e in evil:
 		_check(CaseState.from_save(e) == null, "save adulterado recusado: %s" % str(e).left(60))
@@ -358,3 +359,24 @@ func _files(dir: String) -> Array:
 	for d in DirAccess.get_directories_at(dir):
 		out.append_array(_files(dir + "/" + d))
 	return out
+
+## Regressões de celular (versão Web): teclado virtual ligado no export e
+## barramentos de áudio declarados no layout (criados depois da partida, o
+## Web Audio não toca nada neles — o jogo ficava mudo no celular).
+func _test_platform_config() -> void:
+	var presets := ConfigFile.new()
+	_check(presets.load("res://export_presets.cfg") == OK, "export_presets.cfg lido")
+	var web := ""
+	for section in presets.get_sections():
+		if presets.get_value(section, "platform", "") == "Web":
+			web = section
+	_check(web != "", "preset Web existe")
+	_check(presets.get_value(web + ".options", "html/experimental_virtual_keyboard", false) == true, "teclado virtual ligado na versão Web")
+	var layout_path: String = ProjectSettings.get_setting("audio/buses/default_bus_layout", "")
+	_check(layout_path == "res://default_bus_layout.tres", "layout de áudio do projeto definido")
+	var layout := load(layout_path)
+	_check(layout is AudioBusLayout, "layout de áudio carrega")
+	var text := FileAccess.get_file_as_string(layout_path)
+	for bus in ["Music", "SFX"]:
+		_check(text.contains('&"%s"' % bus), "barramento %s declarado no layout" % bus)
+	_check(AudioServer.get_bus_index("Music") != -1 and AudioServer.get_bus_index("SFX") != -1, "barramentos existem desde a partida")

@@ -25,6 +25,7 @@ func _run() -> void:
 	await _test_title_screen()
 	await _test_city_flow()
 	await _test_screens_build()
+	await _test_online()
 
 	print("\nUI: %d verificações, %d falhas" % [_checks, _failures])
 	get_tree().quit(1 if _failures > 0 else 0)
@@ -267,3 +268,109 @@ func _test_screens_build() -> void:
 	_check(_find_button(end, "NOVO CASO") != null, "capa final monta com ações")
 	end.queue_free()
 	await _frames()
+
+## --- Online (respostas do servidor simuladas) ------------------------------------------
+
+func _test_online() -> void:
+	var calls: Array = []
+	var server := {"seed": 4242, "outcome": CaseState.Outcome.WIN, "fail": false}
+	Online.mock = func(method: int, path: String, body: Dictionary) -> Dictionary:
+		calls.append(path)
+		if server["fail"]:
+			return {"ok": false, "status": 0, "data": null}
+		if path == "/runs/start":
+			return {"ok": true, "status": 200, "data": {"run_id": "e".repeat(32), "seed": server["seed"], "config": CaseGenerator.config_for_rank(GameData.flavor()["ranks"][body["rank"]])}}
+		if path == "/runs/finish":
+			return {"ok": true, "status": 200, "data": {"outcome": server["outcome"], "score": 777, "published": body["publish"], "position": 3 if body["publish"] else null}}
+		if path == "/runs/publish":
+			return {"ok": true, "status": 200, "data": {"published": true, "position": 5}}
+		if path.begins_with("/leaderboard"):
+			return {"ok": true, "status": 200, "data": {"period": "week", "entries": [
+				{"position": 1, "nickname": "Bia", "rank_title": "Repórter", "score": 900, "hours": 80, "city": "paris", "is_you": false},
+				{"position": 2, "nickname": "Teste", "rank_title": "Estagiário(a)", "score": 777, "hours": 90, "city": "rio", "is_you": true},
+			]}}
+		return {"ok": false, "status": 404, "data": null}
+
+	# caso novo usa a semente do servidor
+	GameManager.settings.ranking = "ask"
+	await GameManager.start_new_case()
+	_check(GameManager.case.case_seed == 4242 and GameManager.case.run_id == "e".repeat(32), "caso novo usa semente e run do servidor")
+	# sem servidor: caso local, fora do ranking
+	server["fail"] = true
+	await GameManager.start_new_case()
+	_check(GameManager.case.run_id == "" and GameManager.case.case_seed != 4242, "sem servidor o caso é local")
+	server["fail"] = false
+	# ranking "no": nem pede semente
+	GameManager.settings.ranking = "no"
+	calls.clear()
+	await GameManager.start_new_case()
+	_check(not calls.has("/runs/start") and GameManager.case.run_id == "", "ranking desligado não fala com o servidor")
+
+	# vitória com "ask": registra sem publicar, pergunta, publica ao aceitar
+	GameManager.settings.ranking = "ask"
+	await GameManager.start_new_case()
+	var case: CaseState = GameManager.case
+	case.set_pauta(case.disguise["id"])
+	while not case.is_final_stop():
+		case.travel(case.route[case.stop_index + 1])
+	case.investigate(case.locations_here()[case.hideout_slot])
+	GameManager.finish_case()
+	await _frames(3)
+	_check(GameManager.last_online_result.get("status") == "done" and GameManager.last_online_result.get("published") == false, "com 'ask' o caso é conferido mas não publicado")
+	var end: Control = load("res://scenes/EndScreen.tscn").instantiate()
+	await _mount(end)
+	_check(_find_button(end, "SIM, QUERO") != null, "primeira vitória pergunta sobre o ranking")
+	_press(end, "SIM, QUERO")
+	await _frames(3)
+	_check(GameManager.settings.ranking == "yes", "aceitar liga o ranking")
+	_check(calls.has("/runs/publish") and GameManager.last_online_result.get("position") == 5, "aceitar publica o caso")
+	var texts: Array = end.find_children("*", "Label", true, false).map(func(l): return l.text)
+	_check(texts.any(func(t): return t.begins_with("RANKING: 777 pontos")), "capa mostra pontos e posição")
+	end.queue_free()
+	await _frames()
+
+	# servidor discorda do desfecho -> aviso de divergência, sem quebrar
+	server["outcome"] = CaseState.Outcome.TIMEOUT
+	await GameManager.start_new_case()
+	case = GameManager.case
+	case.set_pauta(case.disguise["id"])
+	while not case.is_final_stop():
+		case.travel(case.route[case.stop_index + 1])
+	case.investigate(case.locations_here()[case.hideout_slot])
+	GameManager.finish_case()
+	await _frames(3)
+	_check(GameManager.last_online_result.get("status") == "mismatch", "divergência de desfecho é sinalizada")
+	server["outcome"] = CaseState.Outcome.WIN
+
+	# tela de ranking
+	var board: Control = load("res://scenes/LeaderboardScreen.tscn").instantiate()
+	await _mount(board)
+	await _frames(3)
+	texts = board.find_children("*", "Label", true, false).map(func(l): return l.text)
+	_check(texts.has("Bia") and texts.has("Teste (você)"), "ranking lista as entradas e marca você")
+	board.queue_free()
+	server["fail"] = true
+	board = load("res://scenes/LeaderboardScreen.tscn").instantiate()
+	await _mount(board)
+	await _frames(3)
+	texts = board.find_children("*", "Label", true, false).map(func(l): return l.text)
+	_check(texts.any(func(t): return t.begins_with("Ranking indisponível")), "ranking fora do ar mostra aviso")
+	board.queue_free()
+
+	# contador + freio do plano grátis (intervalo do servidor, recuo em falha)
+	server["fail"] = false
+	Online.mock = func(m, p, b): return {"ok": true, "status": 200, "data": {"online": 12, "interval": 300}}
+	await Online.heartbeat()
+	_check(Online.online_count == 12 and OnlineBadge.text_for(12).contains("12 repórteres"), "contador de online atualiza")
+	_check(is_equal_approx(Online._timer.wait_time, 300.0), "próximo sinal no intervalo pedido pelo servidor")
+	Online.mock = func(m, p, b): return {"ok": false, "status": 503, "data": null}
+	await Online.heartbeat()
+	_check(is_equal_approx(Online._timer.wait_time, Online.BACKOFF_START) and Online.online_count == -1, "API fora: recua e esconde o contador")
+	await Online.heartbeat()
+	_check(is_equal_approx(Online._timer.wait_time, Online.BACKOFF_START * 2), "falhas seguidas espaçam mais")
+	Online.mock = func(m, p, b): return {"ok": true, "status": 200, "data": {"online": 3, "interval": 999999}}
+	await Online.heartbeat()
+	_check(Online._timer.wait_time <= Online.MAX_INTERVAL, "intervalo absurdo do servidor é limitado")
+	Online._timer.stop()
+	Online.mock = Callable()
+	GameManager.settings.ranking = "ask"

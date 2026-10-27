@@ -24,6 +24,16 @@ func _run() -> void:
 	gm.case = CaseGenerator.generate(rng, CaseGenerator.config_for_rank(gm.career.rank()))
 	var case: CaseState = gm.case
 
+	Online.mock = func(m, path, b):
+		if path.begins_with("/leaderboard"):
+			return {"ok": true, "status": 200, "data": {"entries": [
+				{"position": 1, "nickname": "Bia Manchete", "rank_title": "Repórter Sênior", "score": 1240, "hours": 96, "city": "toquio", "is_you": false},
+				{"position": 2, "nickname": "Ana Furo", "rank_title": "Repórter", "score": 1105, "hours": 88, "city": "paris", "is_you": true},
+				{"position": 3, "nickname": "Repórter Anônimo", "rank_title": "Estagiário(a)", "score": 760, "hours": 120, "city": "rio", "is_you": false},
+			]}}
+		return {"ok": true, "status": 200, "data": {"online": 37, "interval": 60}}
+	await Online.heartbeat()
+	Online._timer.stop()
 	var title = await _shot("res://scenes/TitleScreen.tscn", "01_title", false)
 	title._open_options()
 	await _frames(5)
@@ -31,6 +41,10 @@ func _run() -> void:
 	title.queue_free()
 	await _shot("res://scenes/BriefingScreen.tscn", "02_briefing")
 	await _shot("res://scenes/CareerScreen.tscn", "02b_career")
+	var board = await _shot("res://scenes/LeaderboardScreen.tscn", "02c_dummy", false)
+	await _frames(5)
+	await _save("02c_leaderboard")
+	board.queue_free()
 
 	gm.arrival_messages = ["Você desembarca em %s. Hora de trabalhar." % case.start_city()["name"]]
 	var city = await _shot("res://scenes/CityScreen.tscn", "03_city", false)

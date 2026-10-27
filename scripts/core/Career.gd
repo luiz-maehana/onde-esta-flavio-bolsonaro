@@ -109,3 +109,7 @@ static func _ids(value: Variant) -> Array:
 		if typeof(v) == TYPE_STRING and v.length() <= MAX_ID_LENGTH:
 			_add_unique(out, v)
 	return out
+
+## Posição do cargo atual na lista de cargos (o servidor do ranking usa).
+func rank_index() -> int:
+	return maxi(0, GameData.flavor()["ranks"].find(rank()))

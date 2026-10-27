@@ -42,6 +42,27 @@ Persistência: carreira, opções e caso em andamento ficam em `user://`
 por replay (`CaseState.to_save/from_save`), então todo rng consumido fora
 de ação tem que usar `_sub_rng()`.
 
+## 2b. Servidor (ranking e contador online) — `server/`
+
+Cloudflare Worker em TypeScript (spec 006-B). O núcleo do jogo é portado
+em `server/src/engine/` e **tem que bater bit a bit** com o GDScript:
+qualquer mudança em `scripts/core/` ou `data/` exige regerar os vetores
+(`godot --headless --path . --script res://tools/export_parity.gd`) e
+rodar `npm test` em `server/` (o CI confere as duas coisas). Ordem dos
+sorteios importa — inclusive `dict[chave] = valor` (o GDScript avalia o
+valor antes da chave).
+
+```
+cd server && npm test                 # paridade com o Godot + API
+cd server && npx wrangler deploy --dry-run --outdir /tmp/w   # empacota sem publicar
+```
+
+Deploy só pelo workflow `api.yml` (secrets `CLOUDFLARE_API_TOKEN` e
+`CLOUDFLARE_ACCOUNT_ID`). Plano grátis: o servidor dosa o intervalo do
+contador pra não passar de 100 mil requisições/dia (`presence.ts`).
+No jogo, `Online` (autoload) desliga sozinho em `res://tests` e
+`res://tools`; testes simulam respostas com `Online.mock`.
+
 ## 3. Arquitetura (resumo — detalhe em plan.md)
 
 - `scripts/core/` — lógica pura, sem nó: `CaseGenerator` sorteia,

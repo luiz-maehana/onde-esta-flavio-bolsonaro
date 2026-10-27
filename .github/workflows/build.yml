@@ -74,6 +74,14 @@ jobs:
           timeout 600 godot --headless --path . --script res://tests/run_tests.gd 2>&1 | tee test.log
           ! grep -q "SCRIPT ERROR" test.log
 
+      - name: Vetores de paridade do servidor em dia
+        # o servidor do ranking refaz casos com a mesma lógica; se o núcleo
+        # ou os dados mudarem, os vetores (server/test/vectors.json) precisam
+        # ser regerados (tools/export_parity.gd) e commitados.
+        run: |
+          timeout 300 godot --headless --path . --script res://tools/export_parity.gd
+          git diff --exit-code --stat server/test/vectors.json
+
       - name: Testes de interface
         run: |
           set -o pipefail

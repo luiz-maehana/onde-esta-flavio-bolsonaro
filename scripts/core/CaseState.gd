@@ -15,11 +15,13 @@ enum Outcome { NONE, WIN, NO_PAUTA, WRONG_PAUTA, TIMEOUT }
 ## Custo de investigar o 1º, 2º e 3º local novo da mesma cidade (RF03).
 const INVESTIGATE_COSTS := [2, 3, 4]
 const REVISIT_COST := 1
-const GAG_CHANCE := 0.15
+## Chance de imprevisto em % (sorteio inteiro: o servidor do ranking refaz
+## o caso em TypeScript e o randf() do Godot é difícil de replicar bit a bit).
+const GAG_PERCENT := 15
 const MIN_TRAVEL_HOURS := 2
 const MAX_TRAVEL_HOURS := 7
 const KM_PER_HOUR := 1600.0
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
 ## Um caso inteiro não chega perto disso; acima é save adulterado.
 const MAX_ACTIONS := 1000
 
@@ -61,6 +63,8 @@ var actions: Array = []
 ## Pra estatísticas e conquistas (RF28/RF29).
 var wrong_cities := 0
 var nights := 0
+## Partida no servidor do ranking (semente sorteada lá); "" = caso local.
+var run_id := ""
 var _witness_cache: Dictionary = {}
 var _travel_cache: Dictionary = {}
 
@@ -128,7 +132,7 @@ func investigate(loc_id: String) -> Dictionary:
 	var result: Dictionary = _witness_cache[key].duplicate()
 
 	var gag := {}
-	if first_visit and is_on_trail() and not is_final_stop() and rng.randf() < GAG_CHANCE:
+	if first_visit and is_on_trail() and not is_final_stop() and rng.randi_range(0, 99) < GAG_PERCENT:
 		var gags := flavor_pool("gags")
 		gag = gags[rng.randi_range(0, gags.size() - 1)]
 		hours += int(gag["hours"])
@@ -226,7 +230,7 @@ func set_dossier(trait_key: String, value: String) -> bool:
 ## --- Save (RF27) ---------------------------------------------------------------
 
 func to_save() -> Dictionary:
-	return {"version": SAVE_VERSION, "seed": case_seed, "config": config, "actions": actions}
+	return {"version": SAVE_VERSION, "seed": case_seed, "config": config, "actions": actions, "run_id": run_id}
 
 ## Refaz o caso a partir do save. Devolve null se o save for inválido ou se
 ## qualquer ação não puder ser refeita (save adulterado/de outra versão).
@@ -248,6 +252,9 @@ static func from_save(data: Dictionary) -> CaseState:
 	var r := RandomNumberGenerator.new()
 	r.seed = int(saved_seed)
 	var state := CaseGenerator.generate(r, config)
+	var saved_run = data.get("run_id", "")
+	if is_hex_id(saved_run):
+		state.run_id = saved_run
 	for a in saved_actions:
 		if not state._replay(a):
 			return null
@@ -285,3 +292,12 @@ static func _sanitize_config(c: Dictionary) -> Dictionary:
 	if not c.get("decoys") in ["random", "near"]:
 		return {}
 	return {"route_len": int(route_len), "deadline": int(deadline), "decoys": c["decoys"], "trait_clues": clampi(int(traits), 2, 4)}
+
+## Id do servidor do ranking / do aparelho: 32 dígitos hexadecimais.
+static func is_hex_id(v: Variant) -> bool:
+	if typeof(v) != TYPE_STRING or v.length() != 32:
+		return false
+	for ch in v:
+		if not "0123456789abcdef".contains(ch):
+			return false
+	return true

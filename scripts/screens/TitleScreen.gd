@@ -30,6 +30,8 @@ func _ready() -> void:
 	_build_bottom_bar()
 	_build_name_dialog()
 	_build_options()
+	_build_online_badge()
+	GameManager.case_starting.connect(_on_case_starting)
 	_refresh()
 	if GameManager.has_player():
 		UiTheme.focus_first(_menu_buttons)
@@ -62,30 +64,32 @@ func _build_bottom_bar() -> void:
 	row.add_child(_career_label)
 
 	var grid := GridContainer.new()
-	grid.columns = 3
+	grid.columns = 4
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	row.add_child(grid)
 	var has_saved := GameManager.has_saved_case()
-	var resume := UiTheme.button("CONTINUAR CASO", Vector2(230, 56))
+	var resume := UiTheme.button("CONTINUAR CASO", Vector2(178, 56))
 	resume.pressed.connect(GameManager.continue_case)
 	resume.visible = has_saved
-	var new_case := UiTheme.button("NOVO CASO", Vector2(230, 56))
+	var new_case := UiTheme.button("NOVO CASO", Vector2(178, 56))
 	if has_saved:
 		UiTheme.make_confirm(new_case, "DESCARTAR O SALVO?", GameManager.start_new_case)
 	else:
 		new_case.pressed.connect(GameManager.start_new_case)
-	var career := UiTheme.button("CARREIRA", Vector2(230, 56))
+	var ranking := UiTheme.button("RANKING", Vector2(178, 56))
+	ranking.pressed.connect(GameManager.open_leaderboard)
+	var career := UiTheme.button("CARREIRA", Vector2(178, 56))
 	career.pressed.connect(GameManager.open_career)
-	var options := UiTheme.button("OPÇÕES", Vector2(230, 56))
+	var options := UiTheme.button("OPÇÕES", Vector2(178, 56))
 	options.pressed.connect(_open_options)
-	var change := UiTheme.button("TROCAR REPÓRTER", Vector2(230, 56))
+	var change := UiTheme.button("TROCAR REPÓRTER", Vector2(178, 56))
 	change.pressed.connect(_open_name_dialog)
-	var quit := UiTheme.button("SAIR", Vector2(230, 56))
+	var quit := UiTheme.button("SAIR", Vector2(178, 56))
 	quit.pressed.connect(func(): get_tree().quit())
 	## No navegador "sair" não fecha nada — só some com o botão.
 	quit.visible = not OS.has_feature("web")
-	_menu_buttons = [resume, new_case, career, options, change, quit]
+	_menu_buttons = [resume, new_case, ranking, career, options, change, quit]
 	for b in _menu_buttons:
 		grid.add_child(b)
 
@@ -183,3 +187,16 @@ func _build_options() -> void:
 func _open_options() -> void:
 	_options_overlay.visible = true
 	_options.open()
+
+## Contador de online no canto superior direito, sobre a arte.
+func _build_online_badge() -> void:
+	var badge := OnlineBadge.new()
+	add_child(badge)
+	badge.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	badge.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, 16)
+
+## Enquanto o caso novo espera o servidor do ranking (até alguns segundos).
+func _on_case_starting() -> void:
+	for b in _menu_buttons:
+		b.disabled = true
+	_career_label.text = "Conectando à redação..."

@@ -10,6 +10,7 @@ const TIPS_OFF := "DESLIGADAS"
 const RESET_TEXT := "REVER DICAS"
 const RESET_DONE_TEXT := "DICAS REATIVADAS"
 const RESET_FEEDBACK_SECONDS := 1.5
+const RANKING_NOTE := "Ranking online: envia o nome do repórter, a pontuação e um código aleatório do aparelho. Nenhum dado pessoal."
 
 var _first: Control
 
@@ -72,6 +73,23 @@ func _build() -> void:
 	reset.pressed.connect(func(): _reset_tips(tips_toggle, reset))
 	tips.add_child(reset)
 	_row(col, "DICAS", tips)
+
+	var ranking := HBoxContainer.new()
+	ranking.add_theme_constant_override("separation", 8)
+	var ranking_group := ButtonGroup.new()
+	ranking_group.allow_unpress = false
+	for choice in [["yes", "PARTICIPAR"], ["no", "NÃO PARTICIPAR"]]:
+		var rb := UiTheme.button(choice[1], Vector2(230, 48))
+		rb.toggle_mode = true
+		rb.button_group = ranking_group
+		rb.button_pressed = s.ranking == choice[0]
+		rb.toggled.connect(func(on):
+			if on:
+				s.ranking = choice[0]
+				GameManager.save_settings())
+		ranking.add_child(rb)
+	_row(col, "RANKING", ranking)
+	col.add_child(UiTheme.body(RANKING_NOTE, 22, Palette.GREY))
 
 	var close := UiTheme.button("FECHAR", Vector2(180, 52))
 	close.size_flags_horizontal = Control.SIZE_SHRINK_END

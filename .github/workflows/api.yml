@@ -1,0 +1,69 @@
+name: API (Cloudflare)
+
+# Testa e publica a API do ranking/contador (server/) no Cloudflare Workers.
+# Roda quando muda o servidor, os dados do jogo ou o núcleo (o servidor
+# refaz casos com a mesma lógica e os mesmos JSON).
+on:
+  push:
+    branches: [main]
+    paths: ["server/**", "data/**", "scripts/core/**", ".github/workflows/api.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: server
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      WRANGLER_SEND_METRICS: "false"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Instalar dependências (versões travadas)
+        run: npm ci --no-fund --no-audit
+
+      - name: Testes (paridade com o Godot + API)
+        run: npm test
+
+      - name: Banco D1 (cria se não existir) e schema
+        run: |
+          node scripts/ensure-d1.mjs
+          npx wrangler d1 migrations apply onde-esta-flavio --remote
+
+      - name: Publicar Worker
+        run: npx wrangler deploy
+
+      - name: Segredo do hash de IP (só na primeira vez)
+        run: |
+          if ! npx wrangler secret list --format json | grep -q '"IP_SALT"'; then
+            openssl rand -hex 32 | npx wrangler secret put IP_SALT
+          fi
+
+      - name: Teste de fumaça na API publicada
+        run: |
+          SUB=$(curl -fsS -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain" \
+            | node -e 'process.stdin.on("data", d => console.log(JSON.parse(d).result.subdomain))')
+          URL="https://onde-esta-flavio-api.$SUB.workers.dev"
+          echo "API: $URL" | tee -a "$GITHUB_STEP_SUMMARY"
+          sleep 5
+          node scripts/smoke.ts "$URL"

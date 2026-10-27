@@ -12,8 +12,10 @@ const SFX_POOL := 4
 
 ## Atalhos usados por UiTheme etc.
 const SFX_CLICK := "click"
-## Barramentos criados em tempo de execução: volume de música e de efeitos
-## independentes (RF23), ambos passando pelo Master (mudo geral).
+## Barramentos de música e efeitos (RF23), declarados em
+## default_bus_layout.tres — precisam existir desde a partida: na versão Web
+## (áudio por Web Audio) barramento criado depois não toca nada.
+## _ensure_bus fica só de reserva se o layout faltar.
 const MUSIC_BUS := "Music"
 const SFX_BUS := "SFX"
 

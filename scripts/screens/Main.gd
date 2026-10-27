@@ -10,6 +10,7 @@ const SCREENS := {
 	"travel": preload("res://scenes/TravelScreen.tscn"),
 	"ending": preload("res://scenes/EndScreen.tscn"),
 	"career": preload("res://scenes/CareerScreen.tscn"),
+	"leaderboard": preload("res://scenes/LeaderboardScreen.tscn"),
 }
 const FADE_SECONDS := 0.18
 

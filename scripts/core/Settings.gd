@@ -17,6 +17,9 @@ var fullscreen := false
 var text_speed := "normal"
 var tips_enabled := true
 var seen_tips: Array = []
+## Ranking online (spec 006): "ask" = perguntar no primeiro caso vencido.
+const RANKING_CHOICES := ["ask", "yes", "no"]
+var ranking := "ask"
 
 func chars_per_second() -> float:
 	return CHARS_PER_SECOND[text_speed]
@@ -26,6 +29,7 @@ func to_dict() -> Dictionary:
 		"music_volume": music_volume, "sfx_volume": sfx_volume, "muted": muted,
 		"fullscreen": fullscreen, "text_speed": text_speed,
 		"tips_enabled": tips_enabled, "seen_tips": seen_tips,
+		"ranking": ranking,
 	}
 
 static func from_dict(d: Dictionary) -> Settings:
@@ -35,6 +39,9 @@ static func from_dict(d: Dictionary) -> Settings:
 	s.muted = _bool(d.get("muted"), false)
 	s.fullscreen = _bool(d.get("fullscreen"), false)
 	s.tips_enabled = _bool(d.get("tips_enabled"), true)
+	var rk = d.get("ranking")
+	if typeof(rk) == TYPE_STRING and RANKING_CHOICES.has(rk):
+		s.ranking = rk
 	var speed = d.get("text_speed")
 	if typeof(speed) == TYPE_STRING and TEXT_SPEEDS.has(speed):
 		s.text_speed = speed

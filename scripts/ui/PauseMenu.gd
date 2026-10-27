@@ -32,6 +32,9 @@ func _init() -> void:
 	for b in _buttons:
 		col.add_child(b)
 	col.add_child(UiTheme.body("O caso é salvo automaticamente a cada ação.", 24, Palette.GREY))
+	var badge := OnlineBadge.new()
+	badge.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	col.add_child(badge)
 
 	_options = OptionsPanel.new()
 	_options.visible = false

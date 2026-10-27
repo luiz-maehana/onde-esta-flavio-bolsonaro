@@ -6,6 +6,10 @@ extends Node
 
 signal screen_requested(screen_name: String)
 signal settings_changed
+## Caso novo sendo preparado (pode esperar o servidor do ranking).
+signal case_starting
+## Resposta do servidor do ranking pro caso que acabou de terminar.
+signal online_result_ready(result: Dictionary)
 
 const TITLE := "title"
 const BRIEFING := "briefing"
@@ -13,6 +17,7 @@ const CITY := "city"
 const TRAVEL := "travel"
 const ENDING := "ending"
 const CAREER := "career"
+const LEADERBOARD := "leaderboard"
 ## Semente cabe em 31 bits: o save é JSON (número = double, 53 bits de
 ## precisão), e uma semente de 64 bits voltaria diferente no replay.
 const MAX_SEED := 2147483647
@@ -24,6 +29,10 @@ var case: CaseState
 var arrival_messages: Array = []
 ## Conquistas desbloqueadas no último caso encerrado (pra capa final).
 var last_unlocked: Array = []
+## Ranking do último caso: {} (caso local) ou {"status": "pending" | "done" |
+## "error", "run_id", "outcome", "score", "published", "position"}.
+var last_online_result: Dictionary = {}
+var _starting := false
 
 func _ready() -> void:
 	career = SaveService.load()
@@ -64,13 +73,37 @@ func consume_tip(tip_id: String) -> bool:
 
 ## --- Caso -----------------------------------------------------------------------
 
+## Caso novo. Com o ranking ligado (ou ainda "ask"), a semente vem do
+## servidor (antitrapaça: ele refaz o caso no fim); se a API não responder,
+## o caso é local e simplesmente não entra no ranking.
 func start_new_case() -> void:
+	if _starting:
+		return
+	_starting = true
+	case_starting.emit()
+	var config := CaseGenerator.config_for_rank(career.rank())
+	var new_seed := 0
+	var run_id := ""
+	if settings.ranking != "no" and Online.is_available():
+		var run := await Online.start_run(career.rank_index())
+		var server_seed = run.get("seed")
+		var server_config = run.get("config")
+		if CaseState.is_hex_id(run.get("run_id")) and typeof(server_config) == TYPE_DICTIONARY and (typeof(server_seed) == TYPE_INT or typeof(server_seed) == TYPE_FLOAT):
+			var checked := CaseState._sanitize_config(server_config)
+			if not checked.is_empty() and int(server_seed) >= 1 and int(server_seed) <= MAX_SEED:
+				new_seed = int(server_seed)
+				config = checked
+				run_id = run["run_id"]
 	var rng := RandomNumberGenerator.new()
-	rng.randomize()
-	rng.seed = rng.randi_range(1, MAX_SEED)
-	case = CaseGenerator.generate(rng, CaseGenerator.config_for_rank(career.rank()))
+	if new_seed == 0:
+		rng.randomize()
+		new_seed = rng.randi_range(1, MAX_SEED)
+	rng.seed = new_seed
+	case = CaseGenerator.generate(rng, config)
+	case.run_id = run_id
 	arrival_messages = []
 	save_case()
+	_starting = false
 	screen_requested.emit(BRIEFING)
 
 func has_saved_case() -> bool:
@@ -118,6 +151,10 @@ func finish_case() -> void:
 	last_unlocked = career.record_case(case)
 	SaveService.save(career)
 	SaveService.clear_case()
+	last_online_result = {}
+	if case.run_id != "" and settings.ranking != "no":
+		last_online_result = {"status": "pending", "run_id": case.run_id}
+		_send_finish(case)
 	screen_requested.emit(ENDING)
 
 ## Sai pro título. `abandon` descarta o caso salvo; sem ele, o caso fica pra
@@ -132,3 +169,38 @@ func go_to_title(abandon: bool = false) -> void:
 
 func open_career() -> void:
 	screen_requested.emit(CAREER)
+
+## --- Ranking online (spec 006-B) ---------------------------------------------------
+
+## Manda as ações pro servidor refazer o caso. Publica direto se o jogador
+## já aceitou o ranking; com "ask", só registra (publica se aceitar depois).
+func _send_finish(finished: CaseState) -> void:
+	var res := await Online.finish_run(finished.run_id, finished.actions, career.player_name, settings.ranking == "yes")
+	if res.is_empty():
+		last_online_result = {"status": "error", "run_id": finished.run_id}
+	else:
+		last_online_result = res.duplicate()
+		last_online_result["run_id"] = finished.run_id
+		# servidor e jogo calculam o desfecho com a mesma lógica: divergência
+		# aqui seria bug de paridade, não do jogador
+		last_online_result["status"] = "done" if int(res.get("outcome", -1)) == finished.outcome else "mismatch"
+	online_result_ready.emit(last_online_result)
+
+## Resposta à pergunta do primeiro caso vencido.
+func answer_ranking(accept: bool) -> void:
+	settings.ranking = "yes" if accept else "no"
+	save_settings()
+	var r := last_online_result
+	if not accept or r.get("status") != "done" or r.get("published", false) or int(r.get("outcome", 0)) != CaseState.Outcome.WIN:
+		online_result_ready.emit(last_online_result)
+		return
+	last_online_result["status"] = "pending"
+	online_result_ready.emit(last_online_result)
+	var res := await Online.publish_run(r["run_id"], career.player_name)
+	last_online_result["status"] = "done" if not res.is_empty() else "error"
+	last_online_result["published"] = res.get("published", false)
+	last_online_result["position"] = res.get("position")
+	online_result_ready.emit(last_online_result)
+
+func open_leaderboard() -> void:
+	screen_requested.emit(LEADERBOARD)

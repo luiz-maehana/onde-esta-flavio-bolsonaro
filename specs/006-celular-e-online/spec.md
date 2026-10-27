@@ -1,7 +1,6 @@
 # Spec 006 — Celular responsivo, pessoas online e ranking (planejamento)
 
-> Status: **planejado, não implementado**. Depende das specs 001–005.
-> Decisões em aberto no fim do arquivo.
+> Status: **em implementação** (parte B primeiro). Depende das specs 001–005.
 
 ## A. Jogar no celular pelo navegador (responsivo)
 
@@ -90,6 +89,20 @@ vez só, Turnstile (captcha invisível) opcional no start.
 - Participação **opcional** (Opções → "Ranking online"); o jogo funciona
   normalmente offline ou se a API cair.
 
+### Freio do plano gratuito (sem cobrança, jogo sempre no ar)
+
+- No plano Free o Cloudflare **não cobra**: passou de 100 mil requisições no
+  dia, a API para até 0h UTC. O jogo (GitHub Pages) continua no ar e já
+  trata API fora (sem contador, caso local).
+- Pra a API não chegar lá: o servidor devolve o intervalo do próximo sinal
+  de cada jogador, calculado pra os sinais do dia caberem em 70 mil (sobram
+  30 mil pra partidas/ranking). Até ~48 pessoas simultâneas o dia todo: 1
+  sinal/min; mais gente: mais espaçado (2.000 pessoas: ~42 min). Orçamento
+  esgotado: próximo sinal só depois da meia-noite UTC. Testado simulando um
+  dia inteiro com 1.000 e 5.000 pessoas.
+- O jogo obedece o intervalo e, se a API falhar, espaça as tentativas (2, 4,
+  8 até 15 min).
+
 ### Custos e implantação
 
 - Plano gratuito do Cloudflare cobre com folga: Workers (100 mil
@@ -104,18 +117,25 @@ vez só, Turnstile (captcha invisível) opcional no start.
 - [ ] T55 `ResponsiveLayout` + aspect expand + escala por lado curto (A)
 - [ ] T56 Arranjo retrato das 7 telas + prévias em 3 tamanhos (A)
 - [ ] T57 Área segura, teclado virtual, barra de carregamento (A)
-- [ ] T58 Exportar vetores de paridade do Godot (semente + ações → estado) (B)
-- [ ] T59 Porte do núcleo + PCG32 para TypeScript com teste de paridade (B)
-- [ ] T60 Worker + Durable Object de presença + D1 + rotas (B)
-- [ ] T61 Cliente no jogo: heartbeat, start/finish, telas de ranking, opção (B)
-- [ ] T62 Rate limit, CORS, moderação de apelido, rota de admin (B)
-- [ ] T63 Deploy pelo Actions com token do Cloudflare em secret (B)
+- [x] T58 Exportar vetores de paridade do Godot (semente + ações → estado) (B)
+- [x] T59 Porte do núcleo + PCG32 para TypeScript com teste de paridade (B)
+- [x] T60 Worker + Durable Object de presença + D1 + rotas (B)
+- [x] T61 Cliente no jogo: heartbeat, start/finish, telas de ranking, opção (B)
+- [x] T62 Rate limit, CORS, moderação de apelido, rota de admin (B)
+- [x] T63 Deploy pelo Actions com token do Cloudflare em secret (B)
 
-## Decisões em aberto
+## Decisões (27/10/2026)
 
-1. Ranking ligado por padrão ou só se o jogador ativar?
-2. Mostrar o contador de online no título para todos ou só com o ranking
-   ativo?
-3. Endereço da API: subdomínio `*.workers.dev` (grátis, imediato) ou
-   domínio próprio no Cloudflare?
-4. Turnstile (captcha invisível) já na primeira versão?
+1. Ranking: o jogo **pergunta ao fim do primeiro caso** ("ask"); dá pra
+   mudar em Opções. Enquanto não decidiu, o caso já é registrado no
+   servidor (anônimo) pra poder entrar no ranking se o jogador aceitar.
+2. Contador de online **para todos** (anônimo), no título e na pausa.
+3. API em `onde-esta-flavio-api.ondeestaflavio.workers.dev`.
+4. Turnstile **depois**, se aparecer abuso — o replay no servidor já é a
+   antitrapaça principal.
+5. Moderação de apelido: lista de bloqueio no servidor + remoção manual
+   pelo console do D1 no painel (sem rota de admin exposta).
+6. Pra o porte ser exato, o núcleo deixa de usar `randf()` (algoritmo de
+   float do Godot é difícil de replicar) e passa a usar só inteiros;
+   `SAVE_VERSION` sobe pra 2 (save de caso antigo é descartado, não
+   refeito errado).

@@ -18,10 +18,15 @@ boot_splash/bg_color=Color(0.0784, 0.0784, 0.0784, 1)
 boot_splash/show_image=false
 config/icon="res://assets/icon.png"
 
+[audio]
+
+buses/default_bus_layout="res://default_bus_layout.tres"
+
 [autoload]
 
 GameManager="*res://scripts/autoload/GameManager.gd"
 AudioManager="*res://scripts/autoload/AudioManager.gd"
+Online="*res://scripts/autoload/Online.gd"
 
 [display]
 
