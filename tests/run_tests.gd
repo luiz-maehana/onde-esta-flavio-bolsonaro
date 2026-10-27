@@ -14,6 +14,7 @@ func _initialize() -> void:
 	_test_playthroughs()
 	_test_career()
 	_test_portraits()
+	_test_security()
 	print("\n%d verificações, %d falhas" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -136,6 +137,26 @@ func _test_playthroughs() -> void:
 		_check(res["kind"] == "found", "achou no esconderijo")
 		var expected: int = [CaseState.Outcome.WIN, CaseState.Outcome.WRONG_PAUTA, CaseState.Outcome.NO_PAUTA][mode]
 		_check(s.outcome == expected, "desfecho %d esperado %d (seed %d, horas %d)" % [s.outcome, expected, seed, s.clock.hours])
+
+## Pentest: save adulterado nunca derruba o jogo nem gera cargo vazio.
+func _test_security() -> void:
+	var evil := [
+		{"player_name": "Ana", "cases_solved": -5},
+		{"player_name": "Ana", "cases_solved": 1e30},
+		{"player_name": "Ana", "cases_solved": "abc"},
+		{"player_name": "x", "cases_solved": null, "cases_played": null},
+		{"player_name": ["array"], "cases_solved": NAN},
+		{"player_name": "A".repeat(5000), "cases_solved": INF},
+		{},
+	]
+	for d in evil:
+		var c := Career.from_dict(d)
+		_check(c != null, "save adulterado vira carreira válida: %s" % str(d).left(40))
+		_check(not c.rank().is_empty(), "cargo nunca vazio: %s" % str(d).left(40))
+		_check(c.cases_solved >= 0 and c.cases_solved <= Career.MAX_CASES, "contagem dentro dos limites")
+		_check(c.player_name.length() <= Career.MAX_NAME_LENGTH, "nome truncado")
+		_check(c.cases_played >= c.cases_solved, "jogados >= resolvidos")
+	_check(not Career.rank_for(-100).is_empty(), "rank_for negativo cai no primeiro cargo")
 
 func _test_portraits() -> void:
 	for d in GameData.disguises():

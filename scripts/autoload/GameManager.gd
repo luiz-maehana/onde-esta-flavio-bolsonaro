@@ -25,7 +25,7 @@ func has_player() -> bool:
 
 func set_player_name(player_name: String) -> void:
 	career = Career.new()
-	career.player_name = player_name.strip_edges()
+	career.player_name = Career.sanitize_name(player_name)
 	SaveService.save(career)
 
 func start_new_case() -> void:

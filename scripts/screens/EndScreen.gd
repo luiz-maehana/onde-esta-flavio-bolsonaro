@@ -21,9 +21,11 @@ func _ready() -> void:
 	var options: Array = GameData.flavor()["headlines"][HEADLINE_KEYS[case.outcome]].duplicate()
 	if won:
 		options.append_array(case.scandal["headlines_win"])
+	# Nome do jogador entra por último e como texto literal: um nome como
+	# "{city}" não pode ser interpretado como marcador do modelo.
 	var headline: String = options[randi() % options.size()].format({
-		"player": career.player_name, "city": city["name"], "spot": case.found_spot,
-	})
+		"city": city["name"], "spot": case.found_spot,
+	}).replace("{player}", career.player_name)
 
 	var page := NewspaperPage.new()
 	add_child(page)
