@@ -46,8 +46,11 @@ Jogo (Web/exe) ──HTTPS──► Cloudflare Worker (API)
 
 - **Worker**: API pública, CORS só para `luiz-maehana.github.io` (e o exe,
   que não manda Origin).
-- **Presença** (RF40): o jogo manda um *heartbeat* a cada 30 s com um id de
-  sessão aleatório; o Durable Object conta sessões vistas nos últimos 75 s.
+- **Presença** (RF40): o jogo manda um *heartbeat* a cada 60 s com um id de
+  sessão aleatório; o Durable Object conta sessões vistas nos últimos 150 s.
+  (60 s e não 30 s: é o que mais consome do limite grátis de 100 mil
+  requisições/dia — ~1.600 horas-jogador por dia. Se a API estourar o
+  limite, o jogo só esconde o contador; nada quebra.)
   `GET /online` devolve o número. Exibido no título ("12 repórteres na
   rua agora") e na pausa.
 - **Ranking** (RF41): só casos **vencidos**. Pontuação = base do cargo ×

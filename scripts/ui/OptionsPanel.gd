@@ -5,6 +5,12 @@ extends PanelContainer
 
 signal closed
 
+const TIPS_ON := "LIGADAS"
+const TIPS_OFF := "DESLIGADAS"
+const RESET_TEXT := "REVER DICAS"
+const RESET_DONE_TEXT := "DICAS REATIVADAS"
+const RESET_FEEDBACK_SECONDS := 1.5
+
 var _first: Control
 
 func _init() -> void:
@@ -58,15 +64,12 @@ func _build() -> void:
 
 	var tips := HBoxContainer.new()
 	tips.add_theme_constant_override("separation", 8)
-	tips.add_child(UiTheme.toggle("LIGADAS", "DESLIGADAS", s.tips_enabled, func(on):
+	var tips_toggle := UiTheme.toggle(TIPS_ON, TIPS_OFF, s.tips_enabled, func(on):
 		s.tips_enabled = on
-		GameManager.save_settings()))
-	var reset := UiTheme.button("REVER DICAS", Vector2(200, 48))
-	reset.pressed.connect(func():
-		s.seen_tips.clear()
-		s.tips_enabled = true
-		GameManager.save_settings()
-		reset.text = "OK!")
+		GameManager.save_settings())
+	tips.add_child(tips_toggle)
+	var reset := UiTheme.button(RESET_TEXT, Vector2(240, 48))
+	reset.pressed.connect(func(): _reset_tips(tips_toggle, reset))
 	tips.add_child(reset)
 	_row(col, "DICAS", tips)
 
@@ -76,6 +79,21 @@ func _build() -> void:
 		visible = false
 		closed.emit())
 	col.add_child(close)
+
+## Rever dicas: zera as vistas e religa as dicas — o botão de liga/desliga ao
+## lado passa a mostrar LIGADAS, e o próprio botão confirma por um instante
+## e volta ao texto normal (pode ser usado de novo).
+func _reset_tips(tips_toggle: Button, reset: Button) -> void:
+	var s := GameManager.settings
+	s.seen_tips.clear()
+	s.tips_enabled = true
+	GameManager.save_settings()
+	tips_toggle.set_pressed_no_signal(true)
+	tips_toggle.text = TIPS_ON
+	reset.text = RESET_DONE_TEXT
+	get_tree().create_timer(RESET_FEEDBACK_SECONDS).timeout.connect(func():
+		if is_instance_valid(reset):
+			reset.text = RESET_TEXT)
 
 func _row(col: VBoxContainer, label: String, control: Control) -> void:
 	var row := HBoxContainer.new()

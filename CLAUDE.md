@@ -22,6 +22,7 @@ git); abaixo, `godot`.
 ```
 godot --headless --path . --import                         # reimporta assets / cache de classes
 godot --headless --path . --script res://tests/run_tests.gd # testes da lógica
+godot --headless --path . res://tests/UiTests.tscn         # testes de interface (cliques reais)
 godot --headless --path . --script res://tools/build_audio.gd  # regera música/SFX
 godot --headless --path . --script res://tools/build_icon.gd   # regera ícone
 godot --headless --path . --script res://tools/build_portrait_sheet.gd  # build/portraits.png com todos os retratos

@@ -74,6 +74,12 @@ jobs:
           timeout 600 godot --headless --path . --script res://tests/run_tests.gd 2>&1 | tee test.log
           ! grep -q "SCRIPT ERROR" test.log
 
+      - name: Testes de interface
+        run: |
+          set -o pipefail
+          timeout 300 godot --headless --path . res://tests/UiTests.tscn 2>&1 | tee ui.log
+          ! grep -q "SCRIPT ERROR" ui.log
+
       - name: Exportar Web
         run: |
           mkdir -p build/web
