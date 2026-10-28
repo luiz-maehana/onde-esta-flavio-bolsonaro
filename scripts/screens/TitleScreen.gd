@@ -49,9 +49,11 @@ func _ready() -> void:
 	add_child(bg)
 
 	_build_bottom_bar()
+	# antes dos diálogos: o fundo escuro deles cobre o selo (no celular em pé
+	# ele ficava por cima do título do crachá)
+	_build_online_badge()
 	_build_name_dialog()
 	_build_options()
-	_build_online_badge()
 	GameManager.case_starting.connect(_on_case_starting)
 	_refresh()
 	if GameManager.consume_reopen_options():

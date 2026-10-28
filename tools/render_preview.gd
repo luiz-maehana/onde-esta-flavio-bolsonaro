@@ -97,6 +97,14 @@ func _render_all() -> void:
 	travel._map.hovered_id = "cairo"
 	await _frames(5)
 	await _save("07_travel")
+	# avião no meio do voo (spec 012); o pouso troca de tela, então a foto
+	# sai antes de ele chegar
+	travel._map.fly_to(case.route[1])
+	travel._map._flight_t = 0.45
+	travel._map.set_process(false)
+	travel._map.queue_redraw()
+	await _frames(3)
+	await _save("07b_flight")
 	travel.queue_free()
 
 	case.set_pauta(case.disguise["id"])

@@ -25,7 +25,13 @@ var _fade: ColorRect
 var _switching := false
 var _portrait := false
 
+## Teto de quadros no celular pela Web (RF96): a arte é pixel e anima
+## devagar, 30 fps bastam e poupam bateria.
+const TOUCH_WEB_MAX_FPS := 30
+
 func _ready() -> void:
+	if OS.has_feature("web") and Responsive.is_touch():
+		Engine.max_fps = TOUCH_WEB_MAX_FPS
 	theme = UiTheme.theme()
 	_fade = ColorRect.new()
 	_fade.color = Palette.INK

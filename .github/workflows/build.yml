@@ -108,6 +108,19 @@ jobs:
           # imagem do cartão de compartilhamento (og:image), fora do pacote do jogo
           cp assets/web/og.jpg build/web/og.jpg
           grep -q "og:image" build/web/index.html
+          # spec 012 (RF91/94): pacote do jogo dentro da meta, e a tela de
+          # carregamento anuncia o download real (o Pages serve com gzip)
+          PCK=$(stat -c %s build/web/index.pck)
+          echo "index.pck: $PCK bytes"
+          test "$PCK" -le 4500000
+          TOTAL=0
+          for f in build/web/index.wasm build/web/index.pck build/web/index.js; do
+            TOTAL=$((TOTAL + $(gzip -9 -c "$f" | wc -c)))
+          done
+          MB=$(( (TOTAL + 999999) / 1000000 ))
+          echo "download: ~$MB MB"
+          sed -i "s/Carregando o jogo (~[0-9]* MB)/Carregando o jogo (~$MB MB)/" build/web/index.html
+          grep -q "Carregando o jogo (~$MB MB)" build/web/index.html
 
       - name: Exportar Windows
         run: |

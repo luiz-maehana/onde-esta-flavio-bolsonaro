@@ -17,10 +17,16 @@ const FLIGHT_SECONDS := 1.8
 
 var origin_id := ""
 var option_ids: Array = []
-var highlighted_id := ""
+var highlighted_id := "":
+	set(value):
+		highlighted_id = value
+		queue_redraw()
 var trail_ids: Array = []
 ## Cidade sob o mouse/toque (RF33): mostra nome e país.
-var hovered_id := ""
+var hovered_id := "":
+	set(value):
+		hovered_id = value
+		queue_redraw()
 ## Em pé (RF36): mostra só a região da origem, destinos e trilha.
 var crop_to_cities := false
 
@@ -33,6 +39,8 @@ const EDGE_PADDING := 4.0
 const WORLD := Rect2(-180.0, -LAT_TOP, 360.0, LAT_TOP - LAT_BOTTOM)
 ## Px do jogo por pixel de arte do mapa.
 const ART_SCALE := 2
+## Px do jogo por pixel do avião (cresce com a escala de texto do celular).
+const PLANE_SCALE := 3
 ## Ondas do oceano: uma a cada tantos graus (presas ao mapa, dão a volta).
 const WAVE_STEP := Vector2(12, 9)
 
@@ -82,7 +90,9 @@ func _process(delta: float) -> void:
 		if _flight_t >= 1.0:
 			_flight_t = -1.0
 			flight_finished.emit()
-	queue_redraw()
+	# parado, nada anima: só o pulso do destino em foco e o voo (RF95)
+	if _flight_t >= 0.0 or highlighted_id != "":
+		queue_redraw()
 
 func fly_to(city_id: String) -> void:
 	_flight_to = city_id
@@ -318,20 +328,34 @@ func _city_at(point: Vector2) -> String:
 func _draw_dashed(a: Vector2, b: Vector2, col: Color) -> void:
 	draw_dashed_line(a, b, col, 3, 10)
 
-## Avião seguindo um arco (curva de Bézier quadrática) da origem ao destino.
-func _draw_plane() -> void:
+## Ponto e rumo do avião no instante `progress` (0 a 1) do voo: arco (Bézier
+## quadrática) da origem ao destino, com decolagem e pouso suavizados.
+func plane_at(progress: float) -> Array:
 	var a := _city_pos(origin_id)
 	var b := _city_pos(_flight_to)
 	var ctrl := (a + b) / 2 - Vector2(0, a.distance_to(b) * 0.35)
-	var t := ease(_flight_t, -1.6)
-	var pos := a.lerp(ctrl, t).lerp(ctrl.lerp(b, t), t)
-	var next := a.lerp(ctrl, minf(1, t + 0.02)).lerp(ctrl.lerp(b, minf(1, t + 0.02)), minf(1, t + 0.02))
-	var dir := (next - pos).normalized()
+	var curve := func(t: float) -> Vector2: return a.lerp(ctrl, t).lerp(ctrl.lerp(b, t), t)
+	var t := ease(clampf(progress, 0.0, 1.0), -1.6)
+	var pos: Vector2 = curve.call(t)
+	var dir: Vector2 = (curve.call(minf(1.0, t + 0.02)) - curve.call(maxf(0.0, t - 0.02))).normalized()
 	if dir == Vector2.ZERO:
 		dir = (b - a).normalized()
-	var side := dir.orthogonal()
-	var body := PackedVector2Array([pos + dir * 16, pos + side * 4 - dir * 10, pos - side * 4 - dir * 10])
-	var wings := PackedVector2Array([pos + dir * 2, pos + side * 14 - dir * 4, pos - side * 14 - dir * 4])
-	draw_colored_polygon(wings, Palette.WHITE)
-	draw_colored_polygon(body, Palette.RED)
-	draw_polyline(PackedVector2Array([body[0], body[1], body[2], body[0]]), Palette.INK, 2)
+	return [pos, dir]
+
+## Avião em pixel art (RF97–100): rastro de fumaça que some aos poucos,
+## sombra no mapa que se afasta no meio do voo (altitude) e o quadro da
+## direção mais próxima do rumo.
+func _draw_plane() -> void:
+	var zoom := float(maxi(PLANE_SCALE, roundi(PLANE_SCALE * Responsive.text_scale())))
+	# rastro: baforadas atrás do avião, maiores e mais apagadas quanto mais velhas
+	for i in range(10, 0, -1):
+		if _flight_t - i * 0.02 <= 0.0:
+			continue
+		var puff: Vector2 = plane_at(_flight_t - i * 0.02)[0]
+		draw_circle(puff.round(), (1.0 + i * 0.35) * zoom, Color(Palette.WHITE, 0.5 - i * 0.045))
+	var here := plane_at(_flight_t)
+	var tex := PlaneSprite.frame_for(here[1])
+	var box := Vector2(PlaneSprite.FRAME, PlaneSprite.FRAME) * zoom
+	var lift := sin(_flight_t * PI)
+	draw_texture_rect(tex, Rect2((here[0] - box / 2 + Vector2(3, 5) * zoom * lift).round(), box), false, Color(0, 0, 0, 0.3))
+	draw_texture_rect(tex, Rect2((here[0] - box / 2).round(), box), false)

@@ -334,6 +334,8 @@ func _test_layout_fits() -> void:
 		title.get_child(0)._open_name_dialog()
 		await _frames(3)
 		_check_fits(title, "Crachá " + tag)
+		var badge: Node = title.get_child(0).find_children("*", "OnlineBadge", false, false).front()
+		_check(badge.get_index() < title.get_child(0)._name_dialog.get_index(), "selo online fica embaixo do crachá (%s)" % tag)
 		if Responsive.is_touch():
 			var field: Control = title.get_child(0)._name_edit
 			_check(field.get_global_rect().end.y < title.size.y * 0.5, "campo do nome na metade de cima, acima do teclado virtual (%s)" % tag)
@@ -379,6 +381,20 @@ func _test_layout_fits() -> void:
 		GameManager.last_online_result = {"status": "done", "published": false, "score": 9999, "outcome": CaseState.Outcome.WIN}
 		var end_box := await _layout_box(load("res://scenes/EndScreen.tscn").instantiate())
 		_check_fits(end_box, "Capa + pergunta do ranking " + tag)
+		await _free_box(end_box)
+		# carimbo girado não pode invadir a linha do ranking embaixo dele
+		GameManager.settings.ranking = "yes"
+		GameManager.last_online_result = {"status": "done", "published": true, "position": 1, "score": 830, "outcome": CaseState.Outcome.WIN}
+		end_box = await _layout_box(load("res://scenes/EndScreen.tscn").instantiate())
+		var online: Label = end_box.get_child(0)._online_label
+		var stamps: Array = end_box.find_children("*", "PanelContainer", true, false).filter(func(p): return p.rotation != 0.0)
+		var stamp_bottom := -INF
+		for p in stamps:
+			var xf: Transform2D = p.get_global_transform()
+			for corner in [Vector2.ZERO, Vector2(p.size.x, 0), Vector2(0, p.size.y), p.size]:
+				stamp_bottom = maxf(stamp_bottom, (xf * corner).y)
+		_check(not stamps.is_empty() and stamp_bottom <= online.get_global_rect().position.y + 1,
+			"carimbo acima da linha do ranking (%s: fundo %.0f, linha %.0f)" % [tag, stamp_bottom, online.get_global_rect().position.y])
 		await _free_box(end_box)
 		GameManager.last_online_result = {}
 	Responsive.forced = -1
@@ -996,6 +1012,18 @@ func _test_art_proportions() -> void:
 	for id in map.option_ids:
 		var degrees := absf(map._city_pos(id).x - map._city_pos("santiago").x) / map.pixels_per_degree().x
 		_check(degrees <= 180.0, "Santiago -> %s pelo caminho mais curto (%.0f graus)" % [id, degrees])
+
+	# Spec 012 (RF97–99): avião em 16 direções, da origem ao destino
+	_check(PlaneSprite.frames().size() == PlaneSprite.DIRECTIONS, "avião com %d direções" % PlaneSprite.DIRECTIONS)
+	var wrong_dirs: Array = range(PlaneSprite.DIRECTIONS).filter(func(i):
+		return PlaneSprite.index_for(Vector2.RIGHT.rotated(i * TAU / PlaneSprite.DIRECTIONS + 0.1)) != i)
+	_check(wrong_dirs.is_empty(), "rumo escolhe o quadro mais próximo (erradas: %s)" % [wrong_dirs])
+	map.fly_to("sydney")
+	var start: Vector2 = map.plane_at(0.0)[0]
+	var finish: Vector2 = map.plane_at(1.0)[0]
+	_check(start.distance_to(map._city_pos("santiago")) < 1.0 and finish.distance_to(map._city_pos("sydney")) < 1.0,
+		"avião sai de Santiago e pousa em Sydney (%s -> %s)" % [start, finish])
+	_check(Rect2(Vector2.ZERO, map.size).grow(1).has_point(finish), "pouso dentro do mapa mesmo cruzando a borda")
 	map.queue_free()
 	await _frames()
 

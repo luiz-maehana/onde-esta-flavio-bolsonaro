@@ -166,8 +166,16 @@ static func stamp(text: String, size: int = 18, color: Color = Palette.RED) -> C
 	p.add_child(headline(text, size, color))
 	p.rotation_degrees = -6
 	holder.add_child(p)
-	holder.custom_minimum_size = p.get_combined_minimum_size() + Vector2(0, 24)
-	p.position = Vector2(12, 18)
+	# O tamanho real do carimbo só sai quando a tela aplica tema e fontes:
+	# o espaço reservado acompanha o painel (girado, o canto direito sobe
+	# largura × sen 6°), senão o que vem embaixo sobe por cima dele.
+	var fit := func() -> void:
+		var lift := ceilf(p.size.x * sin(deg_to_rad(6)))
+		p.position = Vector2(12, 4 + lift)
+		holder.custom_minimum_size = Vector2(p.size.x + 16, p.size.y + lift + 12)
+	p.resized.connect(fit)
+	p.size = p.get_combined_minimum_size()
+	fit.call()
 	return holder
 
 ## Faz a primeira opção de uma lista de botões receber o foco do teclado
