@@ -59,33 +59,47 @@ func _ready() -> void:
 	_on_key = JavaScriptBridge.create_callback(_js_key)
 	_element.addEventListener("input", _on_input)
 	_element.addEventListener("keydown", _on_key)
-	_edit.visibility_changed.connect(_sync)
-	_edit.resized.connect(_sync)
-	get_tree().root.size_changed.connect(_sync)
-	_sync.call_deferred()
-
 func _exit_tree() -> void:
 	if _element:
 		_element.removeEventListener("input", _on_input)
 		_element.removeEventListener("keydown", _on_key)
 		_element.style.display = "none"
 
-## Põe o campo nativo exatamente sobre o LineEdit (px de CSS) ou esconde.
-func _sync() -> void:
+## Acompanha o LineEdit a cada quadro: o crachá abre e se posiciona depois
+## (layout dos contêineres, girar o aparelho, teclado redimensionando a
+## página), e mudar de posição não avisa o LineEdit. Só mexe na página quando
+## algo mudou.
+var _shown := false
+var _last_box := Rect2i()
+
+func _process(_delta: float) -> void:
 	if not is_instance_valid(_edit) or _element == null:
 		return
-	if not _edit.is_visible_in_tree():
-		_element.style.display = "none"
+	var visible_now := _edit.is_visible_in_tree()
+	if not visible_now:
+		if _shown:
+			_element.style.display = "none"
+			_shown = false
 		return
-	var rect := _edit.get_viewport().get_screen_transform() * _edit.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, _edit.size)
-	var css := rect.size.abs() / maxf(DisplayServer.screen_get_scale(), 1.0)
-	var pos := rect.position / maxf(DisplayServer.screen_get_scale(), 1.0)
-	_element.style.left = "%dpx" % int(pos.x)
-	_element.style.top = "%dpx" % int(pos.y)
-	_element.style.width = "%dpx" % int(css.x)
-	_element.style.height = "%dpx" % int(css.y)
-	_element.value = _edit.text
-	_element.style.display = "block"
+	var box := css_box(_edit)
+	if box != _last_box:
+		_last_box = box
+		_element.style.left = "%dpx" % box.position.x
+		_element.style.top = "%dpx" % box.position.y
+		_element.style.width = "%dpx" % box.size.x
+		_element.style.height = "%dpx" % box.size.y
+	if not _shown:
+		# texto só copiado ao aparecer: a cada quadro apagaria o cursor
+		_element.value = _edit.text
+		_element.style.display = "block"
+		_shown = true
+
+## Retângulo do controle na página, em px de CSS (a janela do navegador vem
+## em px físicos).
+static func css_box(control: Control) -> Rect2i:
+	var rect := control.get_viewport().get_screen_transform() * control.get_global_transform_with_canvas() * Rect2(Vector2.ZERO, control.size)
+	var scale := maxf(DisplayServer.screen_get_scale(), 1.0)
+	return Rect2i(Vector2i(rect.position / scale), Vector2i(rect.size.abs() / scale))
 
 func _js_input(_args: Array) -> void:
 	_edit.text = str(_element.value).left(_edit.max_length)
