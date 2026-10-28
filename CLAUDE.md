@@ -28,10 +28,16 @@ godot --headless --path . --script res://tools/build_icon.gd   # regera ícone
 godot --headless --path . --script res://tools/build_portrait_sheet.gd  # build/portraits.png com todos os retratos
 godot --path . --script res://tools/build_skyline_sheet.gd      # build/skylines_day|night.png com todos os cenários (precisa de janela)
 godot --headless --path . --script res://tools/build_world.gd -- <ne_110m_land.geojson>  # contornos do mapa em data/world.json
+node tests/web_smoke.js <url> <saída>  # joga a versão Web num navegador (Playwright; o CI roda no build)
 godot --headless --path . --script res://tools/build_og.gd    # imagem de compartilhamento (assets/web/og.jpg)
 godot --path . res://tools/RenderPreview.tscn              # PNG de cada tela em build/preview/<idioma>/<tamanho>/
 godot --headless --path . --export-release "Windows Desktop" build/OndeEstaFlavio.exe
 ```
+
+A versão Web exporta com um modelo enxuto compilado no CI
+(`tools/web_template/custom.py`: sem 3D, só os módulos usados). Recurso
+novo do motor (módulo, formato de imagem/áudio) tem que entrar no perfil —
+o teste no navegador do build acusa o que faltar.
 
 Scripts com `extends SceneTree` (`--script`) não enxergam autoloads; quem
 precisa de `GameManager`/`AudioManager` roda como cena (ver RenderPreview).

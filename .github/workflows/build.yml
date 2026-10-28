@@ -28,7 +28,7 @@ env:
 jobs:
   web-template:
     # spec 012 (RF92): modelo de exportação Web enxuto, só com o que o jogo
-    # usa (perfil em tools/web_template/custom.py). Compila uma vez (~40 min)
+    # usa (perfil em tools/web_template/custom.py). Compila uma vez (~10 min)
     # e fica em cache pela versão do Godot, do emscripten e pelo perfil.
     # Godot e emsdk conferidos pelo commit da tag oficial.
     runs-on: ubuntu-latest

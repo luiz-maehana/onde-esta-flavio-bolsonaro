@@ -2,7 +2,7 @@
 # (.github/workflows/build.yml, job web-template) com:
 #   scons platform=web target=template_release profile=tools/web_template/custom.py
 # (platform e target têm que ir na linha de comando: o perfil é lido depois)
-# Mudar este arquivo invalida o cache e recompila o modelo (~40 min).
+# Mudar este arquivo invalida o cache e recompila o modelo (~10 min no CI).
 #
 # Só o que o jogo usa em execução: GDScript, fontes TTF (freetype + servidor
 # de texto simples — pt/en/es não precisam do avançado), WebP (artes de
