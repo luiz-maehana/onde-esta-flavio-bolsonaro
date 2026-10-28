@@ -1,7 +1,6 @@
 # Spec 012 — Jogo mais leve na Web e avião novo
 
-> Status: **em andamento** (28/10/2026) — aprovada; falta o modelo Web
-> enxuto (T112) e o PWA (T113).
+> Status: **em andamento** (28/10/2026) — aprovada; falta só o PWA (T113).
 > Depende das specs 006 e 011.
 
 ## Por quê
@@ -31,7 +30,7 @@ Download real: **~24 MB**. A tela de carregamento anuncia "~40 MB".
   tamanho; cache do modelo entre execuções. Antes de trocar, lista do que o
   jogo usa (SubViewport, áudio QOA, `HTTPRequest`, `JavaScriptBridge`,
   fontes TTF, JSON, tradução) e partida completa por clique no modelo novo.
-  Meta: `index.wasm` ≤ 5 MB com gzip.
+  Meta: `index.wasm` ≤ 5 MB com gzip (saiu 6,3 MB; o CI barra acima de 6,5).
 - **RF93** — Cache no aparelho (PWA): segunda visita sem baixar tudo de
   novo; versão nova publicada substitui a antiga no próximo acesso.
 - **RF94** — Texto da tela de carregamento com o tamanho real, gerado no CI
@@ -84,13 +83,13 @@ Download real: **~24 MB**. A tela de carregamento anuncia "~40 MB".
 ## Tarefas (quando aprovado)
 
 - [x] T111 Artes de título com perda + medição do pck (RF91)
-- [ ] T112 Modelo Web enxuto no CI + lista do que o jogo usa (RF92)
+- [x] T112 Modelo Web enxuto no CI + lista do que o jogo usa (RF92)
 - [ ] T113 PWA com atualização de versão (RF93)
 - [x] T114 Texto de carregamento com o tamanho real (RF94)
 - [x] T115 Mapa só redesenha animando; teto de fps no celular (RF95, 96)
 - [x] T116 Avião em pixel art, 16 direções, sombra e rastro (RF97–100)
 - [x] T117 Selo online x crachá no celular (RF101)
-- [x] T118 Testes da seção F (avião, selo, carimbo; os do modelo enxuto vêm com a T112)
+- [x] T118 Testes da seção F (avião, selo, carimbo, tamanhos no CI e teste no navegador)
 
 ## Achados durante a implementação
 
@@ -102,3 +101,13 @@ Download real: **~24 MB**. A tela de carregamento anuncia "~40 MB".
 - Carimbo da capa ("FURO!"/"ESCAPOU") por cima da linha do ranking: o
   espaço do carimbo era medido antes do tema/fontes; agora acompanha o
   tamanho real (relato do jogador, corrigido junto).
+- Modelo Web enxuto: `index.wasm` 10,2 → 6,3 MB com gzip (39,5 → ~24 MB
+  sem); download total ~24 MB (início do dia) → ~10 MB. Compila em ~9 min
+  no CI, não 40–60.
+- `platform`/`target` dentro do perfil do scons são ignorados (o perfil é
+  lido depois): vão na linha de comando — a 1ª tentativa gerou o modelo de
+  depuração.
+- Sem o módulo de física o motor avisa no console; o projeto declara
+  `physics/2d/physics_engine.web="Dummy"` (o jogo não usa física).
+- O teste no navegador (tests/web_smoke.js) simula a API do ranking como
+  indisponível: ela só aceita o site oficial (spec 010).
