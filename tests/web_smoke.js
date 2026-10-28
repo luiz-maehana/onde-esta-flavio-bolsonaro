@@ -7,7 +7,8 @@ const { chromium } = require('playwright');
 
 const [url, out] = process.argv.slice(2);
 // Avisos do navegador que não são do jogo.
-const IGNORED = [/AudioContext was not allowed/, /WebGL/i, /GPU stall/i, /favicon/];
+// (o 503 da API simulada também: o Chrome loga todo status de erro HTTP)
+const IGNORED = [/AudioContext was not allowed/, /WebGL/i, /GPU stall/i, /favicon/, /Failed to load resource: the server responded with a status of 503/];
 
 (async () => {
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -19,6 +20,12 @@ const IGNORED = [/AudioContext was not allowed/, /WebGL/i, /GPU stall/i, /favico
     if (m.type() === 'error' || /SCRIPT ERROR|^ERROR:|Cannot get class|not available/.test(text)) problems.push(text);
   });
   page.on('pageerror', (e) => problems.push('pageerror: ' + e.message));
+  // A API do ranking só aceita o site oficial (spec 010): aqui ela responde
+  // "indisponível", como sem rede, e o jogo tem que seguir sem erro.
+  const CORS = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' };
+  await page.route(/workers\.dev/, (route) => route.request().method() === 'OPTIONS'
+    ? route.fulfill({ status: 204, headers: CORS })
+    : route.fulfill({ status: 503, headers: { ...CORS, 'content-type': 'application/json' }, body: '{}' }));
 
   await page.goto(url);
   await page.waitForFunction(() => {

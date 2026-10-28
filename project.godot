@@ -41,6 +41,10 @@ window/stretch/aspect="expand"
 theme/custom_font="res://assets/fonts/VT323-Regular.ttf"
 theme/default_font_size=28
 
+[physics]
+
+2d/physics_engine.web="Dummy"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
