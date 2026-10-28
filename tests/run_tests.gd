@@ -31,6 +31,7 @@ func _initialize() -> void:
 	_test_i18n_data()
 	_test_language_detect()
 	_test_lower_first()
+	_test_partners()
 	print("\n%d verificações, %d falhas" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -546,13 +547,15 @@ func _test_always_winnable() -> void:
 ## Marcadores que o código troca (manchetes da capa). Em qualquer outro texto
 ## um {marcador} apareceria cru pro jogador.
 const HEADLINE_PLACEHOLDERS := ["{city}", "{spot}", "{player}"]
+## Marcadores do alvo do caso (spec 009): valem em qualquer texto do caso.
+const TARGET_PLACEHOLDERS := ["{target}", "{title}", "{role}", "{Role}", "{signature}"]
 
 func _test_content_deep() -> void:
 	# C1 — todo texto dos JSONs
 	var problems: Array = []
 	# português e as traduções (spec 008) passam pela mesma revisão
 	for dir in ["res://data/", "res://data/i18n/en/", "res://data/i18n/es/"]:
-		for f in ["cities", "disguises", "flavor", "scandals", "achievements"]:
+		for f in ["cities", "disguises", "flavor", "scandals", "achievements", "targets"]:
 			var path: String = dir + f + ".json"
 			_scan_text(JSON.parse_string(FileAccess.get_file_as_string(path)), path.trim_prefix("res://data/"), problems)
 	var csv := FileAccess.open("res://data/i18n/ui.csv", FileAccess.READ)
@@ -673,7 +676,7 @@ func _scan_text(value: Variant, where: String, problems: Array) -> void:
 			_scan_text(value[i], "%s[%d]" % [where, i], problems)
 	elif value is String:
 		var s: String = value
-		var allowed: Array = HEADLINE_PLACEHOLDERS if where.contains("headlines") else []
+		var allowed: Array = TARGET_PLACEHOLDERS + (HEADLINE_PLACEHOLDERS if where.contains("headlines") else [])
 		var stripped := s
 		for p in allowed:
 			stripped = stripped.replace(p, "")
@@ -726,7 +729,7 @@ const TEXT_FONTS := ["res://assets/fonts/VT323-Regular.ttf", "res://assets/fonts
 func _test_fonts_cover_languages() -> void:
 	var chars := {}
 	var paths: Array = ["res://data/i18n/ui.csv"]
-	for f in ["cities", "disguises", "flavor", "scandals", "achievements"]:
+	for f in ["cities", "disguises", "flavor", "scandals", "achievements", "targets"]:
 		paths.append("res://data/%s.json" % f)
 		for lang in ["en", "es"]:
 			paths.append("res://data/i18n/%s/%s.json" % [lang, f])
@@ -744,7 +747,7 @@ func _test_fonts_cover_languages() -> void:
 
 ## --- Spec 008 (T82): catálogo e dados por idioma ------------------------------------
 
-const LANG_DATA_FILES := ["cities", "disguises", "flavor", "scandals", "achievements"]
+const LANG_DATA_FILES := ["cities", "disguises", "flavor", "scandals", "achievements", "targets"]
 
 ## Catálogo da interface: toda chave usada em Lang.t() existe, e toda linha
 ## tem inglês e espanhol.
@@ -862,3 +865,99 @@ func _test_language_detect() -> void:
 func _test_lower_first() -> void:
 	_check(Lang.lower_first("A mansão do Lago Sul") == "a mansão do Lago Sul", "só a primeira letra do título vira minúscula")
 	_check(Lang.lower_first("") == "", "título vazio continua vazio")
+
+
+## --- Spec 009: parceiros ------------------------------------------------------------
+
+## Palavras que afirmam crime: só podem aparecer no box factual (LORE).
+const ACCUSING_WORDS := {
+	"pt": ["cúmplice", "culpado", "criminoso", "condenado", "crime"],
+	"en": ["accomplice", "guilty", "criminal", "convicted", "crime"],
+	"es": ["cómplice", "culpable", "criminal", "condenado", "delito"],
+}
+## Campos de piada de um escândalo (fora do box factual).
+const JOKE_FIELDS := ["reasons", "found_spots", "taunts", "gags", "near", "headlines_win"]
+
+func _test_partners() -> void:
+	var ranks: Array = GameData.flavor()["ranks"]
+	var partners := GameData.partners()
+	_check(partners.size() == 7, "7 parceiros no elenco")
+	# RF56: Estagiário sempre Flávio; depois ~30% de parceiros, todos aparecem
+	var seen := {}
+	var others := 0
+	for n in 2000:
+		var g := RandomNumberGenerator.new()
+		g.seed = 300000 + n
+		var first := CaseGenerator.generate(g, CaseGenerator.config_for_rank(ranks[0]))
+		if first.target_id != GameData.DEFAULT_TARGET:
+			_check(false, "estagiário pegou parceiro (semente %d)" % (300000 + n))
+		var h := RandomNumberGenerator.new()
+		h.seed = 300000 + n
+		var s := CaseGenerator.generate(h, CaseGenerator.config_for_rank(ranks[2]))
+		if s.target_id != GameData.DEFAULT_TARGET:
+			others += 1
+			seen[s.target_id] = true
+			_check(s.scandal_id == s.target["scandal"]["id"], "parceiro usa o próprio escândalo")
+	print("parceiros: %.1f%% dos casos a partir de Repórter Júnior" % (others / 20.0))
+	_check(others >= 500 and others <= 700, "cerca de 30%% dos casos com parceiro (%d de 2000)" % others)
+	_check(seen.size() == partners.size(), "todos os parceiros aparecem (%d)" % seen.size())
+	# RF58: save/partida sem target_chance continua caso do Flávio
+	var g2 := RandomNumberGenerator.new()
+	g2.seed = 77
+	var old_config := {"route_len": 5, "deadline": 161, "decoys": "near", "trait_clues": 3}
+	var old := CaseState.from_save({"version": CaseState.SAVE_VERSION, "seed": 12345, "config": old_config, "actions": []})
+	_check(old != null and old.target_id == GameData.DEFAULT_TARGET, "save sem target_chance é caso do Flávio")
+
+	# RF61: textos de caso de parceiro completos, sem citar o senador, nos 3 idiomas
+	for lang in Lang.SUPPORTED:
+		Lang.apply(lang)
+		var problems: Array = []
+		for t in partners:
+			var g3 := RandomNumberGenerator.new()
+			g3.seed = 4242
+			var s := CaseGenerator.generate(g3, {"route_len": 4})
+			s.target_id = t["id"]
+			s.scandal_id = t["scandal"]["id"]
+			var texts: Array = [ClueBuilder.found_text(s)]
+			for key in ["cold_trail", "near", "taunts"]:
+				for line in GameData.flavor()[key]:
+					texts.append(s.fill(line))
+			for key in ["near", "taunts"]:
+				for line in s.scandal[key]:
+					texts.append(s.fill(line))
+			for kind in GameData.flavor()["headlines"]:
+				for line in GameData.flavor()["headlines"][kind] + s.scandal["headlines_win"]:
+					texts.append(s.fill(line).format({"city": "X", "spot": "Y"}).replace("{player}", "Z"))
+			for text in texts:
+				var lower: String = text.to_lower()
+				if text.contains("{") or lower.contains("senador") or lower.contains("senator") or text.contains("Flávio Bolsonaro,"):
+					problems.append("%s/%s: %s" % [lang, t["id"], text.left(60)])
+			# LORE: nada de palavra que afirme crime fora do box factual
+			for field in JOKE_FIELDS:
+				for item in t["scandal"][field]:
+					var joke: String = (item["text"] if item is Dictionary else str(item)).to_lower()
+					for word in ACCUSING_WORDS[lang]:
+						if joke.contains(word):
+							problems.append("%s/%s: '%s' em %s" % [lang, t["id"], word, field])
+		for p in problems.slice(0, 6):
+			printerr("  ", p)
+		_check(problems.is_empty(), "textos de parceiro completos e sem acusação em %s (%d problemas)" % [lang, problems.size()])
+	Lang.apply("pt")
+
+	# RF62: retrato de cada alvo, de procurado, oficial e com cada disfarce
+	for t in GameData.targets():
+		_check(_painted(PortraitFactory.paint(PortraitFactory.target_wanted_spec(t["id"]))), "retrato de procurado de %s" % t["id"])
+		_check(_painted(PortraitFactory.paint(PortraitFactory.target_official_spec(t["id"]))), "foto oficial de %s" % t["id"])
+		for d in GameData.disguises():
+			if not _painted(PortraitFactory.paint(PortraitFactory.target_spec(t["id"], d.get("portrait", {})))):
+				_check(false, "%s disfarçado de %s" % [t["id"], d["id"]])
+
+	# RF63: conquista "parceiros" quando todos foram flagrados
+	var career := Career.new()
+	career.targets_caught = partners.map(func(t): return t["id"])
+	var g4 := RandomNumberGenerator.new()
+	g4.seed = 1
+	_check(Achievements.is_met("parceiros", career, CaseGenerator.generate(g4, {"route_len": 4})), "conquista de todos os parceiros")
+	career.targets_caught.pop_back()
+	_check(not Achievements.is_met("parceiros", career, CaseGenerator.generate(g4, {"route_len": 4})), "falta um parceiro, sem conquista")
+	_check(Career.from_dict(career.to_dict()).targets_caught == career.targets_caught, "parceiros flagrados ficam no save")

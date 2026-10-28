@@ -1,6 +1,6 @@
 # Spec 006 — Celular responsivo, pessoas online e ranking (planejamento)
 
-> Status: **em implementação** (parte B primeiro). Depende das specs 001–005.
+> Status: **implementada** (parte B em 27/10/2026, parte A em 28/10/2026). Depende das specs 001–005.
 
 ## A. Jogar no celular pelo navegador (responsivo)
 

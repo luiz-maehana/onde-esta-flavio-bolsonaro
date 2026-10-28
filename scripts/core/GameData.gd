@@ -12,6 +12,9 @@ const CITIES_PATH := "res://data/cities.json"
 const DISGUISES_PATH := "res://data/disguises.json"
 const FLAVOR_PATH := "res://data/flavor.json"
 const SCANDALS_PATH := "res://data/scandals.json"
+const TARGETS_PATH := "res://data/targets.json"
+## Alvo padrão: o Flávio (os outros são os "parceiros", spec 009).
+const DEFAULT_TARGET := "flavio"
 const I18N_DIR := "res://data/i18n/"
 
 static var _cities: Array = []
@@ -19,6 +22,7 @@ static var _city_by_id: Dictionary = {}
 static var _disguise_data: Dictionary = {}
 static var _flavor: Dictionary = {}
 static var _scandals: Array = []
+static var _targets: Array = []
 
 static func cities() -> Array:
 	_ensure_loaded()
@@ -59,11 +63,30 @@ static func flavor() -> Dictionary:
 	_ensure_loaded()
 	return _flavor
 
+## Escândalo pelo id: os do Flávio (scandals.json) ou o de um parceiro.
 static func scandal(id: String) -> Dictionary:
 	for s in scandals():
 		if s["id"] == id:
 			return s
+	for t in targets():
+		if t.has("scandal") and t["scandal"]["id"] == id:
+			return t["scandal"]
 	return {}
+
+## Alvos possíveis de um caso: o Flávio e os parceiros (spec 009).
+static func targets() -> Array:
+	_ensure_loaded()
+	return _targets
+
+static func target(id: String) -> Dictionary:
+	for t in targets():
+		if t["id"] == id:
+			return t
+	return {}
+
+## Parceiros: os alvos com escândalo próprio (todos menos o Flávio).
+static func partners() -> Array:
+	return targets().filter(func(t): return t.has("scandal"))
 
 ## Escândalos reais que dão tema aos casos (spec 002).
 static func scandals() -> Array:
@@ -82,6 +105,7 @@ static func _ensure_loaded() -> void:
 	_disguise_data = localized(DISGUISES_PATH)
 	_flavor = localized(FLAVOR_PATH)
 	_scandals = localized(SCANDALS_PATH)
+	_targets = localized(TARGETS_PATH)
 
 ## Esquece o cache (troca de idioma): a próxima consulta relê no idioma atual.
 static func reload() -> void:
@@ -159,10 +183,18 @@ static func validate() -> PackedStringArray:
 			errors.append("disfarces %s e %s idênticos" % [d["id"], seen_combo[combo]])
 		seen_combo[combo] = d["id"]
 	var scandal_keys := ["id", "title", "summary", "status", "outlet", "sources", "reasons", "found_spots", "taunts", "gags", "near", "headlines_win"]
-	for s in scandals():
+	var all_scandals: Array = scandals() + partners().map(func(t): return t["scandal"])
+	for s in all_scandals:
 		for k in scandal_keys:
 			if not s.has(k) or (s[k] is Array and s[k].is_empty()) or (s[k] is String and s[k].strip_edges() == ""):
 				errors.append("escândalo %s sem %s" % [s.get("id", "?"), k])
+	# alvos (spec 009): o Flávio sem escândalo próprio, parceiros com
+	for t in targets():
+		for k in ["id", "name", "title", "role", "intro", "signature", "face"]:
+			if not t.has(k) or (t[k] is String and t[k].strip_edges() == ""):
+				errors.append("alvo %s sem %s" % [t.get("id", "?"), k])
+	if target(DEFAULT_TARGET).is_empty() or target(DEFAULT_TARGET).has("scandal"):
+		errors.append("alvo padrão (flavio) ausente ou com escândalo próprio")
 	return errors
 
 ## Linha aleatória de uma lista do flavor.json (sono, provocações...). Usa o

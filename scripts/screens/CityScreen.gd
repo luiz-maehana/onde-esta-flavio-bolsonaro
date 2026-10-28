@@ -171,7 +171,7 @@ func _build() -> void:
 func _wanted_poster() -> PanelContainer:
 	var frame := PanelContainer.new()
 	frame.add_theme_stylebox_override("panel", UiTheme.box(Palette.PAPER_DARK))
-	var face := PixelPortrait.make_rect(PixelPortrait.flavio(), 96)
+	var face := PixelPortrait.make_rect(PixelPortrait.target(_case.target_id), 96)
 	face.tooltip_text = "Procurado para entrevista"
 	face.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	frame.add_child(face)
@@ -240,7 +240,7 @@ func _on_location_chosen(loc_id: String) -> void:
 		"near":
 			AudioManager.play_sfx("alert")
 		"found":
-			portrait = PixelPortrait.flavio_disguised(_case.disguise["id"])
+			portrait = PixelPortrait.target_disguised(_case.target_id, _case.disguise["id"])
 			AudioManager.play_sfx("pauta")
 
 	_speech_queue.clear()

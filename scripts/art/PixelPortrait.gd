@@ -11,18 +11,29 @@ const OVERRIDE_DIR := "res://assets/portraits/"
 
 static var _cache: Dictionary = {}
 
-## Procurado: fedora e sobretudo vermelhos (identidade do jogo).
+## Procurado: fedora e sobretudo vermelhos (identidade do jogo). Alvo =
+## o Flávio ou um parceiro (spec 009); o nome no cache é o id ("flavio",
+## "marcal"...), então assets/portraits/<id>.png substitui.
+static func target(target_id: String) -> Texture2D:
+	return _cached(target_id, func(): return PortraitFactory.target_wanted_spec(target_id))
+
+## Foto oficial, de terno.
+static func target_official(target_id: String) -> Texture2D:
+	return _cached(target_id + "_oficial", func(): return PortraitFactory.target_official_spec(target_id))
+
+## O alvo com o figurino de um disfarce (campo "portrait" do disguises.json).
+static func target_disguised(target_id: String, disguise_id: String) -> Texture2D:
+	return _cached(target_id + "_" + disguise_id, func():
+		return PortraitFactory.target_spec(target_id, GameData.disguise(disguise_id).get("portrait", {})))
+
 static func flavio() -> Texture2D:
-	return _cached("flavio", func(): return PortraitFactory.flavio_wanted_spec())
+	return target(GameData.DEFAULT_TARGET)
 
-## Foto oficial de senador, de terno.
 static func flavio_official() -> Texture2D:
-	return _cached("flavio_oficial", func(): return PortraitFactory.flavio_official_spec())
+	return target_official(GameData.DEFAULT_TARGET)
 
-## O senador com o figurino de um disfarce (campo "portrait" do disguises.json).
 static func flavio_disguised(disguise_id: String) -> Texture2D:
-	return _cached("flavio_" + disguise_id, func():
-		return PortraitFactory.flavio_spec(GameData.disguise(disguise_id).get("portrait", {})))
+	return target_disguised(GameData.DEFAULT_TARGET, disguise_id)
 
 ## Testemunha: figurino do local + traços sorteados com semente fixa por
 ## `key` (ex.: "rio:hotel"), então a mesma pessoa sempre tem a mesma cara.

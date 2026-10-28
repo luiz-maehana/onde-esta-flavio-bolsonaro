@@ -9,7 +9,11 @@ const CELL := PortraitPainter.SIZE * SCALE + 8
 const COLS := 10
 
 func _initialize() -> void:
-	var specs: Array = [PortraitFactory.flavio_wanted_spec(), PortraitFactory.flavio_official_spec()]
+	# o Flávio e os parceiros (spec 009): procurado e foto oficial
+	var specs: Array = []
+	for t in GameData.targets():
+		specs.append(PortraitFactory.target_wanted_spec(t["id"]))
+		specs.append(PortraitFactory.target_official_spec(t["id"]))
 	for d in GameData.disguises():
 		specs.append(PortraitFactory.flavio_spec(d.get("portrait", {})))
 	for loc_id in GameData.flavor()["locations"]:

@@ -31,6 +31,9 @@ func _initialize() -> void:
 		var g := RandomNumberGenerator.new()
 		g.seed = 1 + i * 104729
 		var config := CaseGenerator.config_for_rank(ranks[i % ranks.size()])
+		# -- --so-flavio: confere que, sem parceiros, os casos saem como antes
+		if OS.get_cmdline_user_args().has("--so-flavio"):
+			config["target_chance"] = 0
 		var s := CaseGenerator.generate(g, config)
 		var play := RandomNumberGenerator.new()
 		play.seed = 900000 + i
@@ -40,7 +43,7 @@ func _initialize() -> void:
 			"seed": s.case_seed, "config": s.config, "actions": s.actions,
 			"final": {
 				"route": s.route, "disguise": s.disguise["id"], "scandal": s.scandal["id"],
-				"hideout_slot": s.hideout_slot, "current_city": s.current_city,
+				"hideout_slot": s.hideout_slot, "current_city": s.current_city, "target": s.target_id,
 				"stop_index": s.stop_index, "hours": s.clock.hours, "outcome": s.outcome,
 				"wrong_cities": s.wrong_cities, "nights": s.nights, "pauta": s.pauta,
 				"notes": s.notes.size(), "locations": s.locations_here(),

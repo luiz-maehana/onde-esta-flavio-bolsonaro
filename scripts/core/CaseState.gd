@@ -51,7 +51,13 @@ var disguise: Dictionary:
 		return GameData.disguise(disguise_id)
 	set(value):
 		disguise_id = value.get("id", "")
-## Escândalo real que dá tema ao caso (spec 002), de data/scandals.json.
+## Quem o repórter persegue (spec 009): o Flávio ou um parceiro.
+var target_id := GameData.DEFAULT_TARGET
+var target: Dictionary:
+	get:
+		return GameData.target(target_id)
+## Escândalo real que dá tema ao caso (spec 002), de data/scandals.json ou
+## o do parceiro (targets.json).
 var scandal_id := ""
 var scandal: Dictionary:
 	get:
@@ -230,6 +236,14 @@ func travel(to_id: String) -> Dictionary:
 ## Lista de enfeite (taunts, gags, near) = genéricas do flavor.json + as do
 ## escândalo do caso. Ponto único de mistura, pra ClueBuilder e investigate()
 ## não repetirem a regra.
+## Troca os marcadores do alvo num texto: {target} nome, {title} cargo sem
+## artigo, {role} com artigo, {Role} idem com maiúscula, {signature} a
+## assinatura dos bilhetes.
+func fill(text: String) -> String:
+	var t := target
+	return text.format({"target": t["name"], "title": t["title"], "role": t["role"],
+		"Role": Lang.upper_first(t["role"]), "signature": t["signature"]})
+
 func flavor_pool(key: String) -> Array:
 	var pool: Array = GameData.flavor().get(key, []).duplicate()
 	pool.append_array(scandal.get(key, []))
@@ -315,7 +329,10 @@ static func _sanitize_config(c: Dictionary) -> Dictionary:
 		return {}
 	if not c.get("decoys") in ["random", "near"]:
 		return {}
-	return {"route_len": int(route_len), "deadline": int(deadline), "decoys": c["decoys"], "trait_clues": clampi(int(traits), 2, 4)}
+	# sem target_chance (save ou partida de antes da spec 009) = só o Flávio
+	var chance = c.get("target_chance", 0)
+	chance = clampi(int(chance), 0, 100) if typeof(chance) == TYPE_INT or typeof(chance) == TYPE_FLOAT else 0
+	return {"route_len": int(route_len), "deadline": int(deadline), "decoys": c["decoys"], "trait_clues": clampi(int(traits), 2, 4), "target_chance": chance}
 
 ## Id do servidor do ranking / do aparelho: 32 dígitos hexadecimais.
 static func is_hex_id(v: Variant) -> bool:

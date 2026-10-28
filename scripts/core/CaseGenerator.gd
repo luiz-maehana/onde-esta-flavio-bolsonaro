@@ -11,8 +11,10 @@ const NEAR_POOL := 6
 const EARTH_RADIUS_KM := 6371.0
 
 ## Configuração usada quando o chamador não informa um campo.
+## target_chance: % de casos com outro alvo além do Flávio (spec 009).
 const DEFAULT_CONFIG := {
 	"route_len": 5, "deadline": GameClock.DEADLINE, "decoys": "random", "trait_clues": 4,
+	"target_chance": 0,
 }
 
 ## Configuração de caso a partir de um cargo de flavor.json (campos que
@@ -62,7 +64,26 @@ static func generate(rng: RandomNumberGenerator, config_in: Dictionary) -> CaseS
 	state.reason_index = rng.randi_range(0, state.scandal["reasons"].size() - 1)
 	state.found_spot_index = rng.randi_range(0, state.scandal["found_spots"].size() - 1)
 	state.hideout_slot = rng.randi_range(0, LOCATIONS_PER_CITY - 1)
+	assign_target(state, int(config["target_chance"]))
 	return state
+
+## Alvo do caso (spec 009, RF56–58): sorteio próprio a partir da semente,
+## depois de tudo, sem tocar no rng do caso — com o Flávio o caso sai
+## idêntico ao de antes. Outro alvo troca o escândalo pelo dele (o servidor
+## faz a mesma troca: server/src/engine/case.ts).
+static func assign_target(state: CaseState, chance: int) -> void:
+	if chance <= 0:
+		return
+	var r := RandomNumberGenerator.new()
+	r.seed = hash("%d:alvo" % state.case_seed)
+	if r.randi_range(0, 99) >= chance:
+		return
+	var partners := GameData.partners()
+	var target: Dictionary = partners[r.randi_range(0, partners.size() - 1)]
+	state.target_id = target["id"]
+	state.scandal_id = target["scandal"]["id"]
+	state.reason_index = r.randi_range(0, state.scandal["reasons"].size() - 1)
+	state.found_spot_index = r.randi_range(0, state.scandal["found_spots"].size() - 1)
 
 ## Distribui características do disfarce pelas paradas não finais, uma por
 ## parada, em local sorteado. `max_traits` vem do cargo: cargos altos revelam

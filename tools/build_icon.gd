@@ -17,7 +17,7 @@ func _initialize() -> void:
 	quit()
 
 func _icon(px: int) -> Image:
-	var portrait := PortraitFactory.paint(PortraitFactory.flavio_wanted_spec())
+	var portrait := PortraitFactory.paint(PortraitFactory.target_wanted_spec(GameData.DEFAULT_TARGET))
 	var img := Image.create(256, 256, false, Image.FORMAT_RGBA8)
 	img.fill(Palette.INK)
 	img.fill_rect(Rect2i(8, 8, 240, 240), Palette.YELLOW)

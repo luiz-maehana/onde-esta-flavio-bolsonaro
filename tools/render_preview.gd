@@ -103,6 +103,21 @@ func _render_all() -> void:
 	gm.last_unlocked = ["primeiro_furo", "relampago"]
 	await _shot("res://scenes/EndScreen.tscn", "08_end")
 
+	# caso de parceiro (spec 009)
+	var rng2 := RandomNumberGenerator.new()
+	rng2.seed = 7
+	gm.case = CaseGenerator.generate(rng2, CaseGenerator.config_for_rank(gm.career.rank()))
+	var partner: CaseState = gm.case
+	partner.target_id = "marcal"
+	partner.scandal_id = "marcal"
+	await _shot("res://scenes/BriefingScreen.tscn", "09_parceiro_briefing")
+	partner.set_pauta(partner.disguise["id"])
+	while not partner.is_final_stop():
+		partner.travel(partner.route[partner.stop_index + 1])
+	partner.investigate(partner.locations_here()[partner.hideout_slot])
+	gm.last_unlocked = []
+	await _shot("res://scenes/EndScreen.tscn", "09_parceiro_capa")
+
 func _shot(scene_path: String, shot_name: String, free_after: bool = true) -> Node:
 	var node: Control = load(scene_path).instantiate()
 	node.theme = UiTheme.theme()

@@ -60,4 +60,6 @@ static func is_met(id: String, career: Career, case: CaseState) -> bool:
 			return case.outcome == CaseState.Outcome.WRONG_PAUTA
 		"sem_pauta":
 			return case.outcome == CaseState.Outcome.NO_PAUTA
+		"parceiros":
+			return GameData.partners().all(func(t): return career.targets_caught.has(t["id"]))
 	return false

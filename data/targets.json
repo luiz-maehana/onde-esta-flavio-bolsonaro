@@ -1,0 +1,156 @@
+[
+  {
+    "id": "flavio", "name": "Flávio Bolsonaro", "title": "senador", "role": "o senador",
+    "intro": "O senador Flávio \"Zero Um\" Bolsonaro", "signature": "01",
+    "face": {"skin": "#E9B995", "hair": "side_part", "hair_color": "#24170F", "brows": "thick", "eye_color": "#4A2C17", "gaze": "side", "face_rx": 10.3, "age": 1, "mouth": "smirk", "facial_hair": "shadow"}
+  },
+  {
+    "id": "marcal", "name": "Pablo Marçal", "title": "coach", "role": "o coach",
+    "intro": "O coach Pablo Marçal", "signature": "PM",
+    "face": {"skin": "#E2AE88", "hair": "side_part", "hair_color": "#1B1410", "brows": "normal", "eye_color": "#3B2416", "gaze": "front", "face_rx": 9.6, "age": 1, "mouth": "smile", "facial_hair": "stubble"},
+    "scandal": {
+      "id": "marcal", "title": "O laudo falso",
+      "summary": "Na eleição de 2024 para a Prefeitura de São Paulo, Pablo Marçal divulgou nas redes um laudo dizendo que o adversário Guilherme Boulos tinha usado cocaína. Perícia e exames da Polícia Federal apontaram que o documento era falso — o médico que o teria assinado já tinha morrido. A PF indiciou Marçal por falsificação de documento e calúnia eleitoral. Em 2026 ele atuou como estrategista da campanha de Flávio Bolsonaro.",
+      "status": "Condenado em fevereiro de 2026 a pagar R$ 100 mil a Boulos, com recurso possível; inelegível até 2032 por decisão confirmada em segunda instância; o indiciamento da PF não virou condenação criminal.",
+      "outlet": "Agência Brasil, Gazeta do Povo, CartaCapital",
+      "sources": [
+        "https://agenciabrasil.ebc.com.br/justica/noticia/2026-02/justica-condena-marcal-pagar-indenizacao-boulos-por-desinformacao",
+        "https://www.gazetadopovo.com.br/brasil/marcal-e-condenado-a-pagar-r-100-mil-a-boulos-por-laudo-falso-do-uso-de-cocaina/",
+        "https://www.cartacapital.com.br/cartaexpressa/flavio-bolsonaro-diz-que-o-inelegivel-pablo-marcal-e-um-cara-do-bem/"
+      ],
+      "reasons": ["saiu correndo prometendo um curso de 'como sumir em 7 passos'", "fugiu da coletiva quando pediram para ver um laudo"],
+      "found_spots": ["gravando um vídeo motivacional no alto de um morro, de chinelo", "dando uma palestra para três pessoas num salão de hotel"],
+      "taunts": ["Bilhete: 'Inscreva-se no meu curso pra descobrir onde estou. — PM'", "Post-it: 'Sumir é mindset. — PM'"],
+      "gags": [{"text": "Um coach te ofereceu uma aula grátis de produtividade. Você perdeu duas horas assistindo.", "hours": 2}],
+      "near": ["Ele está aqui! Pediu na farmácia um laudo de 'pessoa muito ocupada'."],
+      "headlines_win": ["SEM CORTES: {player} encontra o coach em {city} e não compra o curso"]
+    }
+  },
+  {
+    "id": "eduardo", "name": "Eduardo Bolsonaro", "title": "ex-deputado", "role": "o ex-deputado",
+    "intro": "O ex-deputado Eduardo \"Zero Três\" Bolsonaro", "signature": "03",
+    "face": {"skin": "#E9B995", "hair": "short", "hair_color": "#3B2416", "brows": "thick", "eye_color": "#3B2416", "gaze": "front", "face_rx": 10.0, "age": 1, "mouth": "neutral", "facial_hair": "beard"},
+    "scandal": {
+      "id": "eduardo", "title": "A campanha nos EUA",
+      "summary": "Eduardo Bolsonaro se mudou para os Estados Unidos em fevereiro de 2025 e buscou, junto ao governo Trump, sanções contra autoridades brasileiras — segundo a PGR, para pressionar o julgamento do pai no STF. Perdeu o mandato de deputado federal em dezembro de 2025 por excesso de faltas.",
+      "status": "Condenado pela Primeira Turma do STF em junho de 2026 a 4 anos e 2 meses por coação no curso do processo, decisão definitiva; em outubro de 2026 o ministro Alexandre de Moraes mandou executar a pena, expediu mandado de prisão e cancelou os passaportes dele.",
+      "outlet": "Estado de Minas, O Povo",
+      "sources": [
+        "https://www.em.com.br/politica/2026/05/7416874-como-eduardo-bolsonaro-perdeu-o-mandato-e-virou-reu-no-stf.html",
+        "https://www.opovo.com.br/noticias/politica/2026/10/16/stf-decide-sobre-bolsonaro-e-reus-do-8-1-apos-1-turno.html"
+      ],
+      "reasons": ["disse que ia 'resolver umas coisas em Washington' e não voltou mais", "saiu da coletiva pedindo um hambúrguer 'do jeito americano'"],
+      "found_spots": ["fritando hambúrguer numa lanchonete de beira de estrada", "escondido atrás de uma pilha de bonés vermelhos"],
+      "taunts": ["Bilhete: 'I'm not here. — 03'", "Cartão-postal: 'Lembranças da América! — 03'"],
+      "gags": [{"text": "Você ficou uma hora na fila da imigração atrás de um grupo de bonés vermelhos.", "hours": 1}],
+      "near": ["Ele está aqui! Pediu o cardápio em inglês, mesmo estando escrito em português."],
+      "headlines_win": ["PASSAPORTE CARIMBADO: {player} encontra o ex-deputado em {city}"]
+    }
+  },
+  {
+    "id": "carlos", "name": "Carlos Bolsonaro", "title": "vereador", "role": "o vereador",
+    "intro": "O vereador Carlos \"Zero Dois\" Bolsonaro", "signature": "02",
+    "face": {"skin": "#EDC2A0", "hair": "buzz", "hair_color": "#24170F", "brows": "thick", "eye_color": "#4A2C17", "gaze": "side", "face_rx": 9.4, "age": 1, "mouth": "neutral", "facial_hair": "shadow"},
+    "scandal": {
+      "id": "carlos", "title": "A Abin paralela",
+      "summary": "A Polícia Federal concluiu em 2025 que a Abin teria sido usada, no governo Jair Bolsonaro, para monitorar adversários, e apontou o vereador Carlos Bolsonaro como chefe do chamado \"gabinete do ódio\", que usaria essas informações em ataques nas redes. Ele foi indiciado junto com mais de 30 pessoas e diz que o indiciamento teve motivação eleitoral.",
+      "status": "Indiciado pela PF em junho de 2025; em julho de 2026 o STF mandou a parte dele para o TRF-1; não há denúncia nem condenação.",
+      "outlet": "CNN Brasil, O Tempo, Revista Fórum",
+      "sources": [
+        "https://www.cnnbrasil.com.br/politica/pf-conclui-abin-paralela-e-indicia-bolsonaro-ramagem-e-carlos/",
+        "https://www.otempo.com.br/politica/judiciario/2026/7/20/com-carlos-bolsonaro-entre-indiciados-moraes-manda-inquerito-da-abin-paralela-para-trf-1",
+        "https://revistaforum.com.br/politica/moraes-abin-paralela-bolsonaro-carlos/"
+      ],
+      "reasons": ["saiu para 'cuidar das redes' e nunca mais apareceu", "fugiu da coletiva quando perguntaram quem tinha a senha do perfil"],
+      "found_spots": ["digitando em sete celulares ao mesmo tempo num quarto escuro", "escondido atrás de um mural cheio de prints"],
+      "taunts": ["Bilhete: 'Já sei onde você está. Hehe. — 02'", "Mensagem apagada há 2 minutos. Assinatura: '02'"],
+      "gags": [{"text": "Um perfil anônimo começou a te responder em todas as redes. Você perdeu uma hora lendo as respostas.", "hours": 1}],
+      "near": ["Ele está aqui! Pediu a senha do wi-fi e quatro carregadores."],
+      "headlines_win": ["DESCONECTADO: {player} encontra o vereador em {city} longe do teclado"]
+    }
+  },
+  {
+    "id": "nikolas", "name": "Nikolas Ferreira", "title": "deputado", "role": "o deputado",
+    "intro": "O deputado Nikolas Ferreira", "signature": "NF",
+    "face": {"skin": "#F2CDAE", "hair": "short", "hair_color": "#6B4226", "brows": "normal", "eye_color": "#3B2416", "gaze": "front", "face_rx": 9.2, "age": 0, "mouth": "smile", "facial_hair": ""},
+    "scandal": {
+      "id": "nikolas", "title": "O documento da PF",
+      "summary": "O deputado federal Nikolas Ferreira divulgou um documento falso atribuído à Polícia Federal, caso que virou ação eleitoral no TRE-MG. A PGR também levou ao STF uma acusação de injúria por uma fala em que ele chamou o presidente Lula de ladrão; a defesa alega imunidade parlamentar.",
+      "status": "Acusação de injúria em análise no STF; a ação no TRE-MG pode levar à perda do mandato, mas ainda não foi julgada; não há condenação.",
+      "outlet": "Portal do STF, Jetss",
+      "sources": [
+        "https://noticias.stf.jus.br/postsnoticias/supremo-atende-a-manifestacao-da-pgr-e-arquiva-pedidos-de-investigacao-contra-deputado-nikolas-ferreira/",
+        "https://br.jetss.com/2026/10/28/nikolas-ferreira-pode-perder-mandato-e-ficar-inelegivel-por-oito-anos/"
+      ],
+      "reasons": ["saiu para gravar um vídeo e postou de outro país", "fugiu da coletiva quando pediram a fonte de um documento"],
+      "found_spots": ["gravando um vídeo vertical com ring light no meio da praça", "escondido atrás de uma pilha de documentos 'oficiais'"],
+      "taunts": ["Bilhete: 'Isso aqui vai viralizar. — NF'", "Post-it: 'Fonte? Confia. — NF'"],
+      "gags": [{"text": "O mesmo vídeo de um deputado apareceu no seu feed 14 vezes seguidas. Você assistiu a todas.", "hours": 1}],
+      "near": ["Ele está aqui! Pediu pra trocar a luz do restaurante por uma ring light."],
+      "headlines_win": ["SEM FILTRO: {player} encontra o deputado em {city} fora do vídeo"]
+    }
+  },
+  {
+    "id": "renan", "name": "Jair Renan Bolsonaro", "title": "vereador", "role": "o vereador",
+    "intro": "O vereador Jair Renan \"Zero Quatro\" Bolsonaro", "signature": "04",
+    "face": {"skin": "#EDC2A0", "hair": "short", "hair_color": "#3B2416", "brows": "normal", "eye_color": "#4A2C17", "gaze": "side", "face_rx": 9.6, "age": 0, "mouth": "smirk", "facial_hair": "stubble"},
+    "scandal": {
+      "id": "renan", "title": "O empréstimo",
+      "summary": "Em 2024 a Polícia Civil do DF denunciou Jair Renan Bolsonaro, hoje vereador em Balneário Camboriú, por supostamente usar dados falsos da própria empresa para conseguir um empréstimo de quase R$ 500 mil. As acusações de falsidade foram arquivadas depois que o empréstimo foi quitado.",
+      "status": "Em fevereiro de 2026 o STJ trancou a última acusação, de lavagem de dinheiro; não há processo em curso. A defesa fala em absolvição, o que a decisão não diz.",
+      "outlet": "Metrópoles, ND Mais",
+      "sources": [
+        "https://www.metropoles.com/colunas/manoela-alcantara/ministro-do-stj-tranca-acao-por-lavagem-de-dinheiro-contra-jair-renan",
+        "https://ndmais.com.br/justica/stj-toma-decisao-em-processo-contra-jair-renan/"
+      ],
+      "reasons": ["saiu para 'abrir uma empresa nova' e sumiu", "fugiu da coletiva quando perguntaram sobre as parcelas"],
+      "found_spots": ["preenchendo uma ficha de empréstimo com caneta de glitter", "pegando sol numa espreguiçadeira de beach club"],
+      "taunts": ["Bilhete: 'Já quitei, tá? — 04'", "Recado: 'O 04 não está. Deixe recado após o bipe.'"],
+      "gags": [{"text": "O gerente do banco te ofereceu um empréstimo pré-aprovado. A conversa durou duas horas.", "hours": 2}],
+      "near": ["Ele está aqui! Perguntou na recepção se dava pra parcelar a diária."],
+      "headlines_win": ["QUITADO: {player} encontra o vereador em {city}"]
+    }
+  },
+  {
+    "id": "queiroz", "name": "Fabrício Queiroz", "title": "ex-assessor", "role": "o ex-assessor",
+    "intro": "O ex-assessor Fabrício Queiroz", "signature": "FQ",
+    "face": {"skin": "#C98E66", "hair": "short", "hair_color": "#9A9A9A", "brows": "normal", "eye_color": "#3B2416", "gaze": "front", "face_rx": 10.4, "age": 2, "mouth": "smile", "facial_hair": ""},
+    "scandal": {
+      "id": "queiroz", "title": "O ex-assessor da Alerj",
+      "summary": "Fabrício Queiroz foi assessor de Flávio Bolsonaro na Alerj, e o MP-RJ o apontou como operador do esquema das rachadinhas. Foi preso em 2020 num imóvel do advogado da família em Atibaia. Em setembro de 2026, decisão do ministro Gilmar Mendes, do STF, citou indícios de que a conta dele concentrava repasses de servidores do gabinete.",
+      "status": "Processo arquivado em 2022 após a anulação de provas; em setembro de 2026 foi pedida ao MP-RJ a reabertura do caso. Queiroz fez campanha para Flávio em 2026.",
+      "outlet": "Correio Braziliense, Revista Fórum",
+      "sources": [
+        "https://www.correiobraziliense.com.br/politica/2026/09/7510791-queiroz-centralizava-dinheiro-de-assessores-de-flavio-aponta-decisao.html",
+        "https://revistaforum.com.br/politica/fabricio-queiroz-votos-flavio/"
+      ],
+      "reasons": ["disse que ia 'passar uns dias no sítio de um amigo' e sumiu", "fugiu da coletiva quando perguntaram sobre a conta bancária"],
+      "found_spots": ["fazendo churrasco no quintal de um sítio, com o celular desligado", "dançando sozinho na sala de espera de um hospital"],
+      "taunts": ["Bilhete: 'Tô tranquilo, tô de boa. — FQ'", "Recado: 'Fui ali no sítio de um amigo. — FQ'"],
+      "gags": [{"text": "Você pegou uma fila de banco atrás de alguém que ia fazer 'só uns depósitos'. Levou uma hora.", "hours": 1}],
+      "near": ["Ele está aqui! Perguntou se a cidade tem algum sítio pra alugar por uns meses."],
+      "headlines_win": ["ACHADO: {player} encontra o ex-assessor em {city} longe do sítio"]
+    }
+  },
+  {
+    "id": "vorcaro", "name": "Daniel Vorcaro", "title": "banqueiro", "role": "o banqueiro",
+    "intro": "O banqueiro Daniel Vorcaro", "signature": "DV",
+    "face": {"skin": "#F2CDAE", "hair": "side_part", "hair_color": "#3B2416", "brows": "normal", "eye_color": "#2E5E8C", "gaze": "side", "face_rx": 9.8, "age": 1, "mouth": "smirk", "facial_hair": "", "glasses": "square"},
+    "scandal": {
+      "id": "vorcaro", "title": "O banqueiro do filme",
+      "summary": "Daniel Vorcaro, dono do Banco Master, foi preso pela PF em novembro de 2025 ao tentar deixar o país, no caso tratado como a maior fraude bancária do Brasil. Segundo a PF, ele prometeu até R$ 131 milhões para o filme \"Dark Horse\", sobre Jair Bolsonaro, e cerca de R$ 60 milhões teriam sido repassados por um fundo nos EUA.",
+      "status": "As investigações do caso Master seguem; não há condenação. Ele nega as acusações e diz que elas se baseiam em \"fato inexistente\".",
+      "outlet": "Brasil de Fato, CNN Brasil",
+      "sources": [
+        "https://www.brasildefato.com.br/2026/09/11/interlocutor-direto-o-que-as-investigacoes-da-pf-revelam-sobre-a-relacao-de-flavio-bolsonaro-com-daniel-vorcaro/",
+        "https://cnnbrasil.com.br/politica/flavio-bolsonaro-e-investigado-em-tres-inqueritos-no-stf"
+      ],
+      "reasons": ["saiu para 'pegar um jatinho rapidinho' e não voltou", "fugiu da coletiva quando perguntaram o saldo do banco"],
+      "found_spots": ["escondido no cofre de uma agência vazia", "assistindo sozinho a uma pré-estreia numa sala de cinema"],
+      "taunts": ["Recibo: 'Patrocínio garantido. — DV'", "Bilhete: 'Meu banco é Master. Sua busca, não. — DV'"],
+      "gags": [{"text": "Um assessor financeiro te ofereceu um investimento 'imperdível'. A explicação levou duas horas.", "hours": 2}],
+      "near": ["Ele está aqui! Perguntou se o aeroporto tem saída pelos fundos."],
+      "headlines_win": ["FIM DO PATROCÍNIO: {player} encontra o banqueiro em {city}"]
+    }
+  }
+]

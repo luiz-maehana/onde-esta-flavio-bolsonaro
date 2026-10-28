@@ -21,6 +21,8 @@ var disguises_caught: Array = []
 var scandals_covered: Array = []
 var cities_visited: Array = []
 var achievements: Array = []
+## Alvos já flagrados (spec 009): o Flávio e os parceiros.
+var targets_caught: Array = []
 
 func rank() -> Dictionary:
 	return rank_for(cases_solved)
@@ -65,6 +67,7 @@ func record_case(case: CaseState) -> Array:
 	if case.outcome == CaseState.Outcome.WIN:
 		cases_solved = mini(cases_solved + 1, MAX_CASES)
 		_add_unique(disguises_caught, case.disguise["id"])
+		_add_unique(targets_caught, case.target_id)
 		_add_unique(scandals_covered, case.scandal["id"])
 		if case.wrong_cities == 0:
 			clean_wins = mini(clean_wins + 1, MAX_CASES)
@@ -85,6 +88,7 @@ func to_dict() -> Dictionary:
 		"best_hours": best_hours, "clean_wins": clean_wins,
 		"disguises_caught": disguises_caught, "scandals_covered": scandals_covered,
 		"cities_visited": cities_visited, "achievements": achievements,
+		"targets_caught": targets_caught,
 	}
 
 ## Tolerante a save corrompido ou adulterado: tipo errado, null, negativo,
@@ -100,6 +104,7 @@ static func from_dict(data: Dictionary) -> Career:
 	c.scandals_covered = _ids(data.get("scandals_covered", []))
 	c.cities_visited = _ids(data.get("cities_visited", []))
 	c.achievements = _ids(data.get("achievements", []))
+	c.targets_caught = _ids(data.get("targets_caught", []))
 	return c
 
 static func _count(value: Variant) -> int:

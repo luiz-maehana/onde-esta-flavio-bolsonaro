@@ -26,7 +26,7 @@ func _ready() -> void:
 		options.append_array(case.scandal["headlines_win"])
 	# Nome do jogador entra por último e como texto literal: um nome como
 	# "{city}" não pode ser interpretado como marcador do modelo.
-	var headline: String = options[randi() % options.size()].format({
+	var headline: String = case.fill(options[randi() % options.size()]).format({
 		"city": city["name"], "spot": case.found_spot,
 	}).replace("{player}", career.player_name)
 
@@ -45,11 +45,11 @@ func _ready() -> void:
 		badge.add_theme_color_override("font_color", Palette.RED_DARK)
 
 	if case.outcome == CaseState.Outcome.TIMEOUT:
-		page.add_photo(PixelPortrait.flavio_official(), "Flávio Bolsonaro — paradeiro desconhecido")
+		page.add_photo(PixelPortrait.target_official(case.target_id), Lang.t("%s — paradeiro desconhecido") % case.target["name"])
 	else:
 		page.add_photo_pair(
-			PixelPortrait.flavio_disguised(case.disguise["id"]), Lang.t("FLAGRANTE: %s") % case.disguise["name"],
-			PixelPortrait.flavio_official(), "FOTO OFICIAL: o senador")
+			PixelPortrait.target_disguised(case.target_id, case.disguise["id"]), Lang.t("FLAGRANTE: %s") % case.disguise["name"],
+			PixelPortrait.target_official(case.target_id), Lang.t("FOTO OFICIAL: %s") % case.target["role"])
 	page.photo_column.add_child(UiTheme.stamp("FURO!" if won else "ESCAPOU", 26, Palette.GREEN if won else Palette.RED))
 	_online_label = UiTheme.body("", 22, Palette.RED_DARK)
 	_online_label.custom_minimum_size.x = 320
@@ -132,17 +132,17 @@ func _story(case: CaseState, career: Career, city: Dictionary) -> Array:
 	var pauta_name: String = GameData.disguise(case.pauta).get("name", Lang.t("nenhuma"))
 	match case.outcome:
 		CaseState.Outcome.WIN:
-			lines.append(Lang.t("%s, %s — Após uma semana de perseguição, %s encontrou o senador %s, disfarçado de %s. Questionado, ele respondeu: \"Sem comentários.\" Mas a foto já estava tirada.") % [
-				city["name"].to_upper(), city["country"], career.player_name, case.found_spot, case.disguise["name"]])
+			lines.append(Lang.t("%s, %s — Após uma semana de perseguição, %s encontrou %s %s, disfarçado de %s. Questionado, ele respondeu: \"Sem comentários.\" Mas a foto já estava tirada.") % [
+				city["name"].to_upper(), city["country"], career.player_name, case.target["name"], case.found_spot, case.disguise["name"]])
 		CaseState.Outcome.NO_PAUTA:
-			lines.append(Lang.t("%s — O senador foi encontrado %s, mas sem pauta aprovada a redação não liberou a entrevista. Enquanto o editor ligava de volta, ele escapuliu — %s.") % [
-				city["name"].to_upper(), case.found_spot, case.disguise["reveal"]])
+			lines.append(Lang.t("%s — %s foi encontrado %s, mas sem pauta aprovada a redação não liberou a entrevista. Enquanto o editor ligava de volta, ele escapuliu — %s.") % [
+				city["name"].to_upper(), Lang.upper_first(case.target["role"]), case.found_spot, case.disguise["reveal"]])
 		CaseState.Outcome.WRONG_PAUTA:
-			lines.append(Lang.t("%s — A pauta dizia \"%s\", mas o senador estava disfarçado de %s. A matéria caiu e ele aproveitou a confusão para sumir de novo.") % [
-				city["name"].to_upper(), pauta_name, case.disguise["name"]])
+			lines.append(Lang.t("%s — A pauta dizia \"%s\", mas %s estava disfarçado de %s. A matéria caiu e ele aproveitou a confusão para sumir de novo.") % [
+				city["name"].to_upper(), pauta_name, case.target["role"], case.disguise["name"]])
 		CaseState.Outcome.TIMEOUT:
-			lines.append(Lang.t("A edição de domingo fechou às 17h sem o furo. O último paradeiro conhecido do senador era %s. Fontes dizem que ele usava um disfarce de %s.") % [
-				GameData.city(case.route[case.stop_index])["name"], case.disguise["name"]])
+			lines.append(Lang.t("A edição de domingo fechou às 17h sem o furo. O último paradeiro conhecido de %s era %s. Fontes dizem que ele usava um disfarce de %s.") % [
+				case.target["name"], GameData.city(case.route[case.stop_index])["name"], case.disguise["name"]])
 	var visited := case.visited.size()
 	lines.append(Lang.t("Ficha do caso: %d cidade(s) investigada(s) de %d na rota · %d anotações · pauta: %s.") % [
 		visited, case.route.size(), case.notes.size(), pauta_name])

@@ -24,28 +24,32 @@ const DEFAULTS := {
 	"headwear": "", "headwear_colors": ["#C8102E", "#141414"], "prop": "",
 }
 
-## --- Senador ---------------------------------------------------------------
+## --- Alvos (o senador e os parceiros, spec 009) --------------------------------
 
-## Caricatura (RF19): cabelo escuro curto penteado de lado com topete,
-## sobrancelha grossa, rosto mais largo, olhar de canto, sorriso de lado.
-const FLAVIO_FACE := {
-	"skin": "#E9B995", "hair": "side_part", "hair_color": "#24170F", "brows": "thick",
-	"eye_color": "#4A2C17", "gaze": "side", "face_rx": 10.3, "age": 1, "mouth": "smirk",
-	"facial_hair": "shadow",
-}
+## Rosto de cada alvo vem do targets.json ("face"); o do Flávio é a
+## caricatura do RF19 (cabelo penteado de lado, sobrancelha grossa, olhar de
+## canto, sorriso de lado). Os outros são genéricos, sem buscar semelhança.
+const WANTED_OUTFIT := {"clothes": "trench", "colors": ["#C8102E", "#F4F1EA", "#009C3B"], "headwear": "fedora", "headwear_colors": ["#C8102E", "#141414"]}
+const OFFICIAL_OUTFIT := {"clothes": "suit", "colors": ["#1F2A44", "#F4F1EA", "#009C3B"], "gaze": "front", "mouth": "smile"}
 
-static func flavio_spec(outfit: Dictionary) -> Dictionary:
-	var spec := FLAVIO_FACE.duplicate()
+static func target_spec(target_id: String, outfit: Dictionary) -> Dictionary:
+	var spec: Dictionary = GameData.target(target_id).get("face", {}).duplicate()
 	spec.merge(outfit, true)
 	return spec
 
 ## Procurado: fedora e sobretudo vermelhos (identidade da capa).
-static func flavio_wanted_spec() -> Dictionary:
-	return flavio_spec({"clothes": "trench", "colors": ["#C8102E", "#F4F1EA", "#009C3B"], "headwear": "fedora", "headwear_colors": ["#C8102E", "#141414"]})
+static func target_wanted_spec(target_id: String) -> Dictionary:
+	return target_spec(target_id, WANTED_OUTFIT)
 
-## Foto oficial de senador: terno escuro, camisa branca, gravata verde.
+## Foto oficial: terno escuro, camisa branca, gravata verde.
+static func target_official_spec(target_id: String) -> Dictionary:
+	return target_spec(target_id, OFFICIAL_OUTFIT)
+
+static func flavio_spec(outfit: Dictionary) -> Dictionary:
+	return target_spec(GameData.DEFAULT_TARGET, outfit)
+
 static func flavio_official_spec() -> Dictionary:
-	return flavio_spec({"clothes": "suit", "colors": ["#1F2A44", "#F4F1EA", "#009C3B"], "gaze": "front", "mouth": "smile"})
+	return target_official_spec(GameData.DEFAULT_TARGET)
 
 ## --- Testemunhas -------------------------------------------------------------
 

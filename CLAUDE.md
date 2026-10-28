@@ -79,7 +79,9 @@ No jogo, `Online` (autoload) desliga sozinho em `res://tests` e
   `PixelPortrait` fachada com cache e override por `assets/portraits/`).
   Figurinos são dados: `disguises.json` (`portrait`) e `flavor.json`
   (`locations.*.outfit`).
-- `data/*.json` — todo o conteúdo (cidades, disfarces, falas). Cidade nova =
+- `data/*.json` — todo o conteúdo (cidades, disfarces, falas, alvos em
+  `targets.json` — o Flávio e os parceiros da spec 009; o servidor lê o
+  mesmo arquivo). Cidade nova =
   entrada em `cities.json` (+ marco novo em `SkylineLandmarks` se precisar).
 
 ## 4. Convenções

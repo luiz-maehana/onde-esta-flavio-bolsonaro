@@ -1,0 +1,87 @@
+[
+  {"id": "flavio", "title": "senador", "role": "el senador", "intro": "El senador Flávio \"Cero Uno\" Bolsonaro"},
+  {"id": "marcal", "title": "coach", "role": "el coach", "intro": "El coach Pablo Marçal",
+   "scandal": {
+    "title": "El informe médico falso",
+    "summary": "En las elecciones municipales de São Paulo de 2024, Pablo Marçal publicó un informe médico que decía que su rival Guilherme Boulos había consumido cocaína. Peritos y la Policía Federal concluyeron que el documento era falso — el médico que supuestamente lo firmó ya había muerto. La PF imputó a Marçal por falsificación de documento y calumnia electoral. En 2026 trabajó como estratega de la campaña de Flávio Bolsonaro.",
+    "status": "Condenado en febrero de 2026 a pagar R$ 100 mil a Boulos, con posibilidad de recurso; inhabilitado para candidaturas hasta 2032 por una decisión confirmada en segunda instancia; la imputación de la PF no se convirtió en condena penal.",
+    "reasons": ["salió corriendo prometiendo un curso de 'cómo desaparecer en 7 pasos'", "huyó de la rueda de prensa cuando le pidieron ver un informe médico"],
+    "found_spots": ["grabando un video motivacional en lo alto de un cerro, en chanclas", "dando una charla a tres personas en un salón de hotel"],
+    "taunts": ["Nota: 'Inscríbete en mi curso para saber dónde estoy. — PM'", "Pósit: 'Desaparecer es mindset. — PM'"],
+    "gags": [{"text": "Un coach te ofreció una clase gratis de productividad. Perdiste dos horas viéndola."}],
+    "near": ["¡Está aquí! Pidió en la farmacia un certificado de 'persona muy ocupada'."],
+    "headlines_win": ["SIN CORTES: {player} encuentra al coach en {city} y no compra el curso"]
+   }},
+  {"id": "eduardo", "title": "exdiputado", "role": "el exdiputado", "intro": "El exdiputado Eduardo \"Cero Tres\" Bolsonaro",
+   "scandal": {
+    "title": "La campaña en EE. UU.",
+    "summary": "Eduardo Bolsonaro se mudó a Estados Unidos en febrero de 2025 y buscó ante el gobierno de Trump sanciones contra autoridades brasileñas — según la Fiscalía General, para presionar el juicio de su padre en el Supremo. Perdió su escaño de diputado federal en diciembre de 2025 por exceso de faltas.",
+    "status": "Condenado por la Primera Sala del Supremo en junio de 2026 a 4 años y 2 meses por coacción en el curso del proceso, decisión firme; en octubre de 2026 el juez Alexandre de Moraes ordenó ejecutar la pena, emitió una orden de prisión y anuló sus pasaportes.",
+    "reasons": ["dijo que iba a 'resolver unas cosas en Washington' y no volvió más", "dejó la rueda de prensa pidiendo una hamburguesa 'a la americana'"],
+    "found_spots": ["friendo hamburguesas en un restaurante de carretera", "escondido detrás de una pila de gorras rojas"],
+    "taunts": ["Nota: 'I'm not here. — 03'", "Postal: '¡Recuerdos de América! — 03'"],
+    "gags": [{"text": "Pasaste una hora en la fila de inmigración detrás de un grupo de gorras rojas."}],
+    "near": ["¡Está aquí! Pidió la carta en inglés, aunque estaba escrita en portugués."],
+    "headlines_win": ["PASAPORTE SELLADO: {player} encuentra al exdiputado en {city}"]
+   }},
+  {"id": "carlos", "title": "concejal", "role": "el concejal", "intro": "El concejal Carlos \"Cero Dos\" Bolsonaro",
+   "scandal": {
+    "title": "La Abin paralela",
+    "summary": "En 2025 la Policía Federal concluyó que la agencia de inteligencia de Brasil (Abin) habría sido usada, en el gobierno de Jair Bolsonaro, para vigilar a adversarios, y señaló al concejal de Río Carlos Bolsonaro como jefe del llamado \"gabinete del odio\", que usaría esa información en ataques en las redes. Fue imputado junto con más de 30 personas y dice que la imputación tuvo motivación electoral.",
+    "status": "Imputado por la PF en junio de 2025; en julio de 2026 el Supremo envió su parte del caso a un tribunal federal (TRF-1); no hay denuncia ni condena.",
+    "reasons": ["salió a 'cuidar las redes' y nunca más apareció", "huyó de la rueda de prensa cuando le preguntaron quién tenía la contraseña del perfil"],
+    "found_spots": ["escribiendo en siete móviles a la vez en un cuarto oscuro", "escondido detrás de un mural lleno de capturas de pantalla"],
+    "taunts": ["Nota: 'Ya sé dónde estás. Jeje. — 02'", "Mensaje eliminado hace 2 minutos. Firma: '02'"],
+    "gags": [{"text": "Un perfil anónimo empezó a responderte en todas las redes. Perdiste una hora leyendo las respuestas."}],
+    "near": ["¡Está aquí! Pidió la contraseña del wifi y cuatro cargadores."],
+    "headlines_win": ["DESCONECTADO: {player} encuentra al concejal en {city} lejos del teclado"]
+   }},
+  {"id": "nikolas", "title": "diputado", "role": "el diputado", "intro": "El diputado Nikolas Ferreira",
+   "scandal": {
+    "title": "El documento de la PF",
+    "summary": "El diputado federal Nikolas Ferreira difundió un documento falso atribuido a la Policía Federal, caso que se convirtió en una acción electoral en el tribunal electoral de Minas Gerais (TRE-MG). La Fiscalía General también llevó al Supremo una acusación de injuria por una frase en la que llamó ladrón al presidente Lula; su defensa invoca la inmunidad parlamentaria.",
+    "status": "Acusación de injuria en análisis en el Supremo; la acción en el TRE-MG puede costarle el escaño, pero aún no se ha juzgado; no hay condena.",
+    "reasons": ["salió a grabar un video y lo publicó desde otro país", "huyó de la rueda de prensa cuando le pidieron la fuente de un documento"],
+    "found_spots": ["grabando un video vertical con aro de luz en medio de la plaza", "escondido detrás de una pila de documentos 'oficiales'"],
+    "taunts": ["Nota: 'Esto se va a hacer viral. — NF'", "Pósit: '¿Fuente? Confía. — NF'"],
+    "gags": [{"text": "El mismo video de un diputado apareció 14 veces seguidas en tu feed. Los viste todos."}],
+    "near": ["¡Está aquí! Pidió cambiar la luz del restaurante por un aro de luz."],
+    "headlines_win": ["SIN FILTRO: {player} encuentra al diputado en {city} fuera del video"]
+   }},
+  {"id": "renan", "title": "concejal", "role": "el concejal", "intro": "El concejal Jair Renan \"Cero Cuatro\" Bolsonaro",
+   "scandal": {
+    "title": "El préstamo",
+    "summary": "En 2024 la Policía Civil del Distrito Federal denunció a Jair Renan Bolsonaro, hoy concejal en Balneário Camboriú, por supuestamente usar datos falsos de su propia empresa para conseguir un préstamo de casi R$ 500 mil. Las acusaciones de falsedad se archivaron después de que el préstamo se pagara.",
+    "status": "En febrero de 2026 el Superior Tribunal de Justicia (STJ) cerró la última acusación, de lavado de dinero; no hay proceso en curso. La defensa habla de absolución, algo que la decisión no dice.",
+    "reasons": ["salió a 'abrir una empresa nueva' y desapareció", "huyó de la rueda de prensa cuando le preguntaron por las cuotas"],
+    "found_spots": ["rellenando una solicitud de préstamo con bolígrafo de purpurina", "tomando el sol en una tumbona de un beach club"],
+    "taunts": ["Nota: 'Ya lo pagué, ¿vale? — 04'", "Mensaje: 'El 04 no está. Deje su mensaje después del pitido.'"],
+    "gags": [{"text": "El gerente del banco te ofreció un préstamo preaprobado. La conversación duró dos horas."}],
+    "near": ["¡Está aquí! Preguntó en recepción si podía pagar la habitación a plazos."],
+    "headlines_win": ["PAGADO: {player} encuentra al concejal en {city}"]
+   }},
+  {"id": "queiroz", "title": "exasesor", "role": "el exasesor", "intro": "El exasesor Fabrício Queiroz",
+   "scandal": {
+    "title": "El exasesor de la Alerj",
+    "summary": "Fabrício Queiroz fue asesor de Flávio Bolsonaro en la Asamblea Legislativa de Río (Alerj), y la Fiscalía de Río (MP-RJ) lo señaló como operador del esquema de las 'rachadinhas'. Fue detenido en 2020 en una propiedad del abogado de la familia en Atibaia. En septiembre de 2026, una decisión del juez del Supremo Gilmar Mendes citó indicios de que su cuenta concentraba transferencias de empleados del despacho.",
+    "status": "Caso archivado en 2022 tras la anulación de pruebas; en septiembre de 2026 se pidió al MP-RJ reabrirlo. Queiroz hizo campaña por Flávio en 2026.",
+    "reasons": ["dijo que iba a 'pasar unos días en la finca de un amigo' y desapareció", "huyó de la rueda de prensa cuando le preguntaron por su cuenta bancaria"],
+    "found_spots": ["haciendo un asado en el patio de una finca, con el móvil apagado", "bailando solo en la sala de espera de un hospital"],
+    "taunts": ["Nota: 'Estoy tranquilo, todo bien. — FQ'", "Mensaje: 'Fui a la finca de un amigo. — FQ'"],
+    "gags": [{"text": "Te tocó una fila de banco detrás de alguien que iba a hacer 'solo unos depósitos'. Tardó una hora."}],
+    "near": ["¡Está aquí! Preguntó si hay alguna finca en la ciudad para alquilar unos meses."],
+    "headlines_win": ["HALLADO: {player} encuentra al exasesor en {city} lejos de la finca"]
+   }},
+  {"id": "vorcaro", "title": "banquero", "role": "el banquero", "intro": "El banquero Daniel Vorcaro",
+   "scandal": {
+    "title": "El banquero de la película",
+    "summary": "Daniel Vorcaro, dueño del Banco Master, fue detenido por la PF en noviembre de 2025 cuando intentaba salir del país, en el caso considerado el mayor fraude bancario de Brasil. Según la PF, prometió hasta R$ 131 millones para la película \"Dark Horse\", sobre Jair Bolsonaro, y unos R$ 60 millones habrían sido transferidos por un fondo en EE. UU.",
+    "status": "Las investigaciones del caso Master siguen; no hay condena. Él niega las acusaciones y dice que se basan en un \"hecho inexistente\".",
+    "reasons": ["salió a 'tomar un jet privado rapidito' y no volvió", "huyó de la rueda de prensa cuando le preguntaron el saldo del banco"],
+    "found_spots": ["escondido en la caja fuerte de una sucursal vacía", "viendo solo un preestreno en una sala de cine"],
+    "taunts": ["Recibo: 'Patrocinio garantizado. — DV'", "Nota: 'Mi banco es Master. Tu búsqueda, no. — DV'"],
+    "gags": [{"text": "Un asesor financiero te ofreció una inversión 'imperdible'. La explicación duró dos horas."}],
+    "near": ["¡Está aquí! Preguntó si el aeropuerto tiene una salida trasera."],
+    "headlines_win": ["FIN DEL PATROCINIO: {player} encuentra al banquero en {city}"]
+   }}
+]

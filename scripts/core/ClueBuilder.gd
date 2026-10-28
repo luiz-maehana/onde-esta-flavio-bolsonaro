@@ -47,18 +47,18 @@ static func render(state: CaseState, speech: Dictionary) -> Dictionary:
 			"trait":
 				text += " " + GameData.trait_value_info(part[1], part[2])["witness"][part[3]]
 			"taunt":
-				text += "\n\n" + state.flavor_pool("taunts")[part[1]]
+				text += "\n\n" + state.fill(state.flavor_pool("taunts")[part[1]])
 			"cold":
-				text = GameData.flavor()["cold_trail"][part[1]]
+				text = state.fill(GameData.flavor()["cold_trail"][part[1]])
 			"near":
-				text = state.flavor_pool("near")[part[1]]
+				text = state.fill(state.flavor_pool("near")[part[1]])
 			"found":
 				text = found_text(state)
 	return {"role": role, "text": text, "kind": speech["kind"], "trait": speech.get("trait", "")}
 
 static func found_text(state: CaseState) -> String:
-	return Lang.t("Lá está ele, %s! Flávio Bolsonaro, disfarçado de %s — %s.") % [
-		state.found_spot, state.disguise["name"], state.disguise["reveal"]]
+	return Lang.t("Lá está ele, %s! %s, disfarçado de %s — %s.") % [
+		state.found_spot, state.target["name"], state.disguise["name"], state.disguise["reveal"]]
 
 static func _speech(loc_id: String, kind: String, parts: Array) -> Dictionary:
 	return {"loc": loc_id, "kind": kind, "parts": parts}

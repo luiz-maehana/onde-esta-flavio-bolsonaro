@@ -46,6 +46,8 @@ func _ready() -> void:
 	page.body_column.add_child(stats_grid)
 	page.body_column.add_child(UiTheme.headline("ÁLBUM DE FLAGRANTES", 14, Palette.RED))
 	page.body_column.add_child(_album(c))
+	page.body_column.add_child(UiTheme.headline("PARCEIROS FLAGRADOS", 14, Palette.RED))
+	page.body_column.add_child(_partners(c))
 
 	page.photo_column.add_child(UiTheme.headline("CONQUISTAS", 14, Palette.RED))
 	var scroll := ScrollContainer.new()
@@ -66,29 +68,42 @@ func _ready() -> void:
 	page.actions.add_child(back)
 	back.call_deferred("grab_focus")
 
+## Álbum de flagrantes: os 14 disfarces com o senador.
 func _album(c: Career) -> GridContainer:
-	# a casa tem a largura da palavra mais longa das legendas (nunca quebra
-	# palavra no meio); quantas cabem por linha sai da largura da coluna
-	var cell := _album_cell_width()
+	var items: Array = GameData.disguises().map(func(d): return {
+		"texture": PixelPortrait.flavio_disguised(d["id"]), "name": d["name"], "caught": c.disguises_caught.has(d["id"])})
+	return _gallery(items)
+
+## Parceiros flagrados (spec 009): retrato de procurado de cada parceiro.
+func _partners(c: Career) -> GridContainer:
+	var items: Array = GameData.partners().map(func(t): return {
+		"texture": PixelPortrait.target(t["id"]), "name": t["name"], "caught": c.targets_caught.has(t["id"])})
+	return _gallery(items)
+
+## Grade de figuras com o nome embaixo ("???" no que falta). A casa tem a
+## largura da palavra mais longa das legendas (nunca quebra palavra no meio);
+## quantas cabem por linha sai da largura da coluna.
+func _gallery(items: Array) -> GridContainer:
+	var cell := _cell_width(items.map(func(i): return i["name"]))
 	var width := BODY_WIDTH_PORTRAIT if Responsive.is_portrait() else BODY_WIDTH_LANDSCAPE
 	var grid := GridContainer.new()
 	grid.columns = clampi((width + ALBUM_GAP) / (cell + ALBUM_GAP), 3, ALBUM_COLUMNS)
 	grid.add_theme_constant_override("h_separation", ALBUM_GAP)
 	grid.add_theme_constant_override("v_separation", 12)
-	for d in GameData.disguises():
-		var caught: bool = c.disguises_caught.has(d["id"])
+	for item in items:
+		var caught: bool = item["caught"]
 		var box := VBoxContainer.new()
 		box.add_theme_constant_override("separation", 4)
 		box.custom_minimum_size.x = cell
 		var frame := PanelContainer.new()
 		frame.add_theme_stylebox_override("panel", UiTheme.box(Palette.PAPER_DARK, Vector2.ZERO))
 		frame.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		var pic := PixelPortrait.make_rect(PixelPortrait.flavio_disguised(d["id"]), ALBUM_PX)
+		var pic := PixelPortrait.make_rect(item["texture"], ALBUM_PX)
 		if not caught:
 			pic.modulate = Color(0, 0, 0, 0.85)
 		frame.add_child(pic)
 		box.add_child(frame)
-		var caption := UiTheme.body(d["name"] if caught else UNKNOWN, CAPTION_SIZE, Palette.INK if caught else Palette.GREY)
+		var caption := UiTheme.body(item["name"] if caught else UNKNOWN, CAPTION_SIZE, Palette.INK if caught else Palette.GREY)
 		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		caption.custom_minimum_size.x = cell
 		caption.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
@@ -96,13 +111,13 @@ func _album(c: Career) -> GridContainer:
 		grid.add_child(box)
 	return grid
 
-## Largura da casa do álbum: a palavra mais longa entre os nomes dos
-## disfarces, na fonte e no idioma atuais.
-func _album_cell_width() -> int:
+## Largura da casa: a palavra mais longa entre as legendas, na fonte e no
+## idioma atuais.
+func _cell_width(names: Array) -> int:
 	var size := UiTheme.text_size(CAPTION_SIZE)
 	var widest := 0.0
-	for d in GameData.disguises():
-		for word in d["name"].split(" "):
+	for name in names:
+		for word in str(name).split(" "):
 			widest = maxf(widest, UiTheme.BODY_FONT.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x)
 	return maxi(ALBUM_CELL_MIN, ceili(widest) + 6)
 

@@ -1,0 +1,87 @@
+[
+  {"id": "flavio", "title": "senator", "role": "the senator", "intro": "Senator Flávio \"Zero One\" Bolsonaro"},
+  {"id": "marcal", "title": "coach", "role": "the coach", "intro": "Life coach Pablo Marçal",
+   "scandal": {
+    "title": "The fake medical report",
+    "summary": "In the 2024 São Paulo mayoral race, Pablo Marçal posted a medical report claiming his rival Guilherme Boulos had used cocaine. Forensic and Federal Police exams found the document was fake — the doctor who supposedly signed it had already died. The Federal Police recommended charges against Marçal for forging a document and electoral slander. In 2026 he worked as a strategist for Flávio Bolsonaro's campaign.",
+    "status": "Ordered in February 2026 to pay Boulos R$ 100,000, subject to appeal; barred from running for office until 2032 by a ruling upheld on appeal; the police recommendation has not become a criminal conviction.",
+    "reasons": ["ran off promising a course on 'how to disappear in 7 steps'", "fled the press conference when asked to show a medical report"],
+    "found_spots": ["recording a motivational video on top of a hill, in flip-flops", "giving a talk to three people in a hotel ballroom"],
+    "taunts": ["Note: 'Sign up for my course to find out where I am. — PM'", "Sticky note: 'Disappearing is a mindset. — PM'"],
+    "gags": [{"text": "A life coach offered you a free productivity class. You lost two hours watching it."}],
+    "near": ["He's here! He asked the pharmacy for a 'very busy person' medical note."],
+    "headlines_win": ["NO CUTS: {player} finds the coach in {city} and doesn't buy the course"]
+   }},
+  {"id": "eduardo", "title": "ex-congressman", "role": "the ex-congressman", "intro": "Ex-congressman Eduardo \"Zero Three\" Bolsonaro",
+   "scandal": {
+    "title": "The campaign in the US",
+    "summary": "Eduardo Bolsonaro moved to the United States in February 2025 and lobbied the Trump administration for sanctions against Brazilian officials — according to Brazil's Prosecutor-General, to pressure his father's trial at the Supreme Court. He lost his seat in Congress in December 2025 for missing too many sessions.",
+    "status": "Convicted by the Supreme Court's First Panel in June 2026 and sentenced to 4 years and 2 months for coercion in the course of proceedings, a final ruling; in October 2026 Justice Alexandre de Moraes ordered the sentence served, issued an arrest warrant and cancelled his passports.",
+    "reasons": ["said he'd 'take care of some things in Washington' and never came back", "left the press conference asking for a hamburger 'the American way'"],
+    "found_spots": ["flipping burgers at a roadside diner", "hiding behind a stack of red caps"],
+    "taunts": ["Note: 'I'm not here. — 03'", "Postcard: 'Greetings from America! — 03'"],
+    "gags": [{"text": "You spent an hour in the immigration line behind a group of red caps."}],
+    "near": ["He's here! He asked for the menu in English, even though it was written in Portuguese."],
+    "headlines_win": ["PASSPORT STAMPED: {player} finds the ex-congressman in {city}"]
+   }},
+  {"id": "carlos", "title": "city councilman", "role": "the city councilman", "intro": "City councilman Carlos \"Zero Two\" Bolsonaro",
+   "scandal": {
+    "title": "The parallel intelligence agency",
+    "summary": "In 2025 the Federal Police concluded that Brazil's intelligence agency (Abin) had allegedly been used, under Jair Bolsonaro, to spy on opponents, and pointed to Rio city councilman Carlos Bolsonaro as head of the so-called \"hate office\", which would use that information for attacks online. He was recommended for charges along with more than 30 people and says the move was politically motivated.",
+    "status": "Recommended for charges by the Federal Police in June 2025; in July 2026 the Supreme Court sent his part of the case to a federal appeals court (TRF-1); no charges and no conviction.",
+    "reasons": ["went out to 'manage the social media' and never showed up again", "fled the press conference when asked who had the account password"],
+    "found_spots": ["typing on seven phones at once in a dark room", "hiding behind a wall full of screenshots"],
+    "taunts": ["Note: 'I already know where you are. Hehe. — 02'", "Message deleted 2 minutes ago. Signed: '02'"],
+    "gags": [{"text": "An anonymous account started replying to you on every social network. You lost an hour reading the replies."}],
+    "near": ["He's here! He asked for the wi-fi password and four chargers."],
+    "headlines_win": ["LOGGED OFF: {player} finds the city councilman in {city}, away from the keyboard"]
+   }},
+  {"id": "nikolas", "title": "congressman", "role": "the congressman", "intro": "Congressman Nikolas Ferreira",
+   "scandal": {
+    "title": "The Federal Police document",
+    "summary": "Congressman Nikolas Ferreira shared a fake document attributed to the Federal Police, a case that became an electoral lawsuit at the Minas Gerais electoral court (TRE-MG). Brazil's Prosecutor-General also took to the Supreme Court a defamation charge over a remark in which he called President Lula a thief; his defense invokes parliamentary immunity.",
+    "status": "Defamation charge under review at the Supreme Court; the TRE-MG case could cost him his seat but has not been ruled on; no conviction.",
+    "reasons": ["went out to record a video and posted it from another country", "fled the press conference when asked for the source of a document"],
+    "found_spots": ["recording a vertical video with a ring light in the middle of the square", "hiding behind a pile of 'official' documents"],
+    "taunts": ["Note: 'This is going to go viral. — NF'", "Sticky note: 'Source? Trust me. — NF'"],
+    "gags": [{"text": "The same video of a congressman showed up in your feed 14 times in a row. You watched every one."}],
+    "near": ["He's here! He asked the restaurant to swap the lights for a ring light."],
+    "headlines_win": ["NO FILTER: {player} finds the congressman in {city}, off camera"]
+   }},
+  {"id": "renan", "title": "city councilman", "role": "the city councilman", "intro": "City councilman Jair Renan \"Zero Four\" Bolsonaro",
+   "scandal": {
+    "title": "The loan",
+    "summary": "In 2024 the Federal District civil police charged Jair Renan Bolsonaro, now a city councilman in Balneário Camboriú, with allegedly using false data about his own company to get a loan of nearly R$ 500,000. The forgery charges were dropped after the loan was paid off.",
+    "status": "In February 2026 the Superior Court of Justice (STJ) halted the last charge, for money laundering; there is no ongoing case. His defense calls it an acquittal, which the ruling does not say.",
+    "reasons": ["went out to 'open a new company' and vanished", "fled the press conference when asked about the installments"],
+    "found_spots": ["filling out a loan application with a glitter pen", "sunbathing on a beach club lounger"],
+    "taunts": ["Note: 'Already paid it off, ok? — 04'", "Message: '04 is out. Leave a message after the beep.'"],
+    "gags": [{"text": "The bank manager offered you a pre-approved loan. The conversation took two hours."}],
+    "near": ["He's here! He asked the front desk if he could pay for the room in installments."],
+    "headlines_win": ["PAID OFF: {player} finds the city councilman in {city}"]
+   }},
+  {"id": "queiroz", "title": "ex-aide", "role": "the ex-aide", "intro": "Ex-aide Fabrício Queiroz",
+   "scandal": {
+    "title": "The former Alerj aide",
+    "summary": "Fabrício Queiroz was Flávio Bolsonaro's aide at the Rio state assembly (Alerj), and Rio state prosecutors (MP-RJ) named him as the operator of the salary kickback scheme. He was arrested in 2020 at a property owned by the family's lawyer in Atibaia. In September 2026, a ruling by Supreme Court Justice Gilmar Mendes cited signs that his account gathered transfers from the office's staffers.",
+    "status": "Case dismissed in 2022 after evidence was annulled; in September 2026 the MP-RJ was asked to reopen it. Queiroz campaigned for Flávio in 2026.",
+    "reasons": ["said he'd 'spend a few days at a friend's country house' and vanished", "fled the press conference when asked about his bank account"],
+    "found_spots": ["grilling in the backyard of a country house, with his phone off", "dancing alone in a hospital waiting room"],
+    "taunts": ["Note: 'I'm chill, all good. — FQ'", "Message: 'Went to a friend's country house. — FQ'"],
+    "gags": [{"text": "You got stuck in a bank line behind someone making 'just a few deposits'. It took an hour."}],
+    "near": ["He's here! He asked if there's a country house in town to rent for a few months."],
+    "headlines_win": ["FOUND: {player} finds the ex-aide in {city}, far from the country house"]
+   }},
+  {"id": "vorcaro", "title": "banker", "role": "the banker", "intro": "Banker Daniel Vorcaro",
+   "scandal": {
+    "title": "The movie's banker",
+    "summary": "Daniel Vorcaro, owner of Banco Master, was arrested by the Federal Police in November 2025 while trying to leave the country, in what is described as Brazil's biggest banking fraud. According to the Federal Police, he promised up to R$ 131 million for the movie \"Dark Horse\", about Jair Bolsonaro, and about R$ 60 million was allegedly transferred through a fund in the US.",
+    "status": "The Banco Master investigations continue; no conviction. He denies the accusations and says they are based on \"a nonexistent fact\".",
+    "reasons": ["went out to 'catch a quick private jet' and didn't come back", "fled the press conference when asked about the bank's balance"],
+    "found_spots": ["hiding in the vault of an empty bank branch", "watching a premiere alone in a movie theater"],
+    "taunts": ["Receipt: 'Sponsorship guaranteed. — DV'", "Note: 'My bank is Master. Your search isn't. — DV'"],
+    "gags": [{"text": "A financial advisor offered you an 'unmissable' investment. The explanation took two hours."}],
+    "near": ["He's here! He asked if the airport has a back exit."],
+    "headlines_win": ["SPONSORSHIP OVER: {player} finds the banker in {city}"]
+   }}
+]

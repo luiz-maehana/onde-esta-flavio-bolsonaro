@@ -166,8 +166,8 @@ Furo"
   que o Godot recusa (inclui ação depois do fim).
 - T65, T67 e T70 passaram de primeira: textos, partida inteira por clique,
   salvar/continuar e navegação por teclado já estavam corretos.
-- Pendente do U5: alvo de toque de 48 px reais depende da escala por lado
-  curto (RF37/T55).
+- U5 com alvo de toque de 48 px reais: entrou com a escala por lado curto
+  (spec 008/T55) e é conferido no teste "cabe na tela".
 
 Ordem sugerida: T64 → T68 → T69 → T65, porque são os que mais acham bug por
 linha de teste. O resto depois.

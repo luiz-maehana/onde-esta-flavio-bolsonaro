@@ -2,12 +2,13 @@
   { "id": "primeiro_furo", "title": "First scoop", "description": "Solve your first case." },
   { "id": "sem_errar", "title": "Human GPS", "description": "Solve a case without setting foot in a wrong city." },
   { "id": "relampago", "title": "Lightning shift", "description": "Solve a case using 72 hours or less." },
-  { "id": "colecionador", "title": "Disguise album", "description": "Catch the senator in every disguise." },
+  { "id": "colecionador", "title": "Disguise album", "description": "Catch every disguise." },
   { "id": "todos_escandalos", "title": "Full coverage", "description": "Solve a case from every scandal." },
   { "id": "globetrotter", "title": "Frequent flyer", "description": "Visit 20 different cities over your career." },
   { "id": "editor_chefe", "title": "Running the newsroom", "description": "Reach the rank of Editor-in-Chief." },
   { "id": "persistente", "title": "Regular beat", "description": "Play 10 cases." },
   { "id": "insone", "title": "Coffee IV", "description": "Sleep 5 nights in a single case." },
-  { "id": "vexame", "title": "Botched story", "description": "Confront the senator with the wrong disguise on your assignment." },
-  { "id": "sem_pauta", "title": "Forgot my press pass", "description": "Find the senator without having issued the assignment." }
+  { "id": "vexame", "title": "Botched story", "description": "Confront the target with the wrong disguise on your assignment." },
+  { "id": "parceiros", "title": "Full cast", "description": "Catch all of Flávio's partners." },
+  { "id": "sem_pauta", "title": "Forgot my press pass", "description": "Find the target without having issued the assignment." }
 ]

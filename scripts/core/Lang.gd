@@ -44,3 +44,7 @@ static func t(key: String) -> String:
 ## Sul" -> "a mansão do Lago Sul"), sem estragar nome próprio.
 static func lower_first(text: String) -> String:
 	return text.left(1).to_lower() + text.substr(1)
+
+## Primeira letra maiúscula ("o coach" -> "O coach").
+static func upper_first(text: String) -> String:
+	return text.left(1).to_upper() + text.substr(1)

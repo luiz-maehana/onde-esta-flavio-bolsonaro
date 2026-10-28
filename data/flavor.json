@@ -1,12 +1,12 @@
 {
   "tips": {
     "briefing": "Leia o box ENTENDA O CASO: é o escândalo real por trás deste caso. O prazo aparece na sua pauta — o relógio só anda quando você investiga ou viaja.",
-    "city": "Cada cidade tem 3 locais. Investigar custa horas (2h, 3h, 4h). As testemunhas falam da PRÓXIMA cidade do senador: bandeira, moeda, idioma, pontos turísticos.",
+    "city": "Cada cidade tem 3 locais. Investigar custa horas (2h, 3h, 4h). As testemunhas falam da PRÓXIMA cidade dele: bandeira, moeda, idioma, pontos turísticos.",
     "clue": "Anote mentalmente a pista e abra VIAJAR: escolha o destino que combina com ela. Tudo que as testemunhas disseram fica em ANOTAÇÕES.",
     "trait": "Essa testemunha descreveu o DISFARCE! Abra o DOSSIÊ e marque. Com 2 características você já identifica o disfarce e pode emitir a PAUTA.",
     "travel": "Passe o mouse (ou toque) nas cidades do mapa para ver o país. Cada destino mostra as horas de voo.",
-    "cold": "Ninguém viu o senador aqui: cidade errada! Volte pelo VIAJAR — a cidade de onde você veio está entre as opções.",
-    "near": "Ele está nesta cidade! Um dos locais esconde o senador. Confira se a PAUTA certa já foi emitida antes de abordá-lo."
+    "cold": "Ninguém o viu aqui: cidade errada! Volte pelo VIAJAR — a cidade de onde você veio está entre as opções.",
+    "near": "Ele está nesta cidade! Um dos locais é o esconderijo. Confira se a PAUTA certa já foi emitida antes de abordá-lo."
   },
   "locations": {
     "aeroporto": { "name": "Aeroporto", "role": "Comissária de bordo", "outfit": { "clothes": "uniform", "colors": ["#1D3557", "#F4F1EA", "#C8102E"], "hair": "bun", "prop": "name_tag" } },
@@ -23,7 +23,7 @@
     "taxi": { "name": "Ponto de Táxi", "role": "Taxista", "outfit": { "clothes": "shirt", "colors": ["#F4D35E", "#F4F1EA"], "headwear": "driver_cap", "headwear_colors": ["#3D405B", "#22253A"] } }
   },
   "cold_trail": [
-    "Senador? Aqui? Não vi ninguém de sobretudo vermelho, não.",
+    "{Role}? Aqui? Não vi ninguém de sobretudo vermelho, não.",
     "Desculpe, nenhum brasileiro fugindo de microfone passou por aqui hoje.",
     "Hmm... não. O único político que vi aqui hoje foi num outdoor.",
     "Ninguém com esse perfil por aqui. Tem certeza de que é a cidade certa?",
@@ -33,12 +33,12 @@
     "Cuidado! Um sujeito de chapéu e sobretudo passou correndo agorinha!",
     "Ele está na cidade, tenho certeza. Ouvi alguém dizendo 'sem comentários' ali perto.",
     "Ele está aqui! Vi um assessor carregando uma mala cheia de panetones.",
-    "Está pertinho! Deixou cair um bilhete escrito 'Zero Um' no chão.",
+    "Está pertinho! Deixou cair um bilhete assinado '{signature}' no chão.",
     "Se eu fosse você, me apressava. Ele perguntou onde fica a saída mais próxima."
   ],
   "taunts": [
-    "Bilhete deixado no balcão: 'Vocês nunca vão me pegar! Ass.: 01'",
-    "Rabiscado num guardanapo: 'Sem comentários. — F.'",
+    "Bilhete deixado no balcão: 'Vocês nunca vão me pegar! Ass.: {signature}'",
+    "Rabiscado num guardanapo: 'Sem comentários. — {signature}'",
     "Recado na secretária eletrônica: 'Ô, repórter, desiste! Kkkkk'",
     "Post-it amarelo: 'Fui ali e já volto (não volto).'"
   ],
@@ -56,29 +56,29 @@
     "Hora de dormir. A redação só paga diária até as 23h."
   ],
   "ranks": [
-    { "title": "Estagiário(a)", "min_cases": 0, "route_len": 4, "deadline": 161, "decoys": "random", "trait_clues": 4 },
-    { "title": "Repórter Júnior", "min_cases": 1, "route_len": 5, "deadline": 161, "decoys": "random", "trait_clues": 4 },
-    { "title": "Repórter", "min_cases": 3, "route_len": 5, "deadline": 137, "decoys": "near", "trait_clues": 3 },
-    { "title": "Repórter Sênior", "min_cases": 5, "route_len": 6, "deadline": 153, "decoys": "near", "trait_clues": 3 },
-    { "title": "Editor(a)-Chefe", "min_cases": 8, "route_len": 7, "deadline": 161, "decoys": "near", "trait_clues": 2 }
+    { "title": "Estagiário(a)", "min_cases": 0, "route_len": 4, "deadline": 161, "decoys": "random", "trait_clues": 4, "target_chance": 0 },
+    { "title": "Repórter Júnior", "min_cases": 1, "route_len": 5, "deadline": 161, "decoys": "random", "trait_clues": 4, "target_chance": 30 },
+    { "title": "Repórter", "min_cases": 3, "route_len": 5, "deadline": 137, "decoys": "near", "trait_clues": 3, "target_chance": 30 },
+    { "title": "Repórter Sênior", "min_cases": 5, "route_len": 6, "deadline": 153, "decoys": "near", "trait_clues": 3, "target_chance": 30 },
+    { "title": "Editor(a)-Chefe", "min_cases": 8, "route_len": 7, "deadline": 161, "decoys": "near", "trait_clues": 2, "target_chance": 30 }
   ],
   "headlines": {
     "win": [
-      "FURO! {player} encontra Flávio em {city} e finalmente faz a pergunta",
-      "PEGO NO FLAGRA: senador é achado {spot} em {city}",
+      "FURO! {player} encontra {target} em {city} e finalmente faz a pergunta",
+      "PEGO NO FLAGRA: {title} é achado {spot} em {city}",
       "EXCLUSIVO: {player} arranca 'sem comentários' cara a cara em {city}"
     ],
     "no_pauta": [
-      "ESCAPOU! Sem pauta aprovada, {player} vê o senador fugir em {city}",
-      "DE NOVO NÃO: Flávio escorrega pelos dedos da imprensa em {city}"
+      "ESCAPOU! Sem pauta aprovada, {player} vê {target} fugir em {city}",
+      "DE NOVO NÃO: {target} escorrega pelos dedos da imprensa em {city}"
     ],
     "wrong_pauta": [
-      "VEXAME! {player} entrevista o disfarce errado e o senador foge em {city}",
+      "VEXAME! {player} entrevista o disfarce errado e {role} foge em {city}",
       "BARRIGA: jornal publica foto do sósia errado em {city}"
     ],
     "timeout": [
       "PRAZO ESGOTADO: edição de domingo sai sem o furo de {player}",
-      "SUMIU DE VEZ: rastro do senador esfria após uma semana de buscas"
+      "SUMIU DE VEZ: rastro de {target} esfria após uma semana de buscas"
     ]
   }
 }

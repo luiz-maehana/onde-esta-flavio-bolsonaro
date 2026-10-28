@@ -12,17 +12,17 @@ func _ready() -> void:
 	add_child(page)
 	page.set_texts(
 		Lang.t("EDIÇÃO EXTRA · %s · Caso nº %03d") % [case.clock.time_text(), career.cases_played + 1],
-		"URGENTE: FLÁVIO BOLSONARO SOME DO MAPA")
+		Lang.t("URGENTE: %s SOME DO MAPA") % case.target["name"].to_upper())
 
-	page.add_paragraph(Lang.t("%s, %s — O senador Flávio \"Zero Um\" Bolsonaro %s. Ele foi visto pela última vez em %s.") % [
-		start["name"].to_upper(), start["country"], case.reason, start["name"]])
+	page.add_paragraph(Lang.t("%s, %s — %s %s. Ele foi visto pela última vez em %s.") % [
+		start["name"].to_upper(), start["country"], case.target["intro"], case.reason, start["name"]])
 	var scandal := case.scandal
 	page.add_fact_box(Lang.t("ENTENDA O CASO: %s") % scandal["title"].to_upper(), scandal["summary"], scandal["status"], scandal["outlet"])
 	var mission := page.add_paragraph(Lang.t("SUA PAUTA, %s %s: siga a trilha, descubra o disfarce (cabeça, transporte, passatempo, lanche), emita a PAUTA no Dossiê e encontre-o até %s, para fazer só uma perguntinha sobre %s.") % [
 		career.rank()["title"].to_upper(), career.player_name.to_upper(), case.clock.deadline_text().to_upper(), Lang.lower_first(scandal["title"])], 26)
 	mission.add_theme_color_override("font_color", Palette.RED)
 
-	page.add_photo(PixelPortrait.flavio(), "PROCURADO PARA ENTREVISTA")
+	page.add_photo(PixelPortrait.target(case.target_id), "PROCURADO PARA ENTREVISTA")
 	var stamp := UiTheme.stamp("URGENTE", 22)
 	page.photo_column.add_child(stamp)
 

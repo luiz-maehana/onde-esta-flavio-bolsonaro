@@ -39,6 +39,22 @@ jornal, acentos verde-amarelos. Manchetes, carimbos, sombras duras.
 - O personagem é sempre o alvo da piada pelo "foge da imprensa", não por
   características pessoais (aparência, família, religião).
 
+## Parceiros (spec 009)
+
+Além do Flávio, o caso pode ser atrás de um **parceiro**: figura pública
+ligada a ele, com o próprio escândalo real (\`data/targets.json\`). Mesmas
+regras do Flávio:
+
+- Todo alvo é "procurado para entrevista" e foge da imprensa — a piada é a
+  fuga, nunca acusação. "Cúmplice" e afins não entram (o termo é
+  "parceiros").
+- Só figuras com cargo ou papel público próprio; o box "Entenda o caso"
+  traz o status (condenado só onde há condenação definitiva) e a negativa.
+- Retratos genéricos, sem buscar semelhança; nada de aparência, família ou
+  religião.
+- Fora: quem não tem papel público próprio (aparece só no box de outro) e
+  notícia não confirmada.
+
 ## Escândalos reais (spec 002)
 
 Os casos usam escândalos reais de `data/scandals.json`. Regras:

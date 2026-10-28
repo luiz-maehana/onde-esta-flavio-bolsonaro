@@ -43,6 +43,7 @@ func _run() -> void:
 	await _test_city_flow()
 	await _test_screens_build()
 	await _test_career_album()
+	await _test_partner_case()
 	await _test_layout_all_languages()
 	await _test_rotation()
 	await _test_reentrancy()
@@ -436,8 +437,16 @@ func _extreme_case() -> void:
 			longest_city = c
 	case.route[0] = longest_city["id"]
 	case.current_city = longest_city["id"]
-	var longest_scandal: Dictionary = GameData.scandals()[0]
-	for s in GameData.scandals():
+	# alvo com a apresentação mais longa (spec 009) e o escândalo mais longo
+	# entre os do Flávio e os dos parceiros
+	var longest_target: Dictionary = GameData.targets()[0]
+	for t in GameData.targets():
+		if (t["intro"] + t["name"]).length() > (longest_target["intro"] + longest_target["name"]).length():
+			longest_target = t
+	case.target_id = longest_target["id"]
+	var all_scandals: Array = GameData.scandals() + GameData.partners().map(func(t): return t["scandal"])
+	var longest_scandal: Dictionary = all_scandals[0]
+	for s in all_scandals:
 		if (s["title"] + s["summary"] + s["status"]).length() > (longest_scandal["title"] + longest_scandal["summary"] + longest_scandal["status"]).length():
 			longest_scandal = s
 	case.scandal = longest_scandal
@@ -1077,12 +1086,53 @@ func _test_language_switch() -> void:
 
 ## Álbum da carreira: nome embaixo de cada figura flagrada, "???" nas outras,
 ## sem depender de tooltip (não aparece no toque).
+## Spec 009: caso de parceiro — briefing, cidade e capa falam dele, não do
+## Flávio; carreira mostra os parceiros flagrados.
+func _test_partner_case() -> void:
+	for t in GameData.partners():
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 51
+		GameManager.case = CaseGenerator.generate(rng, {"route_len": 4})
+		var case: CaseState = GameManager.case
+		case.target_id = t["id"]
+		case.scandal_id = t["scandal"]["id"]
+		var briefing: Control = await _mount(load("res://scenes/BriefingScreen.tscn").instantiate())
+		var texts: Array = briefing.find_children("*", "Label", true, false).map(func(l): return l.text)
+		_check(texts.any(func(x): return x.contains(t["name"].to_upper())), "briefing de %s com o nome na manchete" % t["id"])
+		_check(not texts.any(func(x): return x.contains("FLÁVIO BOLSONARO SOME")), "briefing de %s sem a manchete do Flávio" % t["id"])
+		_check(texts.any(func(x): return x.contains(t["scandal"]["summary"])), "briefing de %s com o box do escândalo dele" % t["id"])
+		briefing.queue_free()
+		case.set_pauta(case.disguise["id"])
+		while not case.is_final_stop():
+			case.travel(case.route[case.stop_index + 1])
+		var city: Control = await _mount(load("res://scenes/CityScreen.tscn").instantiate())
+		city._on_location_chosen(case.locations_here()[case.hideout_slot])
+		await _frames(2)
+		texts = city.find_children("*", "Label", true, false).map(func(l): return l.text)
+		_check(texts.any(func(x): return x.contains(t["name"] + ", ")), "achado de %s fala o nome dele" % t["id"])
+		city.queue_free()
+		GameManager.last_unlocked = []
+		var end: Control = await _mount(load("res://scenes/EndScreen.tscn").instantiate())
+		texts = end.find_children("*", "Label", true, false).map(func(l): return l.text)
+		_check(texts.any(func(x): return x.contains(t["name"])), "capa de %s com o nome dele" % t["id"])
+		_check(not texts.any(func(x): return x.contains("{")), "capa de %s sem marcador cru" % t["id"])
+		end.queue_free()
+		await _frames()
+	GameManager.career = Career.from_dict({"player_name": "Teste", "cases_solved": 2, "cases_played": 3, "targets_caught": ["flavio", "marcal"]})
+	var career: Control = await _mount(load("res://scenes/CareerScreen.tscn").instantiate())
+	var names: Array = career.find_children("*", "Label", true, false).map(func(l): return l.text)
+	_check(names.has("Pablo Marçal") and names.has("PARCEIROS FLAGRADOS"), "carreira mostra os parceiros flagrados")
+	career.queue_free()
+	await _frames()
+	GameManager.career = Career.from_dict({"player_name": "Teste", "cases_solved": 1, "cases_played": 2})
+
 func _test_career_album() -> void:
 	GameManager.career = Career.from_dict({"player_name": "Teste", "cases_solved": 2, "cases_played": 3, "disguises_caught": ["turista", "diva"]})
 	var career: Control = await _mount(load("res://scenes/CareerScreen.tscn").instantiate())
 	var texts: Array = career.find_children("*", "Label", true, false).map(func(l): return l.text)
 	_check(texts.has(GameData.disguise("turista")["name"]) and texts.has(GameData.disguise("diva")["name"]), "álbum mostra o nome dos disfarces flagrados")
-	_check(texts.count("???") == GameData.disguises().size() - 2, "álbum mostra ??? nos que faltam")
+	# álbum (2 flagrados) + galeria de parceiros (nenhum flagrado)
+	_check(texts.count("???") == GameData.disguises().size() - 2 + GameData.partners().size(), "álbum mostra ??? nos que faltam")
 	var tips: Array = career.find_children("*", "TextureRect", true, false).filter(func(t): return t.tooltip_text != "")
 	_check(tips.is_empty(), "álbum sem tooltip")
 	career.queue_free()

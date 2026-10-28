@@ -28,7 +28,7 @@ test(`${vectors.cases.length} casos refeitos chegam ao mesmo estado do Godot`, (
     const f = c.final;
     const got = {
       route: s.route, disguise: s.disguise.id, scandal: s.scandal.id, hideout_slot: s.hideoutSlot,
-      current_city: s.currentCity, stop_index: s.stopIndex, hours: s.clock.hours, outcome: s.outcome,
+      current_city: s.currentCity, target: s.target, stop_index: s.stopIndex, hours: s.clock.hours, outcome: s.outcome,
       wrong_cities: s.wrongCities, nights: s.nights, pauta: s.pauta, notes: s.notes,
       locations: s.locationsHere(), options: s.isOver() ? [] : s.travelOptions(),
     };

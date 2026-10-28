@@ -1,12 +1,12 @@
 {
   "tips": {
     "briefing": "Read the box called THE CASE IN BRIEF: it's the real scandal behind this case. Your deadline is on your assignment — the clock only moves when you investigate or travel.",
-    "city": "Each city has 3 places. Investigating costs hours (2h, 3h, 4h). Witnesses talk about the senator's NEXT city: flag, currency, language, landmarks.",
+    "city": "Each city has 3 places. Investigating costs hours (2h, 3h, 4h). Witnesses talk about his NEXT city: flag, currency, language, landmarks.",
     "clue": "Keep the clue in mind and open TRAVEL: pick the destination that matches it. Everything the witnesses said is saved in NOTES.",
     "trait": "This witness described the DISGUISE! Open the DOSSIER and mark it. With 2 traits you can already pin down the disguise and issue the ASSIGNMENT.",
     "travel": "Hover over (or tap) the cities on the map to see the country. Each destination shows the flight hours.",
-    "cold": "Nobody saw the senator here: wrong city! Go back through TRAVEL — the city you came from is among the options.",
-    "near": "He's in this city! One of the places is hiding the senator. Make sure the right ASSIGNMENT is issued before you approach him."
+    "cold": "Nobody saw him here: wrong city! Go back through TRAVEL — the city you came from is among the options.",
+    "near": "He's in this city! One of the places is his hideout. Make sure the right ASSIGNMENT is issued before you approach him."
   },
   "locations": {
     "aeroporto": { "name": "Airport", "role": "Flight attendant" },
@@ -23,7 +23,7 @@
     "taxi": { "name": "Taxi Stand", "role": "Taxi driver" }
   },
   "cold_trail": [
-    "A senator? Here? I haven't seen anyone in a red trench coat, no.",
+    "{Role}? Here? I haven't seen anyone in a red trench coat, no.",
     "Sorry, no Brazilian running away from a microphone came by here today.",
     "Hmm... no. The only politician I saw here today was on a billboard.",
     "Nobody like that around here. Are you sure it's the right city?",
@@ -33,12 +33,12 @@
     "Careful! A guy in a hat and trench coat just ran past!",
     "He's in town, I'm sure of it. I heard someone saying 'no comment' nearby.",
     "He's here! I saw an aide carrying a suitcase full of panettones.",
-    "He's very close! He dropped a note that says 'Zero One' on the floor.",
+    "He's very close! He dropped a note signed '{signature}' on the floor.",
     "If I were you, I'd hurry. He asked where the nearest exit was."
   ],
   "taunts": [
-    "Note left on the counter: 'You'll never catch me! Signed: 01'",
-    "Scribbled on a napkin: 'No comment. — F.'",
+    "Note left on the counter: 'You'll never catch me! Signed: {signature}'",
+    "Scribbled on a napkin: 'No comment. — {signature}'",
     "Message on the answering machine: 'Hey, reporter, give up! Hahaha'",
     "Yellow sticky note: 'Be right back (I won't be).'"
   ],
@@ -64,21 +64,21 @@
   ],
   "headlines": {
     "win": [
-      "SCOOP! {player} finds Flávio in {city} and finally asks the question",
-      "CAUGHT RED-HANDED: senator found {spot} in {city}",
+      "SCOOP! {player} finds {target} in {city} and finally asks the question",
+      "CAUGHT RED-HANDED: {title} found {spot} in {city}",
       "EXCLUSIVE: {player} gets a face-to-face 'no comment' in {city}"
     ],
     "no_pauta": [
-      "GOT AWAY! With no approved assignment, {player} watches the senator flee in {city}",
-      "NOT AGAIN: Flávio slips through the press's fingers in {city}"
+      "GOT AWAY! With no approved assignment, {player} watches {target} flee in {city}",
+      "NOT AGAIN: {target} slips through the press's fingers in {city}"
     ],
     "wrong_pauta": [
-      "FIASCO! {player} interviews the wrong disguise and the senator flees in {city}",
+      "FIASCO! {player} interviews the wrong disguise and {role} flees in {city}",
       "BOTCHED: paper runs a photo of the wrong look-alike in {city}"
     ],
     "timeout": [
       "DEADLINE MISSED: Sunday edition goes out without {player}'s scoop",
-      "GONE FOR GOOD: the senator's trail goes cold after a week-long search"
+      "GONE FOR GOOD: {target}'s trail goes cold after a week-long search"
     ]
   }
 }

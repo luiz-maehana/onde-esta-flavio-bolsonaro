@@ -6,7 +6,7 @@
 // sorteio que o texto consome no jogo é feito aqui também.
 
 import { GodotRng, godotHash } from "./rng.ts";
-import { cities, city, disguise, disguiseData, flavor, scandals, traitValues, type City, type Disguise, type Scandal } from "./data.ts";
+import { cities, city, disguise, disguiseData, flavor, partners, scandals, traitValues, type City, type Disguise, type Scandal } from "./data.ts";
 
 export const Outcome = { NONE: 0, WIN: 1, NO_PAUTA: 2, WRONG_PAUTA: 3, TIMEOUT: 4 } as const;
 
@@ -26,7 +26,7 @@ const NEAR_POOL = 6;
 const EARTH_RADIUS_KM = 6371;
 export const MAX_ACTIONS = 1000;
 
-export type Config = { route_len: number; deadline: number; decoys: string; trait_clues: number };
+export type Config = { route_len: number; deadline: number; decoys: string; trait_clues: number; target_chance?: number };
 export type Action = string[];
 
 export class GameClock {
@@ -105,7 +105,7 @@ function pickNearDecoys(rng: GodotRng, exclude: string[], targetId: string, coun
 
 export function configForRank(rankIndex: number): Config {
   const r = flavor.ranks[rankIndex];
-  return { route_len: r.route_len, deadline: r.deadline, decoys: r.decoys, trait_clues: r.trait_clues };
+  return { route_len: r.route_len, deadline: r.deadline, decoys: r.decoys, trait_clues: r.trait_clues, target_chance: r.target_chance ?? 0 };
 }
 
 export function generate(rng: GodotRng, config: Config): CaseState {
@@ -155,7 +155,20 @@ export function generate(rng: GodotRng, config: Config): CaseState {
   pick(rng, s.scandal.reasons);
   pick(rng, s.scandal.found_spots);
   s.hideoutSlot = rng.randiRange(0, LOCATIONS_PER_CITY - 1);
+  assignTarget(s, Math.trunc(config.target_chance ?? 0));
   return s;
+}
+
+// CaseGenerator.assign_target (spec 009): sorteio próprio a partir da
+// semente, sem tocar no rng do caso; outro alvo troca o escândalo pelo dele
+// (muda imprevistos e bilhetes, que somam horas). Sem target_chance = Flávio.
+function assignTarget(s: CaseState, chance: number): void {
+  if (chance <= 0) return;
+  const r = new GodotRng(godotHash(`${s.caseSeed}:alvo`));
+  if (r.randiRange(0, 99) >= chance) return;
+  const t = partners[r.randiRange(0, partners.length - 1)];
+  s.target = t.id;
+  s.scandal = t.scandal as Scandal;
 }
 
 // --- Estado e ações ----------------------------------------------------------
@@ -175,6 +188,7 @@ export class CaseState {
   cityLocations = new Map<string, string[]>();
   disguise: Disguise = { id: "", name: "" };
   scandal: Scandal = { id: "", reasons: [], found_spots: [] };
+  target = "flavio";
   hideoutSlot = 0;
 
   stopIndex = 0;
