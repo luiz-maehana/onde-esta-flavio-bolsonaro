@@ -41,6 +41,10 @@ jobs:
       - name: Instalar dependências (versões travadas)
         run: npm ci --no-fund --no-audit
 
+      - name: Assinaturas e procedência dos pacotes (spec 010)
+        # pacote adulterado no npm (assinatura/atestado que não confere) barra o deploy
+        run: npm audit signatures
+
       - name: Testes (paridade com o Godot + API)
         run: npm test
 

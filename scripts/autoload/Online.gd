@@ -93,8 +93,14 @@ func publish_run(run_id: String, nickname: String) -> Dictionary:
 	return res["data"] if res["ok"] and typeof(res["data"]) == TYPE_DICTIONARY else {}
 
 ## {"period", "entries": [{position, nickname, rank_title, score, hours, city, is_you}]} ou {}.
+## Hash do id do aparelho (32 hex), o mesmo do servidor (deviceHash).
+func device_hash() -> String:
+	return device_id.sha256_text().left(32)
+
 func leaderboard(period: String) -> Dictionary:
-	var res := await _request(HTTPClient.METHOD_GET, "/leaderboard?period=%s&device=%s" % [period, device_id], {})
+	# só o hash do id (marca "você"); o id em si não vai pra URL nem pra log
+	# do servidor (spec 010, RF70)
+	var res := await _request(HTTPClient.METHOD_GET, "/leaderboard?period=%s&you=%s" % [period, device_hash()], {})
 	return res["data"] if res["ok"] and typeof(res["data"]) == TYPE_DICTIONARY else {}
 
 ## --- HTTP -------------------------------------------------------------------------

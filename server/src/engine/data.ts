@@ -10,7 +10,7 @@ export type City = { id: string; name: string; lat: number; lon: number; coastal
 export type Disguise = { id: string; name: string; [trait: string]: unknown };
 export type Scandal = { id: string; reasons: string[]; found_spots: string[]; [k: string]: unknown };
 export type Rank = { title: string; min_cases: number; route_len: number; deadline: number; decoys: string; trait_clues: number; target_chance?: number };
-export type Target = { id: string; scandal?: Scandal };
+export type Target = { id: string; name: string; scandal?: Scandal };
 
 export const cities = citiesJson as unknown as City[];
 export const disguiseData = disguisesJson as unknown as {

@@ -15,6 +15,8 @@ export type Run = {
   hours: number | null;
   wrong_cities: number | null;
   city: string | null;
+  /** Spec 010: motivo de não publicar (partida implausível); null = ok. */
+  flag?: string | null;
 };
 
 export type ScoreRow = {
@@ -33,7 +35,9 @@ export interface Store {
   createRun(run: Run): Promise<void>;
   getRun(id: string): Promise<Run | null>;
   countRunsSince(device: string, ipHash: string, since: number): Promise<{ device: number; ip: number }>;
-  finishRun(id: string, fields: Pick<Run, "finished_at" | "outcome" | "score" | "hours" | "wrong_cities" | "city">): Promise<boolean>;
+  finishRun(id: string, fields: Pick<Run, "finished_at" | "outcome" | "score" | "hours" | "wrong_cities" | "city" | "flag">): Promise<boolean>;
+  /** Vitórias do aparelho registradas no servidor (cargo, spec 010). */
+  winsOf(device: string): Promise<number>;
   insertScore(row: ScoreRow): Promise<boolean>;
   hasScore(runId: string): Promise<boolean>;
   /** Melhor resultado de cada aparelho no período (empate: o mais antigo). */
@@ -73,12 +77,20 @@ export class D1Store implements Store {
   }
 
   // Só fecha partida ainda aberta (finished_at IS NULL): uso único.
-  async finishRun(id: string, f: Pick<Run, "finished_at" | "outcome" | "score" | "hours" | "wrong_cities" | "city">): Promise<boolean> {
+  async finishRun(id: string, f: Pick<Run, "finished_at" | "outcome" | "score" | "hours" | "wrong_cities" | "city" | "flag">): Promise<boolean> {
     const res = await this.db
-      .prepare("UPDATE runs SET finished_at = ?, outcome = ?, score = ?, hours = ?, wrong_cities = ?, city = ? WHERE id = ? AND finished_at IS NULL")
-      .bind(f.finished_at, f.outcome, f.score, f.hours, f.wrong_cities, f.city, id)
+      .prepare("UPDATE runs SET finished_at = ?, outcome = ?, score = ?, hours = ?, wrong_cities = ?, city = ?, flag = ? WHERE id = ? AND finished_at IS NULL")
+      .bind(f.finished_at, f.outcome, f.score, f.hours, f.wrong_cities, f.city, f.flag ?? null, id)
       .run();
     return (res.meta.changes ?? 0) > 0;
+  }
+
+  async winsOf(device: string): Promise<number> {
+    const row = await this.db
+      .prepare("SELECT COUNT(*) AS n FROM runs WHERE device = ? AND outcome = 1")
+      .bind(device)
+      .first<{ n: number }>();
+    return row?.n ?? 0;
   }
 
   async insertScore(s: ScoreRow): Promise<boolean> {
@@ -143,11 +155,17 @@ export class MemoryStore implements Store {
     return { device: d, ip: i };
   }
 
-  async finishRun(id: string, f: Pick<Run, "finished_at" | "outcome" | "score" | "hours" | "wrong_cities" | "city">): Promise<boolean> {
+  async finishRun(id: string, f: Pick<Run, "finished_at" | "outcome" | "score" | "hours" | "wrong_cities" | "city" | "flag">): Promise<boolean> {
     const r = this.runs.get(id);
     if (!r || r.finished_at !== null) return false;
     Object.assign(r, f);
     return true;
+  }
+
+  async winsOf(device: string): Promise<number> {
+    let n = 0;
+    for (const r of this.runs.values()) if (r.device === device && r.outcome === 1) n++;
+    return n;
   }
 
   async insertScore(s: ScoreRow): Promise<boolean> {

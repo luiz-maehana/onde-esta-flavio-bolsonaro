@@ -156,6 +156,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
+          # SHA-256 nas notas: quem baixar confere que o .exe é o publicado (spec 010)
+          SHA=$(sha256sum OndeEstaFlavio.exe | cut -d' ' -f1)
           gh release create "$TAG" OndeEstaFlavio.exe \
             --repo "$GITHUB_REPOSITORY" --title "$TAG" \
-            --notes "Versão Windows: baixe OndeEstaFlavio.exe e abra. Para jogar no navegador: https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/"
+            --notes "Versão Windows: baixe OndeEstaFlavio.exe e abra. Para jogar no navegador: https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/ — SHA-256 do OndeEstaFlavio.exe: $SHA (no Windows: Get-FileHash OndeEstaFlavio.exe)"

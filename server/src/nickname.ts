@@ -2,6 +2,8 @@
 // . _ - ; até 18 caracteres. Termos ofensivos viram "Repórter Anônimo".
 // Moderação fina (remover uma entrada) é feita no console do D1.
 
+import { targets } from "./engine/data.ts";
+
 export const MAX_NICKNAME = 18;
 export const ANONYMOUS = "Repórter Anônimo";
 
@@ -36,17 +38,30 @@ export function isOffensive(nick: string): boolean {
   return f.split(" ").some((w) => BLOCK_WORDS.includes(w));
 }
 
+// Nomes reservados (spec 010): o Flávio e os parceiros (gente real não
+// "joga" no ranking) e o próprio apelido de anônimo.
+const RESERVED = [...targets.map((t) => (t as { name?: string }).name ?? ""), ANONYMOUS]
+  .map((n) => fold(n).replace(/ /g, ""))
+  .filter((n) => n.length > 0);
+
+export function isReserved(nick: string): boolean {
+  const joined = fold(nick).replace(/ /g, "");
+  return RESERVED.some((r) => joined.includes(r));
+}
+
 export function sanitizeNickname(input: unknown): string {
   if (typeof input !== "string") return ANONYMOUS;
   const clean = input
     .normalize("NFC")
     // controle/direção do texto viram espaço (igual Career.sanitize_name no jogo)
     .replace(/[\p{Cc}\p{Cf}]/gu, " ")
-    .replace(/[^\p{L}\p{N} ._-]/gu, "")
+    // só alfabeto latino: letras de outro alfabeto parecidas com as latinas
+    // (cirílico "р" no lugar de "p") burlavam a lista (spec 010)
+    .replace(/[^\p{Script=Latin}\p{N} ._-]/gu, "")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, MAX_NICKNAME)
     .trim();
-  if (clean.length < 2 || isOffensive(clean)) return ANONYMOUS;
+  if (clean.length < 2 || isOffensive(clean) || isReserved(clean)) return ANONYMOUS;
   return clean;
 }

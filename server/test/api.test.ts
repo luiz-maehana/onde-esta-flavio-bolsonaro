@@ -2,7 +2,9 @@
 // limites, antitrapaça (replay no servidor) e ranking.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { handle, MAX_RUNS_PER_DEVICE, RUN_TTL_MS, WEEK_MS, type Deps } from "../src/api.ts";
+import { handle, deviceHash, rankForWins, MAX_RUNS_PER_DEVICE, RUN_TTL_MS, WEEK_MS, type Deps } from "../src/api.ts";
+import { MIN_RUN_SECONDS } from "../src/plausibility.ts";
+import { MAX_SESSIONS_PER_IP } from "../src/presence.ts";
 import { MemoryStore } from "../src/store.ts";
 import { PresenceCounter, BEAT_BUDGET, MIN_INTERVAL_S } from "../src/presence.ts";
 import { generate, Outcome, type Config } from "../src/engine/case.ts";
@@ -21,7 +23,7 @@ function setup() {
   let seedSeq = 1000;
   const deps: Deps = {
     store,
-    presenceBeat: async (s) => presence.beat(s, clock.t),
+    presenceBeat: async (s, ip) => presence.beat(s, clock.t, ip),
     presenceCount: async () => presence.count(clock.t),
     now: () => clock.t,
     randomSeed: () => seedSeq++,
@@ -31,6 +33,8 @@ function setup() {
   const call = async (method: string, path: string, body?: unknown, headers: Record<string, string> = {}) => {
     const init: RequestInit = { method, headers: { Origin: ORIGIN, "CF-Connecting-IP": "1.2.3.4", ...headers } };
     if (body !== undefined) init.body = typeof body === "string" ? body : JSON.stringify(body);
+    // partida de gente leva tempo: cada fim de partida acontece 15 min depois
+    if (path === "/runs/finish") clock.t += 15 * 60_000;
     const res = await handle(new Request("https://api.test" + path, init), deps);
     const text = await res.text();
     return { status: res.status, headers: res.headers, data: text ? JSON.parse(text) : null };
@@ -39,12 +43,13 @@ function setup() {
 }
 
 // Joga o caso com perfeição a partir da semente/configuração do servidor.
+// Joga como gente (spec 010): investiga os locais de cada cidade antes de
+// viajar e só emite a pauta depois de ouvir as características.
 function perfectActions(seed: number, config: Config, wrongDetour = false): string[][] {
   const s = generate(new GodotRng(seed), config);
-  s.setPauta(s.disguise.id);
   let detoured = false;
   while (!s.isFinalStop()) {
-    s.investigate(s.locationsHere()[0]);
+    for (const loc of s.locationsHere()) s.investigate(loc);
     if (wrongDetour && !detoured) {
       detoured = true;
       const wrong = s.travelOptions().find((c) => c !== s.route[s.stopIndex + 1]) as string;
@@ -53,9 +58,20 @@ function perfectActions(seed: number, config: Config, wrongDetour = false): stri
     }
     s.travel(s.route[s.stopIndex + 1]);
   }
+  s.setPauta(s.disguise.id);
   s.investigate(s.locationsHere()[s.hideoutSlot]);
   assert.equal(s.outcome, Outcome.WIN);
   return s.actions;
+}
+
+// O robô da auditoria (spec 010): lê a solução do caso, não investiga nada.
+function botActions(seed: number, config: Config): string[][] {
+  const s = generate(new GodotRng(seed), config);
+  const acts: string[][] = [["p", s.disguise.id]];
+  for (let i = 1; i < s.route.length; i++) acts.push(["t", s.route[i]]);
+  for (let i = 1; i < s.route.length; i++) s.travel(s.route[i]);
+  acts.push(["i", s.locationsHere()[s.hideoutSlot]]);
+  return acts;
 }
 
 async function startRun(call: ReturnType<typeof setup>["call"], device = DEV_A, rank = 0) {
@@ -319,4 +335,104 @@ test("virada da semana do ranking", async () => {
   clock.t += 2;
   assert.equal((await call("GET", "/leaderboard?period=week")).data.entries.length, 0, "saiu da semana");
   assert.equal((await call("GET", "/leaderboard?period=all")).data.entries.length, 1, "continua no geral");
+});
+
+
+// --- Spec 010: segurança do ranking ------------------------------------------------
+
+test("robô que lê a solução: partida conta, mas não entra no ranking", async () => {
+  const { call, store } = setup();
+  const run = await startRun(call);
+  const r = await call("POST", "/runs/finish", { run_id: run.run_id, device: DEV_A, actions: botActions(run.seed, run.config), nickname: "Bot", publish: true });
+  assert.equal(r.status, 200);
+  assert.equal(r.data.outcome, Outcome.WIN);
+  assert.equal(r.data.published, false);
+  assert.ok(r.data.flag, "partida marcada");
+  assert.equal(store.scores.length, 0);
+  // e nem publicando depois
+  const pub = await call("POST", "/runs/publish", { run_id: run.run_id, device: DEV_A, nickname: "Bot" });
+  assert.equal(pub.data.published, false);
+});
+
+test("partida rápida demais não entra no ranking", async () => {
+  const { call, clock, deps } = setup();
+  const run = await startRun(call);
+  const actions = perfectActions(run.seed, run.config);
+  // finish no mesmo instante do start (sem os 15 min do wrapper)
+  clock.t -= 15 * 60_000 - (MIN_RUN_SECONDS - 5) * 1000;
+  const res = await handle(new Request("https://api.test/runs/finish", {
+    method: "POST", headers: { Origin: ORIGIN }, body: JSON.stringify({ run_id: run.run_id, device: DEV_A, actions, publish: true }),
+  }), deps);
+  const data = await res.json() as { published: boolean; flag: string };
+  assert.equal(data.published, false);
+  assert.equal(data.flag, "too_fast");
+});
+
+test("cargo pedido acima das vitórias registradas cai pro merecido", async () => {
+  const { call } = setup();
+  const r = await startRun(call, DEV_A, 4);
+  assert.equal(r.config.route_len, 4, "sem vitórias: Estagiário");
+  assert.equal(rankForWins(0), 0);
+  assert.equal(rankForWins(1), 1);
+  assert.equal(rankForWins(99), 4);
+  // ganha 1 caso: passa a poder Repórter Júnior
+  await call("POST", "/runs/finish", { run_id: r.run_id, device: DEV_A, actions: perfectActions(r.seed, r.config) });
+  const next = await call("POST", "/runs/start", { device: DEV_A, rank: 4 });
+  assert.equal(next.data.rank, 1);
+});
+
+test("limite por IP devolve 429 e não deixa passar", async () => {
+  const { deps } = setup();
+  let calls = 0;
+  deps.limit = async () => ++calls <= 3;
+  const req = () => handle(new Request("https://api.test/online", { headers: { Origin: ORIGIN } }), deps);
+  for (let i = 0; i < 3; i++) assert.equal((await req()).status, 200);
+  assert.equal((await req()).status, 429);
+  // /health nunca é limitado
+  assert.equal((await handle(new Request("https://api.test/health"), deps)).status, 200);
+});
+
+test("contador: um IP soma no máximo algumas sessões", async () => {
+  const { call } = setup();
+  for (let i = 0; i < MAX_SESSIONS_PER_IP + 5; i++) {
+    await call("POST", "/presence", { session: i.toString(16).padStart(32, "0") });
+  }
+  assert.equal((await call("GET", "/online")).data.online, MAX_SESSIONS_PER_IP);
+  // outro IP ainda conta
+  await call("POST", "/presence", { session: "f".repeat(32) }, { "CF-Connecting-IP": "9.9.9.9" });
+  assert.equal((await call("GET", "/online")).data.online, MAX_SESSIONS_PER_IP + 1);
+});
+
+test("apelidos: outro alfabeto e nomes reservados viram anônimo", () => {
+  // cirílico "р" no lugar do "p": a letra estrangeira some, o palavrão não passa
+  assert.ok(!sanitizeNickname("рuta").includes("р") && sanitizeNickname("рuta") !== "рuta");
+  assert.equal(sanitizeNickname("Flavio Bolsonaro"), ANONYMOUS);
+  assert.equal(sanitizeNickname("Pablo Marçal 2"), ANONYMOUS);
+  assert.equal(sanitizeNickname("Reporter Anonimo"), ANONYMOUS);
+  assert.equal(sanitizeNickname("Ana Bolsonaro"), "Ana Bolsonaro", "sobrenome sozinho não é reservado");
+  assert.equal(sanitizeNickname("José Ação"), "José Ação", "acentos latinos continuam");
+});
+
+test("corpo grande sem Content-Length é recusado", async () => {
+  const { deps } = setup();
+  const big = new ReadableStream({
+    start(c) {
+      for (let i = 0; i < 80; i++) c.enqueue(new TextEncoder().encode("x".repeat(1024)));
+      c.close();
+    },
+  });
+  const res = await handle(new Request("https://api.test/presence", { method: "POST", headers: { Origin: ORIGIN }, body: big, duplex: "half" } as RequestInit), deps);
+  assert.equal(res.status, 400);
+});
+
+test("ranking marca você pelo hash do aparelho (e ainda pelo id antigo)", async () => {
+  const { call } = setup();
+  const run = await startRun(call);
+  await call("POST", "/runs/finish", { run_id: run.run_id, device: DEV_A, actions: perfectActions(run.seed, run.config), nickname: "Ana", publish: true });
+  const byHash = await call("GET", "/leaderboard?you=" + (await deviceHash(DEV_A)));
+  assert.equal(byHash.data.entries[0].is_you, true);
+  const byId = await call("GET", "/leaderboard?device=" + DEV_A);
+  assert.equal(byId.data.entries[0].is_you, true);
+  const other = await call("GET", "/leaderboard?you=" + (await deviceHash(DEV_B)));
+  assert.equal(other.data.entries[0].is_you, false);
 });

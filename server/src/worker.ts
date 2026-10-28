@@ -13,13 +13,15 @@ export interface Env {
   // Segredo pra o hash de IP (limite de partidas) não ser revertível por força
   // bruta; o IP em si nunca é guardado.
   IP_SALT: string;
+  // Rate limiting do próprio Workers (spec 010, RF66); ausente em dev local.
+  LIMITER?: { limit(options: { key: string }): Promise<{ success: boolean }> };
 }
 
 export class Presence extends DurableObject {
   private counter = new PresenceCounter();
 
-  beat(session: string): { online: number; interval: number } {
-    return this.counter.beat(session, Date.now());
+  beat(session: string, ipKey: string): { online: number; interval: number } {
+    return this.counter.beat(session, Date.now(), ipKey);
   }
 
   count(): number {
@@ -36,11 +38,12 @@ export default {
     const presence = env.PRESENCE.get(env.PRESENCE.idFromName("global"));
     return handle(req, {
       store: new D1Store(env.DB),
-      presenceBeat: (session) => presence.beat(session),
+      presenceBeat: (session, ipKey) => presence.beat(session, ipKey),
       presenceCount: () => presence.count(),
       now: () => Date.now(),
       randomSeed: () => newSeed(() => crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000),
       newId: () => hex(crypto.getRandomValues(new Uint8Array(16))),
+      limit: env.LIMITER ? async (key) => (await (env.LIMITER as NonNullable<Env["LIMITER"]>).limit({ key })).success : undefined,
       // Sal muda por dia: o mesmo IP não é ligável entre dias.
       ipHash: async (ip) => {
         const day = new Date().toISOString().slice(0, 10);

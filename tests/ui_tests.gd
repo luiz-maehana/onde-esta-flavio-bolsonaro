@@ -1392,6 +1392,8 @@ func _test_online() -> void:
 	await _frames(3)
 	texts = board.find_children("*", "Label", true, false).map(func(l): return l.text)
 	_check(texts.has("Bia") and texts.has("Teste (você)"), "ranking lista as entradas e marca você")
+	var board_path: String = calls.filter(func(p): return p.begins_with("/leaderboard")).back()
+	_check(board_path.contains("you=" + Online.device_hash()) and not board_path.contains(Online.device_id), "ranking manda só o hash do aparelho na URL (spec 010)")
 	board.queue_free()
 	server["fail"] = true
 	board = load("res://scenes/LeaderboardScreen.tscn").instantiate()

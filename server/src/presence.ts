@@ -15,17 +15,22 @@ export const MIN_INTERVAL_S = 60;
 const WINDOW_FACTOR = 2.5;
 // Teto de sessões guardadas: impede encher a memória com ids inventados.
 export const MAX_SESSIONS = 50_000;
+// Spec 010 (RF66): sessões que um mesmo IP (hash) soma ao contador — uma casa
+// com alguns aparelhos, não um script inventando milhares de ids.
+export const MAX_SESSIONS_PER_IP = 5;
 const DAY_MS = 86_400_000;
 
 export type Beat = { online: number; interval: number };
 
 export class PresenceCounter {
   private readonly seen = new Map<string, number>();
+  private readonly ipOf = new Map<string, string>();
+  private readonly perIp = new Map<string, number>();
   private day = -1;
   private beatsToday = 0;
   private lastInterval = MIN_INTERVAL_S;
 
-  beat(session: string, now: number): Beat {
+  beat(session: string, now: number, ipKey = ""): Beat {
     const today = Math.floor(now / DAY_MS);
     if (today !== this.day) {
       this.day = today;
@@ -33,10 +38,16 @@ export class PresenceCounter {
     }
     this.beatsToday++;
     this.prune(now);
-    if (this.seen.has(session) || this.seen.size < MAX_SESSIONS) {
+    const known = this.seen.has(session);
+    const ipFull = ipKey !== "" && (this.perIp.get(ipKey) ?? 0) >= MAX_SESSIONS_PER_IP;
+    if (known || (this.seen.size < MAX_SESSIONS && !ipFull)) {
       // re-inserir mantém o Map em ordem de último sinal (prune barato)
       this.seen.delete(session);
       this.seen.set(session, now);
+      if (!known && ipKey !== "") {
+        this.ipOf.set(session, ipKey);
+        this.perIp.set(ipKey, (this.perIp.get(ipKey) ?? 0) + 1);
+      }
     }
     const online = this.seen.size;
     this.lastInterval = this.interval(online, now);
@@ -65,6 +76,13 @@ export class PresenceCounter {
     for (const [session, t] of this.seen) {
       if (now - t <= window) break;
       this.seen.delete(session);
+      const ip = this.ipOf.get(session);
+      if (ip !== undefined) {
+        this.ipOf.delete(session);
+        const left = (this.perIp.get(ip) ?? 1) - 1;
+        if (left > 0) this.perIp.set(ip, left);
+        else this.perIp.delete(ip);
+      }
     }
   }
 }

@@ -22,6 +22,11 @@ mundo antes do fechamento da edição de domingo.
 Godot 4.7.2. Ver [CLAUDE.md](CLAUDE.md) para comandos e arquitetura e
 [specs/001-jogo-base](specs/001-jogo-base/spec.md) para a especificação.
 
+## Correções e segurança
+
+Falha de segurança ou pedido de correção de conteúdo sobre pessoas reais:
+veja [SECURITY.md](SECURITY.md).
+
 ## Créditos
 
 - Arte de título: fornecida pelo autor do projeto.

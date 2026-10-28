@@ -19,5 +19,8 @@
       "migrations_dir": "migrations"
     }
   ],
+  // Spec 010 (RF66): 60 requisições por minuto por IP (hash), antes de tocar
+  // no D1 ou no contador.
+  "ratelimits": [{ "name": "LIMITER", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } }],
   "observability": { "enabled": true }
 }
