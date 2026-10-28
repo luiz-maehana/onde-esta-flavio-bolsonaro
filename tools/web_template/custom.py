@@ -1,0 +1,23 @@
+# Modelo de exportação Web enxuto (spec 012, RF92), compilado no CI
+# (.github/workflows/build.yml, job web-template) com:
+#   scons profile=tools/web_template/custom.py
+# Mudar este arquivo invalida o cache e recompila o modelo (~40 min).
+#
+# Só o que o jogo usa em execução: GDScript, fontes TTF (freetype + servidor
+# de texto simples — pt/en/es não precisam do avançado), WebP (artes de
+# título com perda), SVG (ícones do tema padrão, ex.: alça do slider) e
+# mbedtls (código aleatório do aparelho no ranking). Sem 3D, física,
+# navegação, áudio OGG/MP3, rede além do HTTPRequest, nem importadores.
+platform = "web"
+target = "template_release"
+threads = "no"
+production = "yes"
+optimize = "size_extra"
+disable_3d = "yes"
+modules_enabled_by_default = "no"
+module_gdscript_enabled = "yes"
+module_freetype_enabled = "yes"
+module_text_server_fb_enabled = "yes"
+module_webp_enabled = "yes"
+module_svg_enabled = "yes"
+module_mbedtls_enabled = "yes"
