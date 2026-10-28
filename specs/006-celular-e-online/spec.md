@@ -24,7 +24,10 @@ aparelho".
   `DisplayServer.get_display_safe_area()`.
 - **RF38** — Teclado virtual no nome do repórter (`html/
   experimental_virtual_keyboard`), sem hover obrigatório (o mapa já aceita
-  toque).
+  toque). **Correção (29/10/2026):** no navegador interno do Instagram o
+  teclado não abria (o Godot foca o campo um quadro depois do toque). No
+  celular o nome usa um <input> nativo da página por cima do campo
+  (`WebTextInput`): o toque cai nele e o teclado abre em qualquer navegador.
 - **RF39** — Carregamento: barra de progresso própria na página (wasm de
   ~40 MB) e aviso de "melhor em Wi-Fi".
 - Plano técnico: componente `ResponsiveLayout` (sinal `orientation_changed`,

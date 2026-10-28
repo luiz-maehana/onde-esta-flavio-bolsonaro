@@ -158,6 +158,12 @@ func _build_name_dialog() -> void:
 	_name_edit.max_length = 18
 	_name_edit.text_submitted.connect(func(_t): _confirm_name())
 	col.add_child(_name_edit)
+	# celular no navegador: campo nativo por cima (o teclado não abria no
+	# navegador interno do Instagram)
+	if WebTextInput.needed():
+		var web_input := WebTextInput.new()
+		web_input.submitted.connect(_confirm_name)
+		web_input.attach(_name_edit)
 	_name_warning = UiTheme.body("Atenção: um repórter novo começa a carreira do zero.", 26, Palette.RED)
 	col.add_child(_name_warning)
 	var buttons := HBoxContainer.new()
@@ -178,7 +184,9 @@ func _open_name_dialog() -> void:
 	_name_warning.visible = GameManager.has_player()
 	_name_dialog.visible = true
 	_name_edit.text = ""
-	_name_edit.call_deferred("grab_focus")
+	# com o campo nativo o foco vem do toque do jogador, não do jogo
+	if not WebTextInput.needed():
+		_name_edit.call_deferred("grab_focus")
 
 func _close_name_dialog() -> void:
 	_name_dialog.visible = false

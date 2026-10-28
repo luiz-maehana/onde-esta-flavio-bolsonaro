@@ -42,6 +42,7 @@ func _run() -> void:
 	await _test_title_screen()
 	await _test_city_flow()
 	await _test_screens_build()
+	await _test_career_album()
 	await _test_layout_all_languages()
 	await _test_rotation()
 	await _test_reentrancy()
@@ -1073,6 +1074,20 @@ func _test_language_switch() -> void:
 	get_window().content_scale_size = Responsive.LANDSCAPE_SIZE
 	GameManager.settings = Settings.new()
 	GameManager.settings.tips_enabled = false
+
+## Álbum da carreira: nome embaixo de cada figura flagrada, "???" nas outras,
+## sem depender de tooltip (não aparece no toque).
+func _test_career_album() -> void:
+	GameManager.career = Career.from_dict({"player_name": "Teste", "cases_solved": 2, "cases_played": 3, "disguises_caught": ["turista", "diva"]})
+	var career: Control = await _mount(load("res://scenes/CareerScreen.tscn").instantiate())
+	var texts: Array = career.find_children("*", "Label", true, false).map(func(l): return l.text)
+	_check(texts.has(GameData.disguise("turista")["name"]) and texts.has(GameData.disguise("diva")["name"]), "álbum mostra o nome dos disfarces flagrados")
+	_check(texts.count("???") == GameData.disguises().size() - 2, "álbum mostra ??? nos que faltam")
+	var tips: Array = career.find_children("*", "TextureRect", true, false).filter(func(t): return t.tooltip_text != "")
+	_check(tips.is_empty(), "álbum sem tooltip")
+	career.queue_free()
+	await _frames()
+	GameManager.career = Career.from_dict({"player_name": "Teste", "cases_solved": 1, "cases_played": 2})
 
 ## --- Spec 007 (T68): reentrada e macaco -------------------------------------------------
 

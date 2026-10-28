@@ -16,6 +16,7 @@ apareceu. Bug achado aqui vira teste automatizado quando der.
 | 1.2 | Primeiro toque em qualquer botão | Música e efeitos começam (não fica mudo) | | |
 | 1.3 | Em pé: título, novo caso, briefing | Tudo legível, nada cortado, botões fáceis de acertar | | |
 | 1.4 | TROCAR REPÓRTER → digitar nome | Teclado virtual abre, o campo continua visível acima dele | | |
+| 1.4b | Abrir o link pelo **Instagram** (navegador interno) e tocar no campo do nome | Teclado abre; o nome digitado aparece e ASSINAR CONTRATO aceita | | |
 | 1.5 | Investigar um local e **girar** durante a fala | Volta na cidade sem perder hora nem anotação | | |
 | 1.6 | Viajar e **girar** durante o voo | Chega numa cidade só; relógio anda uma vez | | |
 | 1.7 | Abrir dossiê, marcar 2 traços, **girar** | Marcações continuam lá | | |

@@ -1,9 +1,22 @@
 extends Control
 ## Ficha do repórter (RF28/RF29): estatísticas, álbum de flagrantes (disfarce
-## ainda não flagrado aparece como silhueta) e conquistas.
+## ainda não flagrado aparece como silhueta) e conquistas. Cada figura tem o
+## nome embaixo ("???" se ainda não foi flagrado) — tooltip não aparece no
+## toque e ficava ilegível.
 
 const ALBUM_COLUMNS := 7
 const ALBUM_PX := 60
+const ALBUM_GAP := 8
+## Largura mínima da casa do álbum: figura + moldura.
+const ALBUM_CELL_MIN := 84
+const CAPTION_SIZE := 18
+## Largura da coluna de texto da ficha (NewspaperPage): em pé, a página menos
+## as margens; deitado, também menos a coluna das conquistas.
+const BODY_WIDTH_PORTRAIT := 672
+const BODY_WIDTH_LANDSCAPE := 780
+## Coluna das conquistas deitado: estreita o bastante pro álbum ter 7 por linha.
+const ACHIEVEMENTS_WIDTH_LANDSCAPE := 340
+const UNKNOWN := "???"
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -22,13 +35,21 @@ func _ready() -> void:
 		Lang.t("Escândalos cobertos: %d de %d") % [c.scandals_covered.size(), GameData.scandals().size()],
 		Lang.t("Cidades visitadas: %d de %d") % [c.cities_visited.size(), GameData.cities().size()],
 	]
-	page.add_paragraph("\n".join(stats), 26)
+	# deitado em 2 colunas: sobra altura pro álbum inteiro sem rolar
+	var stats_grid := GridContainer.new()
+	stats_grid.columns = 1 if Responsive.is_portrait() else 2
+	stats_grid.add_theme_constant_override("h_separation", 24)
+	for line in stats:
+		var label := UiTheme.body(line, 24)
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		stats_grid.add_child(label)
+	page.body_column.add_child(stats_grid)
 	page.body_column.add_child(UiTheme.headline("ÁLBUM DE FLAGRANTES", 14, Palette.RED))
 	page.body_column.add_child(_album(c))
 
 	page.photo_column.add_child(UiTheme.headline("CONQUISTAS", 14, Palette.RED))
 	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size = Vector2(420, 330)
+	scroll.custom_minimum_size = Vector2(420 if Responsive.is_portrait() else ACHIEVEMENTS_WIDTH_LANDSCAPE, 330)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	page.photo_column.add_child(scroll)
 	var list := VBoxContainer.new()
@@ -46,22 +67,44 @@ func _ready() -> void:
 	back.call_deferred("grab_focus")
 
 func _album(c: Career) -> GridContainer:
+	# a casa tem a largura da palavra mais longa das legendas (nunca quebra
+	# palavra no meio); quantas cabem por linha sai da largura da coluna
+	var cell := _album_cell_width()
+	var width := BODY_WIDTH_PORTRAIT if Responsive.is_portrait() else BODY_WIDTH_LANDSCAPE
 	var grid := GridContainer.new()
-	grid.columns = ALBUM_COLUMNS
-	grid.add_theme_constant_override("h_separation", 8)
-	grid.add_theme_constant_override("v_separation", 8)
+	grid.columns = clampi((width + ALBUM_GAP) / (cell + ALBUM_GAP), 3, ALBUM_COLUMNS)
+	grid.add_theme_constant_override("h_separation", ALBUM_GAP)
+	grid.add_theme_constant_override("v_separation", 12)
 	for d in GameData.disguises():
+		var caught: bool = c.disguises_caught.has(d["id"])
+		var box := VBoxContainer.new()
+		box.add_theme_constant_override("separation", 4)
+		box.custom_minimum_size.x = cell
 		var frame := PanelContainer.new()
 		frame.add_theme_stylebox_override("panel", UiTheme.box(Palette.PAPER_DARK, Vector2.ZERO))
+		frame.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		var pic := PixelPortrait.make_rect(PixelPortrait.flavio_disguised(d["id"]), ALBUM_PX)
-		if c.disguises_caught.has(d["id"]):
-			pic.tooltip_text = d["name"]
-		else:
+		if not caught:
 			pic.modulate = Color(0, 0, 0, 0.85)
-			pic.tooltip_text = "???"
 		frame.add_child(pic)
-		grid.add_child(frame)
+		box.add_child(frame)
+		var caption := UiTheme.body(d["name"] if caught else UNKNOWN, CAPTION_SIZE, Palette.INK if caught else Palette.GREY)
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		caption.custom_minimum_size.x = cell
+		caption.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+		box.add_child(caption)
+		grid.add_child(box)
 	return grid
+
+## Largura da casa do álbum: a palavra mais longa entre os nomes dos
+## disfarces, na fonte e no idioma atuais.
+func _album_cell_width() -> int:
+	var size := UiTheme.text_size(CAPTION_SIZE)
+	var widest := 0.0
+	for d in GameData.disguises():
+		for word in d["name"].split(" "):
+			widest = maxf(widest, UiTheme.BODY_FONT.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x)
+	return maxi(ALBUM_CELL_MIN, ceili(widest) + 6)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
