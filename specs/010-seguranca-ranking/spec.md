@@ -97,12 +97,16 @@ conta está no **Free** (no Paid, o que passar da cota é cobrado).
 - `wrangler` 4.154.0: a correção do `undici` só existe a partir da
   4.153.0 (versões de out/2026); a 4.154.0 tem procedência SLSA verificada
   (`npm audit signatures`), que o CI passa a exigir antes do deploy.
-- Limite por IP: o rate limiting nativo do Workers foi aceito no plano
-  grátis, mas no teste em produção deixou passar ~170 req/min por IP (é
-  "permissivo" por desenho). Somado a ele, um limitador em memória por
-  instância (`limiter.ts`, 60 req/min), exato pra quem martela da mesma
-  região. Antes: o limite por IP usava só o nativo (60 req/min);
-  sem domínio próprio não há como barrar requisições antes do Worker.
+- Limite de volume por IP: no plano grátis com workers.dev não há como
+  fazer de forma confiável. O rate limiting nativo foi aceito, mas no teste
+  em produção deixou passar ~170 req/min por IP; um limitador em memória
+  também não barrou (as requisições caem em muitas instâncias). Fica o
+  nativo como barreira extra. O que protege de fato é por IP dentro do que
+  é consistente: sessões no contador (Durable Object, máx. 5), partidas
+  (D1, 60/h) — e o ranking em cache de 30 s no Durable Object, que limita
+  as leituras do D1 a ~2 por 30 s qualquer que seja o tráfego (antes, alguns
+  milhares de consultas esgotariam os 5 milhões de linhas/dia do D1 e
+  derrubariam o ranking até o dia seguinte).
 
 ## Testes
 

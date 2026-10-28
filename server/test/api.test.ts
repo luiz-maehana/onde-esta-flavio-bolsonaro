@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { handle, deviceHash, rankForWins, MAX_RUNS_PER_DEVICE, RUN_TTL_MS, WEEK_MS, type Deps } from "../src/api.ts";
 import { MIN_RUN_SECONDS } from "../src/plausibility.ts";
 import { MAX_SESSIONS_PER_IP } from "../src/presence.ts";
-import { IsolateLimiter, LIMIT_PER_MINUTE } from "../src/limiter.ts";
+import { TtlCache } from "../src/ttlcache.ts";
 import { MemoryStore } from "../src/store.ts";
 import { PresenceCounter, BEAT_BUDGET, MIN_INTERVAL_S } from "../src/presence.ts";
 import { generate, Outcome, type Config } from "../src/engine/case.ts";
@@ -438,11 +438,33 @@ test("ranking marca você pelo hash do aparelho (e ainda pelo id antigo)", async
   assert.equal(other.data.entries[0].is_you, false);
 });
 
-test("limitador em memória: 60 por minuto por IP, janela renova", () => {
-  const l = new IsolateLimiter();
+test("cache do ranking: uma leitura por período dentro da validade", async () => {
+  const cache = new TtlCache<number>(30_000);
+  let loads = 0;
+  const load = async () => ++loads;
   const t0 = 1_000_000;
-  for (let i = 0; i < LIMIT_PER_MINUTE; i++) assert.ok(l.allow("ip-a", t0 + i));
-  assert.equal(l.allow("ip-a", t0 + 100), false, "61ª no mesmo minuto barrada");
-  assert.ok(l.allow("ip-b", t0 + 100), "outro IP passa");
-  assert.ok(l.allow("ip-a", t0 + 60_001), "minuto seguinte libera");
+  // consultas simultâneas com o cache vazio esperam a mesma leitura
+  const [a, b] = await Promise.all([cache.get("week", t0, load), cache.get("week", t0 + 1, load)]);
+  assert.equal(a, 1);
+  assert.equal(b, 1);
+  assert.equal(await cache.get("week", t0 + 29_000, load), 1, "ainda válido");
+  assert.equal(await cache.get("all", t0 + 29_000, load), 2, "outro período lê à parte");
+  assert.equal(await cache.get("week", t0 + 30_000, load), 3, "venceu: lê de novo");
+  assert.equal(loads, 3);
+  // leitura que falha não fica guardada
+  await assert.rejects(cache.get("x", t0, async () => { throw new Error("D1 fora"); }));
+  assert.equal(await cache.get("x", t0 + 1, async () => 42), 42);
+});
+
+test("ranking usa as linhas em cache quando o servidor oferece", async () => {
+  const { call, deps } = setup();
+  let asked = 0;
+  deps.leaderboardRows = async () => {
+    asked++;
+    return [{ run_id: "r", device: DEV_A, nickname: "Cache", rank_title: "Repórter", score: 1, hours: 1, wrong_cities: 0, city: "rio", created_at: 0 }];
+  };
+  const r = await call("GET", "/leaderboard?you=" + (await deviceHash(DEV_A)));
+  assert.equal(asked, 1);
+  assert.equal(r.data.entries[0].nickname, "Cache");
+  assert.equal(r.data.entries[0].is_you, true);
 });

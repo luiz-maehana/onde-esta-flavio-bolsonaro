@@ -9,7 +9,7 @@ import { configForRank, replay, score as computeScore, Outcome, MAX_ACTIONS } fr
 import { flavor } from "./engine/data.ts";
 import { sanitizeNickname } from "./nickname.ts";
 import { implausible } from "./plausibility.ts";
-import type { Store } from "./store.ts";
+import type { ScoreRow, Store } from "./store.ts";
 
 export const ALLOWED_ORIGINS = ["https://luiz-maehana.github.io"];
 export const MAX_BODY = 64 * 1024;
@@ -34,6 +34,9 @@ export type Deps = {
   /** Spec 010 (RF66): limite de requisições por chave (hash do IP);
    * false = estourou. Ausente = sem limite (testes antigos, dev local). */
   limit?: (key: string) => Promise<boolean>;
+  /** Spec 010: linhas do ranking com cache (no Durable Object, pra não
+   * esgotar as leituras do D1). Ausente = lê direto do store. */
+  leaderboardRows?: (period: "week" | "all") => Promise<ScoreRow[]>;
 };
 
 export async function handle(req: Request, deps: Deps): Promise<Response> {
@@ -168,7 +171,7 @@ async function leaderboard(url: URL, deps: Deps, origin: string | null): Promise
   // não vai pra URL nem pra log); "device" (id cru) fica pra versões antigas
   const device = url.searchParams.get("device");
   const you = url.searchParams.get("you");
-  const rows = await deps.store.top(since, LEADERBOARD_SIZE);
+  const rows = deps.leaderboardRows ? await deps.leaderboardRows(period) : await deps.store.top(since, LEADERBOARD_SIZE);
   const mine = await Promise.all(rows.map(async (r) => (isId(device) && r.device === device) || (isId(you) && (await deviceHash(r.device)) === you)));
   const entries = rows.map((r, i) => ({
     // rank: índice do cargo, pro jogo mostrar o título no idioma do jogador
