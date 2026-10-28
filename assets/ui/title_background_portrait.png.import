@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://sxwteemrs4fp"
-path="res://.godot/imported/Onde Está Flávio Bolsonaro_ (1).png-a4ea7033ee932541eb10310c9e5459c0.ctex"
+uid="uid://i48hs4rrcbj3"
+path="res://.godot/imported/title_background_portrait.png-95c0abbb6ecc2393f702bd4ab9bffb9a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Onde Está Flávio Bolsonaro_ (1).png"
-dest_files=["res://.godot/imported/Onde Está Flávio Bolsonaro_ (1).png-a4ea7033ee932541eb10310c9e5459c0.ctex"]
+source_file="res://assets/ui/title_background_portrait.png"
+dest_files=["res://.godot/imported/title_background_portrait.png-95c0abbb6ecc2393f702bd4ab9bffb9a.ctex"]
 
 [params]
 

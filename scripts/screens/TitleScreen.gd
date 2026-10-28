@@ -3,8 +3,8 @@ extends Control
 ## com carreira + menu, aviso de paródia, e o cadastro do nome do repórter.
 
 const BACKGROUND := preload("res://assets/ui/title_background.png")
-## Altura da arte no topo com o celular em pé (720 de largura, proporção da arte).
-const PORTRAIT_ART_HEIGHT := 405
+## Arte própria pro celular em pé (9:16).
+const BACKGROUND_PORTRAIT := preload("res://assets/ui/title_background_portrait.png")
 ## Distância do crachá de nome ao topo da tela no toque (teclado embaixo).
 const NAME_DIALOG_TOP := 24
 const DISCLAIMER := "PARÓDIA — piadas e situações são inventadas. Os boxes \"Entenda o caso\" resumem reportagens publicadas, com o status de cada apuração (investigação não é condenação). Sem afiliação com partidos ou com Carmen Sandiego."
@@ -28,15 +28,19 @@ func _ready() -> void:
 	ink.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(ink)
 	var bg := TextureRect.new()
-	bg.texture = BACKGROUND
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	bg.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	if Responsive.is_portrait():
-		# em pé: arte inteira na largura, no topo (cobrir cortaria o letreiro)
-		bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		# em pé: arte retrato na largura toda, presa no topo. Cobrir a tela
+		# cortaria as laterais do letreiro nos celulares compridos; o que sobra
+		# embaixo fica sob a barra do menu.
+		bg.texture = BACKGROUND_PORTRAIT
+		bg.stretch_mode = TextureRect.STRETCH_SCALE
 		bg.set_anchors_preset(Control.PRESET_TOP_WIDE)
-		bg.custom_minimum_size.y = PORTRAIT_ART_HEIGHT
+		var art := BACKGROUND_PORTRAIT.get_size()
+		bg.custom_minimum_size.y = Responsive.PORTRAIT_SIZE.x * art.y / art.x
 	else:
+		bg.texture = BACKGROUND
 		bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
@@ -62,20 +66,15 @@ func _build_bottom_bar() -> void:
 	sb.set_content_margin_all(18)
 	bar.add_theme_stylebox_override("panel", sb)
 	var portrait := Responsive.is_portrait()
-	if portrait:
-		bar.set_anchors_preset(Control.PRESET_FULL_RECT)
-		bar.offset_top = PORTRAIT_ART_HEIGHT
-	else:
-		# cresce pra cima se o nome/cargo pedirem mais de 200 px
-		bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-		bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
-		bar.offset_top = -200
+	# barra no rodapé, por cima da arte; cresce pra cima o quanto o menu pedir
+	# (deitado: pelo menos 200 px)
+	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	bar.offset_top = 0 if portrait else -200
 	add_child(bar)
 
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 12)
-	# em pé a barra vai da arte até o fim da tela: menu no meio, sem buraco
-	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	bar.add_child(col)
 
 	var row := Responsive.flow_box()

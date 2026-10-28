@@ -320,6 +320,10 @@ func _test_layout_fits() -> void:
 		_extreme_case()
 		var title := await _layout_box(load("res://scenes/TitleScreen.tscn").instantiate())
 		_check_fits(title, "Título " + tag)
+		var art: Array = title.find_children("*", "TextureRect", true, false).map(func(t): return t.texture)
+		var screen: Control = title.get_child(0)
+		var expected: Texture2D = screen.BACKGROUND_PORTRAIT if Responsive.is_portrait() else screen.BACKGROUND
+		_check(art.has(expected), "título usa a arte %s (%s)" % ["retrato" if Responsive.is_portrait() else "paisagem", tag])
 		title.get_child(0)._open_name_dialog()
 		await _frames(3)
 		_check_fits(title, "Crachá " + tag)
