@@ -47,20 +47,30 @@ static func load() -> Career:
 
 const CASE_PATH := "user://onde_esta_flavio_case.json"
 const CASE_MAX_BYTES := 65536
+## Em read_only o caso vai pra memória: testes e prévias exercitam salvar e
+## continuar sem ler nem gravar o caso real do jogador.
+static var _memory_case := ""
 
 static func save_case(state: CaseState) -> void:
+	var text := JSON.stringify(state.to_save())
 	if read_only:
+		_memory_case = text
 		return
 	var file := FileAccess.open(CASE_PATH, FileAccess.WRITE)
 	if file:
-		file.store_string(JSON.stringify(state.to_save()))
+		file.store_string(text)
 
 ## Caso salvo refeito, ou null se não houver ou for inválido.
 static func load_case() -> CaseState:
-	var file := FileAccess.open(CASE_PATH, FileAccess.READ)
-	if file == null or file.get_length() > CASE_MAX_BYTES:
+	var text := _memory_case
+	if not read_only:
+		var file := FileAccess.open(CASE_PATH, FileAccess.READ)
+		if file == null or file.get_length() > CASE_MAX_BYTES:
+			return null
+		text = file.get_as_text()
+	if text == "":
 		return null
-	var data = JSON.parse_string(file.get_as_text())
+	var data = JSON.parse_string(text)
 	if typeof(data) != TYPE_DICTIONARY:
 		return null
 	var state := CaseState.from_save(data)
@@ -70,6 +80,7 @@ static func load_case() -> CaseState:
 
 static func clear_case() -> void:
 	if read_only:
+		_memory_case = ""
 		return
 	if FileAccess.file_exists(CASE_PATH):
 		DirAccess.remove_absolute(CASE_PATH)

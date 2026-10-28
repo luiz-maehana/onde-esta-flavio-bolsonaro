@@ -164,6 +164,32 @@ test("ranking: publicar depois, ordem, semana, is_you e moderação", async () =
   assert.equal((await call("GET", "/leaderboard?period=all")).data.entries.length, 2);
 });
 
+test("ranking: uma linha por jogador, com o melhor resultado", async () => {
+  const { call, clock } = setup();
+  // A vence 3 casos (um com desvio, pontuação menor); B vence 1
+  const scores: number[] = [];
+  for (const clean of [true, false, true]) {
+    const r = await startRun(call, DEV_A);
+    const fin = await call("POST", "/runs/finish", { run_id: r.run_id, device: DEV_A, actions: perfectActions(r.seed, r.config, !clean), nickname: "Ana", publish: true });
+    assert.equal(fin.data.published, true);
+    scores.push(fin.data.score);
+    clock.t += 60_000;
+  }
+  const rb = await startRun(call, DEV_B);
+  const finB = await call("POST", "/runs/finish", { run_id: rb.run_id, device: DEV_B, actions: perfectActions(rb.seed, rb.config), nickname: "Bia", publish: true });
+  for (const period of ["week", "all"]) {
+    const board = await call("GET", `/leaderboard?period=${period}&device=${DEV_A}`);
+    assert.equal(board.data.entries.length, 2, "uma linha por aparelho");
+    const mine = board.data.entries.filter((e: { is_you: boolean }) => e.is_you);
+    assert.equal(mine.length, 1);
+    assert.equal(mine[0].score, Math.max(...scores), "fica o melhor resultado");
+    assert.deepEqual(board.data.entries.map((e: { position: number }) => e.position), [1, 2]);
+  }
+  // posição de B conta só o melhor de cada outro aparelho
+  const expected = Math.max(...scores) > finB.data.score || (Math.max(...scores) === finB.data.score) ? 2 : 1;
+  assert.equal(finB.data.position, expected);
+});
+
 test("dry_run não grava no ranking", async () => {
   const { call, store } = setup();
   const run = await startRun(call);
@@ -220,4 +246,76 @@ test("freio do plano grátis: intervalo cresce com gente online e com o orçamen
   const full = new PresenceCounter();
   for (let i = 0; i < BEAT_BUDGET; i++) full.beat("f".repeat(32), t0);
   assert.ok(full.interval(10, t0) >= 86_400);
+});
+
+// --- Spec 007 (S2): API hostil ------------------------------------------------------
+
+test("campos com tipo errado são recusados sem quebrar", async () => {
+  const { call } = setup();
+  const run = await startRun(call);
+  const bodies: unknown[] = [
+    { device: 123, rank: 0 }, { device: DEV_A, rank: "0" }, { device: null }, [], "null", "42", "\"texto\"",
+  ];
+  for (const b of bodies) {
+    const r = await call("POST", "/runs/start", b);
+    assert.ok(r.status >= 400 && r.status < 500, `start com ${JSON.stringify(b)} deu ${r.status}`);
+  }
+  const finishes: unknown[] = [
+    { run_id: run.run_id, device: DEV_A, actions: "i,x" }, { run_id: run.run_id, device: DEV_A, actions: { 0: ["i"] } },
+    { run_id: run.run_id, device: DEV_A, actions: [[1, 2]] }, { run_id: run.run_id, device: DEV_A, actions: [null] },
+    { run_id: 7, device: DEV_A, actions: [] }, { run_id: run.run_id, device: DEV_A, actions: [], publish: "sim", nickname: { a: 1 } },
+  ];
+  for (const b of finishes) {
+    const r = await call("POST", "/runs/finish", b);
+    assert.ok(r.status >= 400 && r.status < 500, `finish com ${JSON.stringify(b)} deu ${r.status}`);
+  }
+  // nada disso queimou a partida: o caso legítimo ainda fecha
+  const ok = await call("POST", "/runs/finish", { run_id: run.run_id, device: DEV_A, actions: perfectActions(run.seed, run.config) });
+  assert.equal(ok.status, 200);
+});
+
+test("ação depois do fim do caso é recusada (mesma regra do Godot)", async () => {
+  const { call } = setup();
+  const run = await startRun(call);
+  const actions = perfectActions(run.seed, run.config);
+  for (const extra of [["d", "hat", ""], ["p", "turista"], ["i", "banco"]]) {
+    const r = await call("POST", "/runs/finish", { run_id: run.run_id, device: DEV_A, actions: [...actions, extra] });
+    assert.equal(r.status, 422, `ação ${extra[0]} depois do fim aceita`);
+  }
+});
+
+test("dois finish ao mesmo tempo: só um conta", async () => {
+  const { call, store } = setup();
+  const run = await startRun(call);
+  const body = { run_id: run.run_id, device: DEV_A, actions: perfectActions(run.seed, run.config), nickname: "Ana", publish: true };
+  const results = await Promise.all([call("POST", "/runs/finish", body), call("POST", "/runs/finish", body)]);
+  assert.deepEqual(results.map((r) => r.status).sort(), [200, 409]);
+  assert.equal(store.scores.length, 1);
+});
+
+test("apelidos com controle, direção do texto e unicode", () => {
+  const cases: [string, (s: string) => boolean][] = [
+    ["Ana\nFuro", (s) => s === "Ana Furo"],
+    ["‮oruf ana", (s) => !s.includes("‮")],
+    ["Ana​​Furo", (s) => !s.includes("​")],
+    ["\u0000\u0001\u007F", (s) => s === ANONYMOUS],
+    ["José Ação", (s) => s === "José Ação"],
+    ["José", (s) => s === "José"],
+    ["W".repeat(40), (s) => s.length <= 18],
+  ];
+  for (const [input, ok] of cases) {
+    const out = sanitizeNickname(input);
+    assert.ok(ok(out), `apelido ${JSON.stringify(input)} virou ${JSON.stringify(out)}`);
+  }
+});
+
+test("virada da semana do ranking", async () => {
+  const { call, clock } = setup();
+  const run = await startRun(call);
+  await call("POST", "/runs/finish", { run_id: run.run_id, device: DEV_A, actions: perfectActions(run.seed, run.config), nickname: "Ana", publish: true });
+  clock.t += WEEK_MS - 1;
+  assert.equal((await call("GET", "/leaderboard?period=week")).data.entries.length, 1, "ainda na semana");
+  clock.t += 2;
+  assert.equal((await call("GET", "/leaderboard?period=week")).data.entries.length, 0, "saiu da semana");
+  assert.equal((await call("GET", "/leaderboard?period=all")).data.entries.length, 1, "continua no geral");
 });

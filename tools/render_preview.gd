@@ -2,16 +2,33 @@ extends Node
 ## Renderiza cada tela num PNG em build/preview/ pra conferir layout sem
 ## precisar jogar (abre uma janela por alguns segundos; não envia tecla
 ## nenhuma). Roda em modo somente leitura: nunca grava nos saves reais.
+## Gera cada tela em 3 tamanhos de janela (RF36): PC, celular deitado e
+## celular em pé, cada um numa subpasta.
 ## Roda com: godot --path . res://tools/RenderPreview.tscn
 
 const OUT := "res://build/preview/"
+const SIZES := {"1280x720": Vector2i(1280, 720), "844x390": Vector2i(844, 390), "390x844": Vector2i(390, 844)}
+
+var _dir := OUT
 
 func _ready() -> void:
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
 	_run.call_deferred()
 
 func _run() -> void:
 	SaveService.read_only = true
+	for size_name in SIZES:
+		_dir = OUT + size_name + "/"
+		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_dir))
+		get_window().size = SIZES[size_name]
+		await _frames(5)
+		# tamanhos de celular: simula tela de toque (botões de 48 px reais)
+		Responsive.forced_touch = 0 if size_name == "1280x720" else 1
+		UiTheme.reset_theme()
+		get_window().content_scale_size = Responsive.base_size()
+		await _render_all()
+	get_tree().quit()
+
+func _render_all() -> void:
 	var gm = GameManager
 	gm.settings = Settings.new()
 	gm.settings.tips_enabled = false
@@ -53,6 +70,12 @@ func _run() -> void:
 	await _save("04_witness")
 	city.queue_free()
 
+	city = await _shot("res://scenes/CityScreen.tscn", "04b_dummy", false)
+	city._open_dossier()
+	await _frames(5)
+	await _save("04b_dossier")
+	city.queue_free()
+
 	city = await _shot("res://scenes/CityScreen.tscn", "05_dummy", false)
 	city._open_pause()
 	await _frames(5)
@@ -77,7 +100,6 @@ func _run() -> void:
 	case.investigate(case.locations_here()[case.hideout_slot])
 	gm.last_unlocked = ["primeiro_furo", "relampago"]
 	await _shot("res://scenes/EndScreen.tscn", "08_end")
-	get_tree().quit()
 
 func _shot(scene_path: String, shot_name: String, free_after: bool = true) -> Node:
 	var node: Control = load(scene_path).instantiate()
@@ -96,5 +118,5 @@ func _frames(n: int) -> void:
 
 func _save(shot_name: String) -> void:
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png(OUT + shot_name + ".png")
-	print("preview: ", shot_name)
+	get_viewport().get_texture().get_image().save_png(_dir + shot_name + ".png")
+	print("preview: ", _dir, shot_name)

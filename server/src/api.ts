@@ -139,7 +139,7 @@ async function insertScore(deps: Deps, run: { id: string; device: string; rank_i
     wrong_cities: run.wrong_cities ?? 0, city: run.city ?? "", created_at: createdAt,
   });
   if (!ok) return null;
-  return await deps.store.position(run.score ?? 0, createdAt, createdAt - WEEK_MS);
+  return await deps.store.position(run.score ?? 0, createdAt, createdAt - WEEK_MS, run.device);
 }
 
 async function leaderboard(url: URL, deps: Deps, origin: string | null): Promise<Response> {

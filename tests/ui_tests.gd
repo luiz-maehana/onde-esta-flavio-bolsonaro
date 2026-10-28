@@ -8,11 +8,26 @@ extends Node
 var _failures := 0
 var _checks := 0
 var _screens: Array[String] = []
+var _log := ErrorLog.new()
+
+## Guarda todo erro do motor (erro de script, lambda com captura liberada...)
+## pra os testes dizerem em que passo aconteceu.
+class ErrorLog extends Logger:
+	var errors: PackedStringArray = []
+	func _log_error(function: String, file: String, line: int, code: String, rationale: String, _editor_notify: bool, error_type: int, backtrace: Array[ScriptBacktrace]) -> void:
+		if error_type != ERROR_TYPE_WARNING:
+			var where := "%s:%d %s" % [file.get_file(), line, function]
+			for bt in backtrace:
+				if bt.get_frame_count() > 0:
+					where = "%s:%d %s" % [bt.get_frame_file(0).get_file(), bt.get_frame_line(0), bt.get_frame_function(0)]
+					break
+			errors.append("%s (%s)" % [rationale if rationale != "" else code, where])
 
 func _ready() -> void:
 	_run.call_deferred()
 
 func _run() -> void:
+	OS.add_logger(_log)
 	SaveService.read_only = true
 	GameManager.settings = Settings.new()
 	GameManager.settings.tips_enabled = false
@@ -25,7 +40,15 @@ func _run() -> void:
 	await _test_title_screen()
 	await _test_city_flow()
 	await _test_screens_build()
+	await _test_layout_fits()
+	await _test_rotation()
+	await _test_reentrancy()
+	await _test_monkey()
+	await _test_full_game_by_click()
+	await _test_hostile_inputs()
+	await _test_keyboard()
 	await _test_online()
+	_check(_log.errors.is_empty(), "nenhum erro do motor durante os testes: %s" % "; ".join(_log.errors.slice(0, 5)))
 
 	print("\nUI: %d verificações, %d falhas" % [_checks, _failures])
 	get_tree().quit(1 if _failures > 0 else 0)
@@ -181,6 +204,9 @@ func _test_title_screen() -> void:
 	_press(title, "OPÇÕES")
 	await _frames()
 	_check(_find_button(title, OptionsPanel.RESET_TEXT) != null, "opções abrem no título")
+	var option_texts: Array = title.find_children("*", "Label", true, false).filter(func(l): return l.is_visible_in_tree()).map(func(l): return l.text)
+	_check(option_texts.has(OptionsPanel.version_text()) and OptionsPanel.version_text().begins_with("Versão "), "opções mostram a versão")
+	_check(_find_button(title, "SIM (F11)") != null or _find_button(title, "NÃO (F11)") != null, "opções têm tela cheia")
 	_press(title, "FECHAR")
 	_press(title, "TROCAR REPÓRTER")
 	await _frames()
@@ -268,6 +294,753 @@ func _test_screens_build() -> void:
 	_check(_find_button(end, "NOVO CASO") != null, "capa final monta com ações")
 	end.queue_free()
 	await _frames()
+
+## --- Spec 007 (T69): cabe na tela e girar no meio ----------------------------------------
+
+## U5: cada tela e cada overlay, deitado e em pé, com os textos mais longos
+## do jogo (nome de 18 letras largas, maior cidade, cargo, escândalo e
+## disfarce). Nada visível pode passar das bordas da tela.
+## Aparelhos simulados: [nome, orientação, lado curto em px de CSS, toque].
+## Celular de 360 px em 16:9 é o pior caso de altura (deitado) e de escala.
+const LAYOUT_PROFILES := [
+	["PC deitado", 0, 720.0, 0],
+	["janela em pé", 1, 720.0, 0],
+	["celular deitado", 0, 360.0, 1],
+	["celular em pé", 1, 360.0, 1],
+]
+
+func _test_layout_fits() -> void:
+	GameManager.career = _longest_career()
+	for profile in LAYOUT_PROFILES:
+		Responsive.forced = profile[1]
+		Responsive.forced_short_side = profile[2]
+		Responsive.forced_touch = profile[3]
+		UiTheme.reset_theme()
+		var tag: String = profile[0]
+		_extreme_case()
+		var title := await _layout_box(load("res://scenes/TitleScreen.tscn").instantiate())
+		_check_fits(title, "Título " + tag)
+		title.get_child(0)._open_name_dialog()
+		await _frames(3)
+		_check_fits(title, "Crachá " + tag)
+		if Responsive.is_touch():
+			var field: Control = title.get_child(0)._name_edit
+			_check(field.get_global_rect().end.y < title.size.y * 0.5, "campo do nome na metade de cima, acima do teclado virtual (%s)" % tag)
+		title.get_child(0)._close_name_dialog()
+		title.get_child(0)._open_options()
+		await _frames(3)
+		_check_fits(title, "Opções " + tag)
+		await _free_box(title)
+
+		for scene in ["BriefingScreen", "TravelScreen", "CareerScreen", "LeaderboardScreen"]:
+			var box := await _layout_box(load("res://scenes/%s.tscn" % scene).instantiate())
+			_check_fits(box, "%s %s" % [scene, tag])
+			await _free_box(box)
+
+		var city_box := await _layout_box(load("res://scenes/CityScreen.tscn").instantiate())
+		var city := city_box.get_child(0)
+		_check_fits(city_box, "Cidade " + tag)
+		for panel in [["Dossiê", "_open_dossier"], ["Anotações", "_open_notes"], ["Investigar", "_open_investigate"], ["Pausa", "_open_pause"]]:
+			city.call(panel[1])
+			await _frames(3)
+			_check_fits(city_box, "%s %s" % [panel[0], tag])
+			city._pause.close()
+			city._back_to_actions()
+		city._on_location_chosen(GameManager.case.locations_here()[0])
+		city._witness.show_speech("TESTEMUNHA · 4H", _longest_speech(), null)
+		await _frames(3)
+		_check_fits(city_box, "Fala mais longa " + tag)
+		var cont: Button = _find_button(city._witness, "CONTINUAR >")
+		_check(cont != null and city._witness.get_global_rect().encloses(cont.get_global_rect()), "CONTINUAR dentro da caixa com a fala mais longa (%s)" % tag)
+		await _free_box(city_box)
+
+		var tip_box := await _layout_box(TipBox.new())
+		GameManager.settings.tips_enabled = true
+		GameManager.settings.seen_tips.clear()
+		tip_box.get_child(0).try_show(_longest_key(GameData.flavor()["tips"]))
+		await _frames(3)
+		_check_fits(tip_box, "Dica mais longa " + tag)
+		GameManager.settings.tips_enabled = false
+		await _free_box(tip_box)
+
+		_finish_extreme_case()
+		GameManager.settings.ranking = "ask"
+		GameManager.last_online_result = {"status": "done", "published": false, "score": 9999, "outcome": CaseState.Outcome.WIN}
+		var end_box := await _layout_box(load("res://scenes/EndScreen.tscn").instantiate())
+		_check_fits(end_box, "Capa + pergunta do ranking " + tag)
+		await _free_box(end_box)
+		GameManager.last_online_result = {}
+	Responsive.forced = -1
+	Responsive.forced_short_side = -1.0
+	Responsive.forced_touch = -1
+	UiTheme.reset_theme()
+	GameManager.career = Career.from_dict({"player_name": "Teste", "cases_solved": 1, "cases_played": 2})
+
+var _longest_speech_cache := ""
+
+## A fala mais longa que o jogo gera de fato: 300 casos jogados inteiros
+## (todo local de toda cidade, com desvio) + imprevistos e diário de sono.
+func _longest_speech() -> String:
+	if _longest_speech_cache != "":
+		return _longest_speech_cache
+	var texts: Array = GameData.flavor()["sleep"].duplicate()
+	for g in GameData.flavor()["gags"]:
+		texts.append(g["text"])
+	for n in 300:
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 400000 + n
+		var s := CaseGenerator.generate(rng, CaseGenerator.config_for_rank(GameData.flavor()["ranks"][n % 5]))
+		for g in s.scandal.get("gags", []):
+			texts.append(g["text"])
+		s.travel(s.decoys[0][0])
+		for loc in s.locations_here():
+			texts.append(s.investigate(loc).get("text", ""))
+		s.travel(s.route[0])
+		while not s.is_over():
+			for loc in s.locations_here():
+				if not s.is_over():
+					texts.append(s.investigate(loc).get("text", ""))
+			if not s.is_over() and not s.is_final_stop():
+				s.travel(s.route[s.stop_index + 1])
+	_longest_speech_cache = _longest(texts)
+	return _longest_speech_cache
+
+## Carreira com o nome mais largo possível e o cargo de título mais longo.
+func _longest_career() -> Career:
+	var ranks: Array = GameData.flavor()["ranks"]
+	var longest: Dictionary = ranks[0]
+	for r in ranks:
+		if r["title"].length() > longest["title"].length():
+			longest = r
+	return Career.from_dict({"player_name": "W".repeat(Career.MAX_NAME_LENGTH), "cases_solved": longest["min_cases"], "cases_played": 99,
+		"achievements": Achievements.all().map(func(a): return a["id"])})
+
+## Caso com a cidade, o escândalo e o disfarce de textos mais longos (só pra
+## desenhar — mexe direto nos campos).
+func _extreme_case() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 99
+	var case := CaseGenerator.generate(rng, CaseGenerator.config_for_rank(GameManager.career.rank()))
+	var longest_city: Dictionary = GameData.cities()[0]
+	for c in GameData.cities():
+		if (c["name"] + c["country"]).length() > (longest_city["name"] + longest_city["country"]).length():
+			longest_city = c
+	case.route[0] = longest_city["id"]
+	case.current_city = longest_city["id"]
+	var longest_scandal: Dictionary = GameData.scandals()[0]
+	for s in GameData.scandals():
+		if (s["title"] + s["summary"] + s["status"]).length() > (longest_scandal["title"] + longest_scandal["summary"] + longest_scandal["status"]).length():
+			longest_scandal = s
+	case.scandal = longest_scandal
+	case.reason = _longest(longest_scandal["reasons"])
+	case.found_spot = _longest(longest_scandal["found_spots"])
+	var longest_disguise: Dictionary = GameData.disguises()[0]
+	for d in GameData.disguises():
+		if d["name"].length() > longest_disguise["name"].length():
+			longest_disguise = d
+	case.disguise = longest_disguise
+	for i in 30:
+		case.notes.append({"city": longest_city["name"], "role": "Testemunha", "text": _longest(GameData.flavor()["taunts"])})
+	GameManager.case = case
+
+func _finish_extreme_case() -> void:
+	var case: CaseState = GameManager.case
+	case.pauta = case.disguise["id"]
+	case.outcome = CaseState.Outcome.WIN
+	# o máximo que um caso costuma destravar de uma vez
+	GameManager.last_unlocked = Achievements.all().slice(0, 3).map(func(a): return a["id"])
+
+func _longest(values: Array) -> String:
+	var best := ""
+	for v in values:
+		var text := str(v)
+		if text.length() > best.length():
+			best = text
+	return best
+
+func _longest_key(d: Dictionary) -> String:
+	var best := ""
+	for k in d:
+		if best == "" or str(d[k]).length() > str(d[best]).length():
+			best = k
+	return best
+
+## Caixa do tamanho-base da orientação atual com o controle dentro.
+func _layout_box(screen: Control) -> Control:
+	var box := Control.new()
+	box.size = Vector2(Responsive.base_size())
+	box.theme = UiTheme.theme()
+	add_child(box)
+	box.add_child(screen)
+	await _frames(4)
+	return box
+
+func _free_box(box: Control) -> void:
+	box.queue_free()
+	await _frames()
+
+func _check_fits(box: Control, what: String) -> void:
+	var limit := box.get_global_rect().grow(1)
+	var out := _overflowing(box, limit)
+	_check(out == null, "%s cabe na tela (vazou: %s)" % [what, _describe(out, limit) if out else ""])
+	# RF37: no toque, todo botão visível com pelo menos 48 px reais de altura
+	if Responsive.is_touch():
+		var small: Array = box.find_children("*", "Button", true, false).filter(func(b):
+			return b.is_visible_in_tree() and b.size.y * Responsive.screen_per_base() < Responsive.TOUCH_TARGET_CSS - 1.0)
+		_check(small.is_empty(), "%s: botões com 48 px reais (pequenos: %s)" % [what, small.map(func(b): return "%s=%dpx" % [b.text.left(16), int(b.size.y * Responsive.screen_per_base())]).slice(0, 4)])
+
+func _describe(c: Control, limit: Rect2) -> String:
+	var r := c.get_global_rect()
+	var text: String = (" \"%s\"" % str(c.get("text")).left(30)) if c.get("text") != null else ""
+	return "%s%s %s fora de %s" % [c.get_class(), text, r, limit]
+
+## Primeiro controle visível que passa da área. Não desce em rolagem nem em
+## controle que recorta o conteúdo (lá dentro, passar da borda é normal).
+func _overflowing(node: Node, limit: Rect2) -> Control:
+	for child in node.get_children():
+		if not (child is Control and child.is_visible_in_tree()):
+			continue
+		if not limit.encloses(child.get_global_rect()):
+			return child
+		if child is ScrollContainer or child.clip_contents:
+			continue
+		var inner := _overflowing(child, limit)
+		if inner:
+			return inner
+	return null
+
+## U4: girar o aparelho no meio de cada coisa. O caso não muda, nenhuma
+## ação duplica, e a tela remontada continua jogável.
+func _test_rotation() -> void:
+	Responsive.forced = 0
+	GameManager.settings.text_speed = "instantanea"
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 31
+	GameManager.case = CaseGenerator.generate(rng, {"route_len": 4})
+	var case: CaseState = GameManager.case
+	var main: Control = load("res://scenes/Main.tscn").instantiate()
+	add_child(main)
+	await _wait(0.5)
+	GameManager.go_to_city()
+	await _settle(main)
+
+	var steps := [
+		["fala aberta", func(city): city._on_location_chosen(case.locations_here()[0])],
+		["dossiê aberto", func(city): city._open_dossier()],
+		["anotações abertas", func(city): city._open_notes()],
+		["pausa aberta", func(city): city._open_pause()],
+	]
+	var orientation := 1
+	for s in steps:
+		var acted := case.actions.size()
+		var errors_before := _log.errors.size()
+		s[1].call(main._current)
+		await _frames(3)
+		acted = case.actions.size()
+		await _rotate(main, orientation)
+		orientation = 1 - orientation
+		_check(main._current_name == "city" and case.actions.size() == acted, "girar com %s mantém o caso" % s[0])
+		_check(_usable(main), "girar com %s: tela continua jogável" % s[0])
+		_check(_log.errors.size() == errors_before, "girar com %s sem erro" % s[0])
+
+	# no meio do voo: ou o voo some (sem ação) ou chega (uma ação), nunca dois
+	GameManager.open_travel()
+	await _settle(main)
+	var acted_before := case.actions.size()
+	var dest := _button_starting(main._current, GameData.city(case.travel_options()[0])["name"].to_upper())
+	_click(dest)
+	await _wait(0.3)
+	await _rotate(main, orientation)
+	orientation = 1 - orientation
+	await _wait(WorldMapView.FLIGHT_SECONDS + 0.5)
+	await _settle(main)
+	_check(case.actions.size() - acted_before <= 1, "girar no meio do voo não duplica viagem")
+	_check(_usable(main), "girar no meio do voo: tela continua jogável")
+
+	# última fala (o caso já acabou): girar não pode prender na cidade
+	if main._current_name != "city":
+		GameManager.go_to_city()
+		await _settle(main)
+	case.set_pauta(case.disguise["id"])
+	while not case.is_final_stop():
+		case.travel(case.route[case.stop_index + 1])
+	GameManager.go_to_city()
+	await _settle(main)
+	main._current._on_location_chosen(case.locations_here()[case.hideout_slot])
+	await _frames(3)
+	_check(case.is_over(), "achou o senador")
+	await _rotate(main, orientation)
+	for i in 5:
+		if main._current_name == "ending":
+			break
+		var cont := _find_button(main._current, "CONTINUAR >")
+		if cont:
+			_click(cont)
+		await _settle(main)
+	_check(main._current_name == "ending", "girar na última fala ainda leva à capa (ficou em %s)" % main._current_name)
+
+	main.queue_free()
+	await _frames(3)
+	Responsive.forced = -1
+	get_window().content_scale_size = Responsive.LANDSCAPE_SIZE
+
+func _rotate(main: Control, orientation: int) -> void:
+	Responsive.forced = orientation
+	main._on_window_resized()
+	await _settle(main)
+
+## Algum botão visível e habilitado pra apertar.
+func _usable(main: Control) -> bool:
+	return main.find_children("*", "BaseButton", true, false).any(func(b): return b.is_visible_in_tree() and not b.disabled)
+
+## --- Spec 007 (T67): partida inteira por clique + salvar e continuar ---------------------
+
+## U1 + U7: do título à capa só apertando botões (sabendo a resposta), nas
+## duas orientações; no meio, SALVAR E SAIR e CONTINUAR CASO restauram tudo.
+func _test_full_game_by_click() -> void:
+	for orientation in [0, 1]:
+		var tag := "em pé" if orientation == 1 else "deitado"
+		Responsive.forced = orientation
+		SaveService.clear_case()
+		GameManager.settings = Settings.new()
+		GameManager.settings.tips_enabled = false
+		GameManager.settings.text_speed = "instantanea"
+		GameManager.settings.ranking = "no"
+		GameManager.career = Career.from_dict({"player_name": "Clique", "cases_solved": 0, "cases_played": 0})
+		var main: Control = load("res://scenes/Main.tscn").instantiate()
+		add_child(main)
+		await _wait(0.5)
+		var errors_before := _log.errors.size()
+		var ok := await _play_by_click(main, tag)
+		_check(ok, "partida por clique até a capa (%s)" % tag)
+		_check(_log.errors.size() == errors_before, "partida por clique sem erro do motor (%s)" % tag)
+		main.queue_free()
+		await _frames(3)
+	Responsive.forced = -1
+	get_window().content_scale_size = Responsive.LANDSCAPE_SIZE
+	GameManager.career = Career.from_dict({"player_name": "Teste", "cases_solved": 1, "cases_played": 2})
+	GameManager.settings = Settings.new()
+	GameManager.settings.tips_enabled = false
+
+## Joga um caso inteiro. Cada passo que não acha o botão esperado falha com o
+## nome do passo e a tela em que estava.
+func _play_by_click(main: Control, tag: String) -> bool:
+	if not await _step(main, "NOVO CASO", "briefing", tag):
+		return false
+	var case: CaseState = GameManager.case
+	if not await _step(main, "EMBARCAR PARA", "city", tag):
+		return false
+	var saved_once := false
+	while true:
+		# investiga os 3 locais (no último, só o esconderijo)
+		var locs: Array = [case.locations_here()[case.hideout_slot]] if case.is_final_stop() else case.locations_here()
+		for loc in locs:
+			if not await _step(main, "INVESTIGAR", "city", tag):
+				return false
+			if not await _step(main, GameData.location_info(loc)["name"].to_upper(), "city", tag):
+				return false
+			while _find_button(main._current, "CONTINUAR >") != null and main._current_name == "city":
+				_click(_find_button(main._current, "CONTINUAR >"))
+				await _settle(main)
+			if case.is_over():
+				break
+			if not await _step(main, "VOLTAR", "city", tag):
+				return false
+		if case.is_over():
+			break
+		if case.pauta == "" and not await _issue_pauta_by_click(main, case, tag):
+			return false
+		if not saved_once and case.stop_index == 1:
+			saved_once = true
+			if not await _save_and_continue(main, case, tag):
+				return false
+			case = GameManager.case
+		if not await _step(main, "VIAJAR", "travel", tag):
+			return false
+		# _settle espera o voo inteiro
+		if not await _step(main, GameData.city(case.route[case.stop_index + 1])["name"].to_upper(), "city", tag):
+			return false
+	await _settle(main)
+	_check(main._current_name == "ending" and case.outcome == CaseState.Outcome.WIN, "capa de vitória (%s): tela %s, desfecho %d" % [tag, main._current_name, case.outcome])
+	_check(saved_once, "salvar e continuar foi exercitado (%s)" % tag)
+	return await _step(main, "NOVO CASO", "briefing", tag)
+
+## Aperta o botão cujo texto começa com `prefix` e espera chegar em `screen`.
+func _step(main: Control, prefix: String, screen: String, tag: String) -> bool:
+	var b: Button = null
+	for c in main._current.find_children("*", "Button", true, false):
+		if c.is_visible_in_tree() and not c.disabled and c.text.begins_with(prefix):
+			b = c
+			break
+	if b == null:
+		_check(false, "botão '%s' na tela %s (%s)" % [prefix, main._current_name, tag])
+		return false
+	_click(b)
+	await _settle(main)
+	if screen == "travel" or main._current_name == screen or main._current_name == "ending":
+		return true
+	_check(false, "'%s' devia levar a %s, foi pra %s (%s)" % [prefix, screen, main._current_name, tag])
+	return false
+
+func _issue_pauta_by_click(main: Control, case: CaseState, tag: String) -> bool:
+	if not await _step(main, "DOSSIÊ", "city", tag):
+		return false
+	for t in GameData.trait_order():
+		var label: String = GameData.trait_value_info(t, case.disguise[t])["label"]
+		if not await _step(main, label, "city", tag):
+			return false
+	if not await _step(main, "EMITIR PAUTA", "city", tag):
+		return false
+	_check(case.pauta == case.disguise["id"], "pauta emitida por clique (%s)" % tag)
+	return await _step(main, "FECHAR", "city", tag)
+
+## U7: pausa → SALVAR E SAIR → título → CONTINUAR CASO devolve o mesmo caso.
+func _save_and_continue(main: Control, case: CaseState, tag: String) -> bool:
+	var before := {"city": case.current_city, "hours": case.clock.hours, "pauta": case.pauta, "dossier": case.dossier.duplicate(),
+		"notes": case.notes.size(), "actions": case.actions.size(), "stop": case.stop_index}
+	if not await _step(main, "MENU", "city", tag):
+		return false
+	if not await _step(main, "SALVAR E SAIR", "title", tag):
+		return false
+	if not await _step(main, "CONTINUAR CASO", "city", tag):
+		return false
+	var back: CaseState = GameManager.case
+	var after := {"city": back.current_city, "hours": back.clock.hours, "pauta": back.pauta, "dossier": back.dossier.duplicate(),
+		"notes": back.notes.size(), "actions": back.actions.size(), "stop": back.stop_index}
+	_check(after == before, "CONTINUAR CASO restaura o caso (%s): %s → %s" % [tag, before, after])
+	return after == before
+
+## --- Spec 007 (T66): entradas hostis na interface ------------------------------------------
+
+## E1 na tela: nome hostil no título e na manchete da capa — nada vaza e o
+## nome entra literal (um "{city}" no nome não vira o nome da cidade).
+func _test_hostile_inputs() -> void:
+	var names := ["W".repeat(Career.MAX_NAME_LENGTH), "{city}", "Ana\nFuro", "[b]Ana[/b]", "%s %d"]
+	for raw in names:
+		GameManager.career = Career.from_dict({"player_name": raw, "cases_solved": 2, "cases_played": 3})
+		var shown: String = raw.c_escape()
+		var title := await _layout_box(load("res://scenes/TitleScreen.tscn").instantiate())
+		_check_fits(title, "título com nome '%s'" % shown)
+		await _free_box(title)
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 5
+		GameManager.case = CaseGenerator.generate(rng, {"route_len": 4})
+		var case: CaseState = GameManager.case
+		case.set_pauta(case.disguise["id"])
+		while not case.is_final_stop():
+			case.travel(case.route[case.stop_index + 1])
+		case.investigate(case.locations_here()[case.hideout_slot])
+		GameManager.last_unlocked = []
+		var end := await _layout_box(load("res://scenes/EndScreen.tscn").instantiate())
+		_check_fits(end, "capa com nome '%s'" % shown)
+		var texts: Array = end.find_children("*", "Label", true, false).map(func(l): return l.text)
+		var clean_name := GameManager.career.player_name
+		_check(texts.any(func(t): return t.contains(clean_name)), "nome '%s' aparece literal na capa" % shown)
+		await _free_box(end)
+	GameManager.career = Career.from_dict({"player_name": "Teste", "cases_solved": 1, "cases_played": 2})
+
+	# E2: caso salvo estragado nunca trava o título nem oferece CONTINUAR
+	var g := RandomNumberGenerator.new()
+	g.seed = 8
+	var good := CaseGenerator.generate(g, {"route_len": 4})
+	good.investigate(good.locations_here()[0])
+	var good_json := JSON.stringify(good.to_save())
+	var many: Array = []
+	for i in 10000:
+		many.append(["d", "hat", ""])
+	var future: Dictionary = good.to_save()
+	future["version"] = 99
+	var bad_saves := [good_json.left(good_json.length() / 2), "\u0000\u0001binário\uFFFD", "[]", "null", "\"texto\"", "{}",
+		JSON.stringify(future), JSON.stringify({"version": 2, "seed": 1, "config": good.config, "actions": many}),
+		"{\"version\": 2, \"seed\": 1e400}", "x".repeat(200000)]
+	for bad in bad_saves:
+		SaveService._memory_case = bad
+		var errors_before := _log.errors.size()
+		_check(SaveService.load_case() == null and not GameManager.has_saved_case(), "save estragado recusado: %s" % bad.left(30).c_escape())
+		var title: Control = await _mount(load("res://scenes/TitleScreen.tscn").instantiate())
+		_check(_find_button(title, "CONTINUAR CASO") == null, "título sem CONTINUAR com save estragado: %s" % bad.left(30).c_escape())
+		title.queue_free()
+		await _frames()
+		# erro de parse do JSON é esperado (o motor reclama); script quebrado não
+		var script_errors: Array = Array(_log.errors.slice(errors_before)).filter(func(e): return not e.contains("JSON"))
+		_check(script_errors.is_empty(), "save estragado sem erro de script: %s" % "; ".join(script_errors))
+		_log.errors.resize(errors_before)
+	SaveService._memory_case = good_json
+	_check(GameManager.has_saved_case(), "save bom continua aceito")
+	SaveService.clear_case()
+
+	# E3: opções no tranco — extremos, mudo 50 vezes, rever dicas e fechar já
+	var s := GameManager.settings
+	var panel := OptionsPanel.new()
+	await _mount(panel)
+	panel.open()
+	await _frames()
+	for slider in panel.find_children("*", "HSlider", true, false):
+		for v in [-50, 0, 100, 1e9, 37]:
+			slider.value = v
+	_check(s.music_volume >= 0.0 and s.music_volume <= 1.0 and s.sfx_volume >= 0.0 and s.sfx_volume <= 1.0, "volumes ficam entre 0 e 100%")
+	var muted_before := s.muted
+	for i in 50:
+		_press(panel, "MUDO" if s.muted else "LIGADO")
+	_check(s.muted == muted_before, "mudo 50 vezes volta ao estado inicial")
+	_press(panel, OptionsPanel.RESET_TEXT)
+	panel.queue_free()
+	await _wait(OptionsPanel.RESET_FEEDBACK_SECONDS + 0.3)
+	_check(true, "rever dicas e fechar na hora não quebra")
+
+## --- Spec 007 (T70): teclado/controle ------------------------------------------------------
+
+## U6: em cada tela e painel, Tab passa por todo botão visível e o foco nunca
+## some; ESC faz o que a tela promete.
+func _test_keyboard() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 13
+	GameManager.case = CaseGenerator.generate(rng, {"route_len": 4})
+	GameManager.settings.text_speed = "instantanea"
+
+	for scene in ["TitleScreen", "BriefingScreen", "CityScreen", "TravelScreen", "CareerScreen", "LeaderboardScreen"]:
+		var node: Control = await _mount(load("res://scenes/%s.tscn" % scene).instantiate())
+		await _frames(3)
+		await _check_tab_cycle(node, scene)
+		node.queue_free()
+		await _frames()
+
+	var city: Control = await _mount(load("res://scenes/CityScreen.tscn").instantiate())
+	await _frames(3)
+	for panel in [["Dossiê", "_open_dossier"], ["Anotações", "_open_notes"], ["Investigar", "_open_investigate"]]:
+		city.call(panel[1])
+		await _frames(3)
+		await _check_tab_cycle(city, panel[0])
+		_escape()
+		await _frames(3)
+		_check(not city._dossier.visible and not city._notes.visible and not city._investigate.visible, "ESC fecha %s" % panel[0])
+		_check(_focus_visible(), "foco visível depois de fechar %s com ESC" % panel[0])
+	_escape()
+	await _frames(3)
+	_check(city._pause.visible, "ESC na cidade abre a pausa")
+	await _check_tab_cycle(city._pause, "Pausa")
+	_escape()
+	await _frames(3)
+	_check(not city._pause.visible and _focus_visible(), "ESC fecha a pausa e devolve o foco")
+	city.queue_free()
+	await _frames()
+
+	var expected_exit := {"TravelScreen": "city", "CareerScreen": "title", "LeaderboardScreen": "title"}
+	for scene in expected_exit:
+		var node: Control = await _mount(load("res://scenes/%s.tscn" % scene).instantiate())
+		await _frames(3)
+		_screens.clear()
+		_escape()
+		await _frames(2)
+		_check(_screens == [expected_exit[scene]], "ESC em %s volta pra %s (%s)" % [scene, expected_exit[scene], _screens])
+		node.queue_free()
+		await _frames()
+
+func _key(keycode: Key) -> void:
+	for pressed in [true, false]:
+		var e := InputEventKey.new()
+		e.keycode = keycode
+		e.physical_keycode = keycode
+		e.pressed = pressed
+		get_viewport().push_input(e)
+
+func _focus_visible() -> bool:
+	var f := get_viewport().gui_get_focus_owner()
+	return f != null and f.is_visible_in_tree()
+
+## Tab dá a volta: começa com foco num controle visível, passa por todos os
+## botões visíveis e habilitados, e nunca cai em controle escondido.
+func _check_tab_cycle(root: Control, what: String) -> void:
+	var targets: Array = root.find_children("*", "BaseButton", true, false).filter(func(b):
+		return b.is_visible_in_tree() and not b.disabled and b.focus_mode != Control.FOCUS_NONE)
+	_check(_focus_visible(), "%s abre com foco num controle visível" % what)
+	if not _focus_visible():
+		targets[0].grab_focus()
+	var reached := {}
+	var lost := ""
+	for i in targets.size() * 2 + 4:
+		var f := get_viewport().gui_get_focus_owner()
+		if f == null or not f.is_visible_in_tree():
+			lost = str(f.get_path()) if f else "nenhum"
+			break
+		reached[f] = true
+		_key(KEY_TAB)
+		await _frames()
+	_check(lost == "", "%s: Tab não perde o foco (%s)" % [what, lost])
+	var missed: Array = targets.filter(func(b): return not reached.has(b)).map(func(b): return b.text if b is Button else b.get_class())
+	_check(missed.is_empty(), "%s: Tab alcança todos os botões (faltou %s)" % [what, missed])
+
+## --- Spec 007 (T68): reentrada e macaco -------------------------------------------------
+
+## Clique de mouse de verdade no centro do controle (passa pelos overlays e
+## pelo mouse_filter como um toque real). Fica dentro do Godot — não manda
+## tecla nem clique pra janela nenhuma do sistema.
+func _click(c: Control) -> void:
+	var pos := c.get_global_rect().get_center()
+	var motion := InputEventMouseMotion.new()
+	motion.position = pos
+	get_viewport().push_input(motion, true)
+	for pressed in [true, false]:
+		var e := InputEventMouseButton.new()
+		e.button_index = MOUSE_BUTTON_LEFT
+		e.position = pos
+		e.pressed = pressed
+		get_viewport().push_input(e, true)
+
+func _escape() -> void:
+	for pressed in [true, false]:
+		var e := InputEventKey.new()
+		e.keycode = KEY_ESCAPE
+		e.physical_keycode = KEY_ESCAPE
+		e.pressed = pressed
+		get_viewport().push_input(e)
+
+func _button_starting(root: Node, prefix: String) -> Button:
+	for b in root.find_children("*", "Button", true, false):
+		if b.is_visible_in_tree() and b.text.begins_with(prefix):
+			return b
+	return null
+
+## U3: toque duplo e pedidos repetidos não duplicam ação.
+func _test_reentrancy() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 21
+	GameManager.case = CaseGenerator.generate(rng, {"route_len": 4})
+	var case: CaseState = GameManager.case
+
+	# viagem: dois toques no destino durante a decolagem = um voo só
+	var travel: Control = await _mount(load("res://scenes/TravelScreen.tscn").instantiate())
+	var dest: String = case.travel_options()[0]
+	var b := _button_starting(travel, GameData.city(dest)["name"].to_upper())
+	_check(b != null, "botão do destino na viagem")
+	if b:
+		var before := case.actions.size()
+		_click(b)
+		await _frames()
+		_click(b)
+		await _wait(WorldMapView.FLIGHT_SECONDS + 0.5)
+		_check(case.actions.size() == before + 1, "toque duplo na viagem = uma ação (%d)" % (case.actions.size() - before))
+	travel.queue_free()
+	await _frames()
+
+	# fala: CONTINUAR apertado várias vezes durante a digitação
+	GameManager.settings.text_speed = "lenta"
+	var city: Control = await _mount(load("res://scenes/CityScreen.tscn").instantiate())
+	city._on_location_chosen(case.locations_here()[0])
+	var acted := case.actions.size()
+	for i in 4:
+		var cont := _find_button(city, "CONTINUAR >")
+		if cont:
+			_click(cont)
+		await _frames()
+	_check(case.actions.size() == acted, "CONTINUAR repetido não gera ação")
+	GameManager.settings.text_speed = "instantanea"
+	city.queue_free()
+	await _frames()
+
+	# NOVO CASO duas vezes com o servidor lento = um caso só
+	var starts := [0]
+	Online.mock = func(_m, path, _body):
+		await get_tree().create_timer(0.3).timeout
+		if path == "/runs/start":
+			starts[0] += 1
+		return {"ok": false, "status": 503, "data": null}
+	_screens.clear()
+	GameManager.start_new_case()
+	GameManager.start_new_case()
+	await _wait(0.8)
+	_check(starts[0] == 1 and _screens.count("briefing") == 1, "NOVO CASO repetido abre um caso só (%d pedidos, %d telas)" % [starts[0], _screens.count("briefing")])
+	Online.mock = Callable()
+
+## U2: cliques aleatórios em botões reais da árvore inteira (Main troca as
+## telas), nas 3 orientações. A cada passo: sem erro do motor, tela atual
+## válida, no máximo um overlay aberto, foco nunca num controle escondido.
+const MONKEY_STEPS := 400
+const MONKEY_SKIP := ["SAIR", "SIM (F11)", "NÃO (F11)"]
+## Saídas do caso: evitadas na maioria das vezes, senão o macaco quase nunca
+## chega ao fim de um caso.
+const MONKEY_EXITS := ["ABANDONAR CASO", "SALVAR E SAIR", "DESISTIR"]
+
+func _test_monkey() -> void:
+	for run in [[101, 0], [202, 1], [303, -1]]:
+		Responsive.forced = run[1]
+		SaveService.clear_case()
+		GameManager.settings = Settings.new()
+		GameManager.settings.text_speed = "instantanea"
+		GameManager.career = Career.from_dict({"player_name": "Macaco", "cases_solved": run[0] % 7, "cases_played": 9})
+		var main: Control = load("res://scenes/Main.tscn").instantiate()
+		add_child(main)
+		await _wait(0.5)
+		var r := RandomNumberGenerator.new()
+		r.seed = run[0]
+		var trail: Array = []
+		var problem := ""
+		var step := 0
+		var visited := {}
+		while step < MONKEY_STEPS and problem == "":
+			var errors_before := _log.errors.size()
+			trail.append(await _monkey_step(main, r))
+			if trail.size() > 6:
+				trail.pop_front()
+			await _settle(main)
+			problem = _monkey_problem(main)
+			visited[main._current_name] = true
+			if _log.errors.size() > errors_before:
+				problem = "erro do motor: " + _log.errors[errors_before]
+			step += 1
+		print("macaco %d: %d passos, telas %s" % [run[0], step, visited.keys()])
+		_check(visited.has("city") and visited.has("travel"), "macaco %d chegou na cidade e na viagem" % run[0])
+		_check(problem == "", "macaco (semente %d, orientação %d) passo %d: %s — últimos: %s" % [run[0], run[1], step - 1, problem, " > ".join(trail)])
+		main.queue_free()
+		await _frames(3)
+	Responsive.forced = -1
+	get_window().content_scale_size = Responsive.LANDSCAPE_SIZE
+	GameManager.career = Career.from_dict({"player_name": "Teste", "cases_solved": 1, "cases_played": 2})
+	GameManager.settings = Settings.new()
+	GameManager.settings.tips_enabled = false
+
+func _monkey_step(main: Control, r: RandomNumberGenerator) -> String:
+	if r.randi_range(0, 9) == 0:
+		_escape()
+		return "ESC@" + main._current_name
+	var candidates: Array = main.find_children("*", "BaseButton", true, false).filter(func(b):
+		return b.is_visible_in_tree() and not b.disabled and not MONKEY_SKIP.has(b.text))
+	if r.randi_range(0, 9) > 0:
+		candidates = candidates.filter(func(b): return not MONKEY_EXITS.has(b.text))
+	if candidates.is_empty():
+		await _wait(0.3)
+		return "(esperou)"
+	var b: BaseButton = candidates[r.randi_range(0, candidates.size() - 1)]
+	var label: String = b.text.replace("\n", " ") if b is Button else b.get_class()
+	_click(b)
+	return "%s@%s" % [label, main._current_name]
+
+## Espera a troca de tela (fade) e o voo terminarem.
+func _settle(main: Control) -> void:
+	await _frames(3)
+	var waited := 0.0
+	while (main._switching or _flying(main)) and waited < 4.0:
+		await _wait(0.1)
+		waited += 0.1
+
+func _flying(main: Control) -> bool:
+	return is_instance_valid(main._current) and main._current_name == "travel" and main._current._target != ""
+
+func _monkey_problem(main: Control) -> String:
+	if not is_instance_valid(main._current) or not main._current.is_inside_tree():
+		return "sem tela atual"
+	var overlays: Array = main.find_children("*", "Overlay", true, false).filter(func(o): return o.is_visible_in_tree())
+	if overlays.size() > 1:
+		return "%d overlays abertos" % overlays.size()
+	var focus := get_viewport().gui_get_focus_owner()
+	if focus and not focus.is_visible_in_tree():
+		return "foco em controle escondido: %s" % focus.get_path()
+	if main._current_name in ["city", "travel", "briefing"]:
+		# caso encerrado na cidade só enquanto a última fala está na tela
+		var speaking: bool = main._current_name == "city" and main._current._witness.visible
+		if GameManager.case == null or (GameManager.case.is_over() and not speaking):
+			return "tela %s sem caso em andamento" % main._current_name
+	return ""
 
 ## --- Online (respostas do servidor simuladas) ------------------------------------------
 

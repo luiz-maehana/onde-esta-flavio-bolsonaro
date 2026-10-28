@@ -219,7 +219,7 @@ func set_pauta(disguise_id: String) -> bool:
 	return true
 
 func set_dossier(trait_key: String, value: String) -> bool:
-	if not GameData.trait_order().has(trait_key):
+	if is_over() or not GameData.trait_order().has(trait_key):
 		return false
 	if value != "" and not GameData.trait_values(trait_key).has(value):
 		return false

@@ -32,14 +32,38 @@ func _build() -> void:
 	col.add_child(UiTheme.headline("DOSSIÊ DO DISFARCE", 18, Palette.RED))
 	col.add_child(UiTheme.body("Marque o que as testemunhas contaram. Com um único disfarce possível, emita a pauta.", 26, Palette.GREY))
 
+	# características e compatíveis rolam (celular em pé, botões de 48 px
+	# reais); pauta e botões de ação ficam sempre à vista embaixo
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.follow_focus = true
+	col.add_child(scroll)
+	var list := VBoxContainer.new()
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	list.add_theme_constant_override("separation", 10)
+	scroll.add_child(list)
+
+	# deitado: rótulo à esquerda e botões na linha; em pé: rótulo em cima e
+	# botões quebrando linha
+	var portrait := Responsive.is_portrait()
 	for trait_key in GameData.trait_order():
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 8)
-		col.add_child(row)
 		var name_label := UiTheme.body(GameData.trait_label(trait_key).to_upper(), 28)
-		name_label.custom_minimum_size.x = 170
 		name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-		row.add_child(name_label)
+		var row: Container
+		if portrait:
+			list.add_child(name_label)
+			var flow := HFlowContainer.new()
+			flow.add_theme_constant_override("h_separation", 8)
+			flow.add_theme_constant_override("v_separation", 8)
+			row = flow
+		else:
+			var line := HBoxContainer.new()
+			line.add_theme_constant_override("separation", 8)
+			name_label.custom_minimum_size.x = 170
+			line.add_child(name_label)
+			row = line
+		list.add_child(row)
 		var group := ButtonGroup.new()
 		var values: Array = [""] + GameData.trait_values(trait_key)
 		for value in values:
@@ -60,7 +84,7 @@ func _build() -> void:
 				_first_button = b
 
 	_matches_label = UiTheme.body("", 28)
-	col.add_child(_matches_label)
+	list.add_child(_matches_label)
 	_pauta_label = UiTheme.headline("", 14)
 	col.add_child(_pauta_label)
 

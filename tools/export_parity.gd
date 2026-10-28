@@ -7,9 +7,12 @@ extends SceneTree
 
 const OUT := "res://server/test/vectors.json"
 const CASES := 400
+## Saves que o Godot recusa ao refazer (spec 007, S1): o servidor tem que
+## recusar os mesmos.
+const REJECTS := 120
 
 func _initialize() -> void:
-	var out := {"rng": [], "hash": [], "cases": []}
+	var out := {"rng": [], "hash": [], "cases": [], "rejects": []}
 	for seed in [1, 2, 42, 12345, 2147483647, 987654321]:
 		var r := RandomNumberGenerator.new()
 		r.seed = seed
@@ -44,9 +47,22 @@ func _initialize() -> void:
 				"options": s.travel_options() if not s.is_over() else [],
 			},
 		})
+	for i in REJECTS:
+		var g := RandomNumberGenerator.new()
+		g.seed = 7 + i * 7919
+		var s := CaseGenerator.generate(g, CaseGenerator.config_for_rank(ranks[i % ranks.size()]))
+		var play := RandomNumberGenerator.new()
+		play.seed = 500000 + i
+		_play(s, play, i % 2 == 0)
+		var actions: Array = s.actions.duplicate(true)
+		actions.append(_bad_action(s, i % 6))
+		var save := {"version": CaseState.SAVE_VERSION, "seed": s.case_seed, "config": s.config, "actions": actions}
+		if CaseState.from_save(save) != null:
+			push_error("parity: vetor de recusa %d foi aceito pelo Godot" % i)
+		out["rejects"].append({"seed": s.case_seed, "config": s.config, "actions": actions, "kind": i % 6})
 	var f := FileAccess.open(ProjectSettings.globalize_path(OUT), FileAccess.WRITE)
 	f.store_string(JSON.stringify(out))
-	print("parity: %d rng, %d hash, %d casos" % [out["rng"].size(), out["hash"].size(), out["cases"].size()])
+	print("parity: %d rng, %d hash, %d casos, %d recusas" % [out["rng"].size(), out["hash"].size(), out["cases"].size(), out["rejects"].size()])
 	quit()
 
 ## Metade "esperta" (segue a trilha, emite a pauta certa, às vezes erra
@@ -88,3 +104,21 @@ func _play(s: CaseState, r: RandomNumberGenerator, smart: bool) -> void:
 			else:
 				var ds := GameData.disguises()
 				s.set_pauta(ds[r.randi_range(0, ds.size() - 1)]["id"])
+
+## Uma ação que não pode ser refeita a partir do estado `s`.
+func _bad_action(s: CaseState, kind: int) -> Array:
+	var after_end := s.is_over()
+	match kind:
+		0:  # depois do fim (ou destino fora das opções, se o caso não acabou)
+			if after_end:
+				return ["i", GameData.flavor()["locations"].keys()[0]]
+			return ["t", GameData.cities().filter(func(c): return not s.travel_options().has(c["id"]))[0]["id"]]
+		1:
+			return ["i", "cofre_do_banco"]
+		2:
+			return ["d", "hat", "coroa"] if not after_end else ["d", "hat", ""]
+		3:
+			return ["p", "disfarce_falso"]
+		4:
+			return ["x", "y"]
+	return ["t"]

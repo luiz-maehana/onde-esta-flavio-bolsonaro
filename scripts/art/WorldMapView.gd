@@ -15,19 +15,28 @@ var highlighted_id := ""
 var trail_ids: Array = []
 ## Cidade sob o mouse/toque (RF33): mostra nome e país.
 var hovered_id := ""
+## Em pé (RF36): mostra só a região da origem, destinos e trilha, sem
+## esticar (mesmos graus por pixel nos dois eixos).
+var crop_to_cities := false
 
 const HOVER_RADIUS := 14.0
 const FLAG_SIZE := Vector2(30, 20)
+## Folga em graus em volta das cidades no recorte.
+const CROP_PADDING := 14.0
+const WORLD := Rect2(-180.0, -LAT_TOP, 360.0, LAT_TOP - LAT_BOTTOM)
 
 var _flight_to := ""
 var _flight_t := -1.0
 var _pulse := 0.0
 ## Etiquetas já desenhadas neste quadro — as seguintes desviam delas.
 var _placed: Array[Rect2] = []
+## Janela visível em graus: x = longitude, y = -latitude.
+var _view := WORLD
 
 func _ready() -> void:
 	clip_contents = true
-	resized.connect(queue_redraw)
+	resized.connect(_update_view)
+	_update_view()
 
 func _process(delta: float) -> void:
 	_pulse = fmod(_pulse + delta * 3.0, TAU)
@@ -43,7 +52,31 @@ func fly_to(city_id: String) -> void:
 	_flight_t = 0.0
 
 func project(lon: float, lat: float) -> Vector2:
-	return Vector2((lon + 180.0) / 360.0 * size.x, (LAT_TOP - lat) / (LAT_TOP - LAT_BOTTOM) * size.y)
+	return Vector2((lon - _view.position.x) / _view.size.x * size.x, (-lat - _view.position.y) / _view.size.y * size.y)
+
+func _update_view() -> void:
+	_view = _crop_view() if crop_to_cities and size.x > 0 and size.y > 0 else WORLD
+	queue_redraw()
+
+## Caixa das cidades com folga, alargada até a proporção do controle e
+## mantida dentro do mapa.
+func _crop_view() -> Rect2:
+	var ids: Array = [origin_id] + option_ids + trail_ids
+	var c := GameData.city(ids[0])
+	var box := Rect2(float(c["lon"]), -float(c["lat"]), 0, 0)
+	for id in ids:
+		c = GameData.city(id)
+		box = box.expand(Vector2(float(c["lon"]), -float(c["lat"])))
+	box = box.grow(CROP_PADDING)
+	var ratio := size.x / size.y
+	var center := box.get_center()
+	if box.size.x / box.size.y < ratio:
+		box.size.x = box.size.y * ratio
+	else:
+		box.size.y = box.size.x / ratio
+	box.size = box.size.min(WORLD.size)
+	box.position = (center - box.size / 2).clamp(WORLD.position, WORLD.end - box.size)
+	return box
 
 func _city_pos(id: String) -> Vector2:
 	var c := GameData.city(id)

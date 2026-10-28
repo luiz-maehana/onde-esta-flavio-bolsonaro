@@ -27,7 +27,7 @@ godot --headless --path . --script res://tools/build_audio.gd  # regera música/
 godot --headless --path . --script res://tools/build_icon.gd   # regera ícone
 godot --headless --path . --script res://tools/build_portrait_sheet.gd  # build/portraits.png com todos os retratos
 godot --headless --path . --script res://tools/build_og.gd    # imagem de compartilhamento (assets/web/og.jpg)
-godot --path . res://tools/RenderPreview.tscn              # PNG de cada tela em build/preview/
+godot --path . res://tools/RenderPreview.tscn              # PNG de cada tela em build/preview/<tamanho>/ (PC, celular deitado e em pé)
 godot --headless --path . --export-release "Windows Desktop" build/OndeEstaFlavio.exe
 ```
 
@@ -91,6 +91,9 @@ No jogo, `Online` (autoload) desliga sozinho em `res://tests` e
 - Fontes: Pixelify Sans Bold (títulos/botões), VT323 (texto), Press Start 2P
   só em logotipo sem acento ("O FURO", "F.U.R.O.") — os acentos maiúsculos
   dela somem.
+- Celular (spec 006): telas montam o arranjo por `Responsive` (orientação,
+  alvo de toque de 48 px reais, escala de texto). O teste "cabe na tela"
+  simula PC e celular de 360 px; layout novo tem que passar nele.
 - Pixel art com `TEXTURE_FILTER_NEAREST`; arte do título é a exceção
   (ilustração, filtro linear).
 - Ferramentas de asset ficam em `tools/build_*.gd`, guardadas e rodáveis.

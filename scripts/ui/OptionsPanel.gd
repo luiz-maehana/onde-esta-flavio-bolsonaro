@@ -10,13 +10,23 @@ const TIPS_OFF := "DESLIGADAS"
 const RESET_TEXT := "REVER DICAS"
 const RESET_DONE_TEXT := "DICAS REATIVADAS"
 const RESET_FEEDBACK_SECONDS := 1.5
+const WEB_FULLSCREEN_ON := "SIM"
+const WEB_FULLSCREEN_OFF := "NÃO"
+## Folga entre o painel e as bordas da tela (bordas + respiro).
+const MARGIN_TO_SCREEN := 90.0
 const RANKING_NOTE := "Ranking online: envia o nome do repórter, a pontuação e um código aleatório do aparelho. Nenhum dado pessoal."
 
 var _first: Control
+## Botão de tela cheia da versão Web (null fora dela).
+var _web_fullscreen: Button
+
+func _ready() -> void:
+	# entrar/sair da tela cheia (inclusive pelo Esc do navegador) redimensiona
+	get_tree().root.size_changed.connect(_sync_web_fullscreen)
 
 func _init() -> void:
 	add_theme_stylebox_override("panel", UiTheme.box(Palette.PAPER))
-	custom_minimum_size = Vector2(720, 0)
+	custom_minimum_size = Vector2(660 if Responsive.is_portrait() else 720, 0)
 
 func open() -> void:
 	for child in get_children():
@@ -27,10 +37,20 @@ func open() -> void:
 
 func _build() -> void:
 	var s := GameManager.settings
+	# título e rodapé fixos; as opções rolam se não couberem (celular deitado,
+	# com botões de 48 px reais)
+	var outer := VBoxContainer.new()
+	outer.add_theme_constant_override("separation", 14)
+	add_child(outer)
+	outer.add_child(UiTheme.headline("OPÇÕES", 20, Palette.RED))
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.follow_focus = true
+	outer.add_child(scroll)
 	var col := VBoxContainer.new()
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.add_theme_constant_override("separation", 14)
-	add_child(col)
-	col.add_child(UiTheme.headline("OPÇÕES", 20, Palette.RED))
+	scroll.add_child(col)
 
 	_first = _slider_row(col, "MÚSICA", s.music_volume, func(v):
 		s.music_volume = v
@@ -46,6 +66,13 @@ func _build() -> void:
 		_row(col, "TELA CHEIA", UiTheme.toggle("SIM (F11)", "NÃO (F11)", s.fullscreen, func(on):
 			s.fullscreen = on
 			GameManager.save_settings()))
+	elif not OS.has_feature("web_ios"):
+		# navegador: tela cheia só a partir de um clique (não dá pra religar ao
+		# abrir o jogo), então não é salva; o botão mostra o estado real, já que
+		# Esc no navegador também sai. Safari do iPhone não tem tela cheia.
+		_web_fullscreen = UiTheme.toggle(WEB_FULLSCREEN_ON, WEB_FULLSCREEN_OFF, _is_fullscreen(), func(on):
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if on else DisplayServer.WINDOW_MODE_WINDOWED))
+		_row(col, "TELA CHEIA", _web_fullscreen)
 
 	var speeds := HBoxContainer.new()
 	speeds.add_theme_constant_override("separation", 8)
@@ -91,12 +118,43 @@ func _build() -> void:
 	_row(col, "RANKING", ranking)
 	col.add_child(UiTheme.body(RANKING_NOTE, 22, Palette.GREY))
 
+	var footer := HBoxContainer.new()
+	outer.add_child(footer)
+	var version := UiTheme.body(version_text(), 22, Palette.GREY)
+	version.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	version.size_flags_vertical = Control.SIZE_SHRINK_END
+	footer.add_child(version)
 	var close := UiTheme.button("FECHAR", Vector2(180, 52))
-	close.size_flags_horizontal = Control.SIZE_SHRINK_END
 	close.pressed.connect(func():
 		visible = false
 		closed.emit())
-	col.add_child(close)
+	footer.add_child(close)
+	_fit_height(outer, scroll, col)
+
+## Rolagem só com a altura que faltar: mede um quadro depois de montar (antes
+## disso o Godot ainda não calculou o tamanho do texto).
+func _fit_height(outer: Control, scroll: ScrollContainer, col: Control) -> void:
+	scroll.custom_minimum_size.y = Responsive.base_size().y / 2.0
+	await get_tree().process_frame
+	if not is_instance_valid(scroll):
+		return
+	var fixed := outer.get_combined_minimum_size().y - scroll.get_combined_minimum_size().y
+	scroll.custom_minimum_size.y = minf(col.get_combined_minimum_size().y, Responsive.base_size().y - MARGIN_TO_SCREEN - fixed)
+
+static func _is_fullscreen() -> bool:
+	return DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+
+## Botão da Web acompanha o estado real da janela.
+func _sync_web_fullscreen() -> void:
+	if is_instance_valid(_web_fullscreen):
+		_web_fullscreen.set_pressed_no_signal(_is_fullscreen())
+		_web_fullscreen.text = WEB_FULLSCREEN_ON if _is_fullscreen() else WEB_FULLSCREEN_OFF
+
+## Versão do jogo: o CI grava `git describe` (tag + commits depois + hash)
+## em application/config/version antes de exportar — diz qual código está no
+## ar. Rodando local é "dev".
+static func version_text() -> String:
+	return "Versão " + str(ProjectSettings.get_setting("application/config/version", "dev"))
 
 ## Rever dicas: zera as vistas e religa as dicas — o botão de liga/desliga ao
 ## lado passa a mostrar LIGADAS, e o próprio botão confirma por um instante
@@ -109,13 +167,15 @@ func _reset_tips(tips_toggle: Button, reset: Button) -> void:
 	tips_toggle.set_pressed_no_signal(true)
 	tips_toggle.text = TIPS_ON
 	reset.text = RESET_DONE_TEXT
-	get_tree().create_timer(RESET_FEEDBACK_SECONDS).timeout.connect(func():
-		if is_instance_valid(reset):
-			reset.text = RESET_TEXT)
+	# tween preso ao botão: some junto se o painel fechar antes
+	var tween := reset.create_tween()
+	tween.tween_interval(RESET_FEEDBACK_SECONDS)
+	tween.tween_callback(func(): reset.text = RESET_TEXT)
 
+## Rótulo à esquerda (deitado) ou em cima (em pé).
 func _row(col: VBoxContainer, label: String, control: Control) -> void:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 16)
+	var row := Responsive.flow_box()
+	row.add_theme_constant_override("separation", 4 if Responsive.is_portrait() else 16)
 	var l := UiTheme.body(label, 30)
 	l.custom_minimum_size.x = 170
 	l.autowrap_mode = TextServer.AUTOWRAP_OFF

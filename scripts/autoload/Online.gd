@@ -26,7 +26,8 @@ var online_count := -1
 var device_id := ""
 var session_id := ""
 ## Testes desligam a rede ou trocam as respostas por um Callable
-## (method, path, body) -> {"ok", "status", "data"}.
+## (method, path, body) -> {"ok", "status", "data"} — pode ser corrotina
+## (servidor lento).
 var enabled := true
 var mock := Callable()
 
@@ -100,7 +101,7 @@ func leaderboard(period: String) -> Dictionary:
 
 func _request(method: int, path: String, body: Dictionary) -> Dictionary:
 	if mock.is_valid():
-		return mock.call(method, path, body)
+		return await mock.call(method, path, body)
 	if not enabled:
 		return {"ok": false, "status": 0, "data": null}
 	var http := HTTPRequest.new()

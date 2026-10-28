@@ -31,13 +31,13 @@ func _init() -> void:
 	row.add_child(place_col)
 
 	var clock_col := VBoxContainer.new()
-	clock_col.custom_minimum_size.x = 300
+	clock_col.custom_minimum_size.x = 210 if Responsive.is_portrait() else 300
 	_clock = UiTheme.headline("", 16)
 	_clock.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	clock_col.add_child(_clock)
 	_deadline = ProgressBar.new()
 	_deadline.show_percentage = false
-	_deadline.custom_minimum_size = Vector2(300, 16)
+	_deadline.custom_minimum_size = Vector2(210 if Responsive.is_portrait() else 300, 16)
 	_deadline.max_value = 1.0
 	_deadline.add_theme_stylebox_override("background", UiTheme.box(Palette.PAPER_DARK, Vector2.ZERO))
 	clock_col.add_child(_deadline)

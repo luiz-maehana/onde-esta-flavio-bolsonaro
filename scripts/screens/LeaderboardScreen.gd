@@ -3,6 +3,10 @@ extends Control
 ## entradas (mesmo aparelho) aparecem destacadas.
 
 const COLUMNS := [["#", 50], ["REPÓRTER", 300], ["CARGO", 230], ["PONTOS", 120], ["HORAS", 100], ["ONDE", 200]]
+## Em pé (RF36) cabem só estas colunas (índices de COLUMNS).
+const PORTRAIT_COLUMNS := [0, 1, 3, 4]
+
+var _columns: Array
 
 var _list: VBoxContainer
 var _status: Label
@@ -15,9 +19,12 @@ func _ready() -> void:
 	var page := NewspaperPage.new()
 	add_child(page)
 	page.set_texts("CLASSIFICADOS DA REDAÇÃO", "RANKING DOS REPÓRTERES")
+	_columns = PORTRAIT_COLUMNS if Responsive.is_portrait() else range(COLUMNS.size())
 
-	var tabs := HBoxContainer.new()
-	tabs.add_theme_constant_override("separation", 10)
+	# quebra linha em pé: o selo de online desce pra baixo das abas
+	var tabs := HFlowContainer.new()
+	tabs.add_theme_constant_override("h_separation", 10)
+	tabs.add_theme_constant_override("v_separation", 10)
 	var group := ButtonGroup.new()
 	group.allow_unpress = false
 	for t in [["week", "DA SEMANA"], ["all", "GERAL"]]:
@@ -85,7 +92,7 @@ func _load() -> void:
 func _row(values: Array, color: Color, header: bool) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
-	for i in values.size():
+	for i in _columns:
 		var l := UiTheme.headline(str(values[i]), 12, color) if header else UiTheme.body(str(values[i]), 26, color)
 		l.custom_minimum_size.x = COLUMNS[i][1]
 		l.clip_text = true

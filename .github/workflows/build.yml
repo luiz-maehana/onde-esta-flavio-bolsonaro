@@ -35,6 +35,8 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
+          # histórico e tags pro git describe (versão mostrada nas Opções)
+          fetch-depth: 0
 
       - name: Cache do Godot e templates
         id: cache-godot
@@ -63,6 +65,15 @@ jobs:
           cp ~/godot-cache/templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
           sudo ln -s ~/godot-cache/Godot_v${GODOT_VERSION}-stable_linux.x86_64 /usr/local/bin/godot
 
+      - name: Versão do jogo
+        # tag + commits depois dela + hash (ex.: v1.0.1-3-gb71595d): aparece nas
+        # Opções e diz exatamente qual código está publicado
+        run: |
+          VERSION=$(git describe --tags --always)
+          sed -i "s|^config/version=.*|config/version=\"$VERSION\"|" project.godot
+          grep -qF "config/version=\"$VERSION\"" project.godot
+          echo "Versão: $VERSION"
+
       - name: Importar assets
         run: timeout 600 godot --headless --path . --import
 
@@ -85,7 +96,8 @@ jobs:
       - name: Testes de interface
         run: |
           set -o pipefail
-          timeout 300 godot --headless --path . res://tests/UiTests.tscn 2>&1 | tee ui.log
+          # ~3 min local (macaco, voos e fades em tempo real); folga pro runner
+          timeout 600 godot --headless --path . res://tests/UiTests.tscn 2>&1 | tee ui.log
           ! grep -q "SCRIPT ERROR" ui.log
 
       - name: Exportar Web

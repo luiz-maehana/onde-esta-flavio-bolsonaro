@@ -39,16 +39,18 @@ func _ready() -> void:
 	_map.origin_id = _case.current_city
 	_map.option_ids = _case.travel_options()
 	_map.trail_ids = _case.route.slice(0, _case.stop_index + 1)
+	_map.crop_to_cities = Responsive.is_portrait()
 	_map.flight_finished.connect(_on_landed)
 	frame.add_child(_map)
 	page.add_child(frame)
 
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 14)
+	var portrait := Responsive.is_portrait()
+	var row := Responsive.flow_box()
+	row.add_theme_constant_override("separation", 10 if portrait else 14)
 	page.add_child(row)
 	for id in _case.travel_options():
 		var city := GameData.city(id)
-		var b := UiTheme.button("%s\n%dh de voo" % [city["name"].to_upper(), _case.travel_hours(id)], Vector2(0, 84))
+		var b := UiTheme.button("%s\n%dh de voo" % [city["name"].to_upper(), _case.travel_hours(id)], Vector2(0, 76 if portrait else 84))
 		b.add_theme_font_size_override("font_size", UiTheme.scaled(12))
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.focus_entered.connect(_highlight.bind(id))
@@ -56,7 +58,7 @@ func _ready() -> void:
 		b.pressed.connect(_depart.bind(id))
 		row.add_child(b)
 		_buttons.append(b)
-	var stay := UiTheme.button("FICAR", Vector2(150, 84))
+	var stay := UiTheme.button("FICAR", Vector2(0 if portrait else 150, 76 if portrait else 84))
 	stay.pressed.connect(GameManager.go_to_city)
 	row.add_child(stay)
 	_buttons.append(stay)

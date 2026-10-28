@@ -3,10 +3,12 @@ extends Control
 ## Esqueleto de capa de jornal reutilizado pelo briefing (US3) e pelo
 ## desfecho (US9): papel, cabeçalho "O FURO", manchete, coluna de texto à
 ## esquerda, foto à direita e uma linha de botões. Quem usa só preenche.
+## Em pé (RF36): uma coluna só, foto em cima; botões quebram linha. O
+## miolo rola se não couber.
 
 var body_column: VBoxContainer
 var photo_column: VBoxContainer
-var actions: HBoxContainer
+var actions: Container
 var _headline: Label
 var _edition: Label
 
@@ -19,8 +21,9 @@ func _init() -> void:
 
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var portrait := Responsive.is_portrait()
 	for side in ["left", "right"]:
-		margin.add_theme_constant_override("margin_" + side, 56)
+		margin.add_theme_constant_override("margin_" + side, 24 if portrait else 56)
 	margin.add_theme_constant_override("margin_top", 18)
 	margin.add_theme_constant_override("margin_bottom", 22)
 	add_child(margin)
@@ -43,21 +46,35 @@ func _init() -> void:
 	page.add_child(_headline)
 	page.add_child(_rule(2))
 
-	var columns := HBoxContainer.new()
+	var columns := Responsive.flow_box()
 	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	columns.add_theme_constant_override("separation", 36)
-	page.add_child(columns)
+	columns.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	columns.add_theme_constant_override("separation", 20 if portrait else 36)
+	# rola nas duas orientações: capa com história longa + conquistas passa
+	# da altura da tela até deitado
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	page.add_child(scroll)
+	scroll.add_child(columns)
 	body_column = VBoxContainer.new()
 	body_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body_column.add_theme_constant_override("separation", 14)
-	columns.add_child(body_column)
 	photo_column = VBoxContainer.new()
 	photo_column.add_theme_constant_override("separation", 8)
-	columns.add_child(photo_column)
+	if portrait:
+		photo_column.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		columns.add_child(photo_column)
+		columns.add_child(body_column)
+	else:
+		columns.add_child(body_column)
+		columns.add_child(photo_column)
 
-	actions = HBoxContainer.new()
-	actions.alignment = BoxContainer.ALIGNMENT_END
-	actions.add_theme_constant_override("separation", 16)
+	var flow := HFlowContainer.new()
+	flow.alignment = FlowContainer.ALIGNMENT_END
+	flow.add_theme_constant_override("h_separation", 16)
+	flow.add_theme_constant_override("v_separation", 12)
+	actions = flow
 	page.add_child(actions)
 
 func set_texts(edition: String, headline: String) -> void:

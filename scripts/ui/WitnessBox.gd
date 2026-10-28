@@ -10,6 +10,7 @@ signal finished
 var _portrait: TextureRect
 var _role: Label
 var _text: Label
+var _scroll: ScrollContainer
 var _continue: Button
 var _shown := 0.0
 var _typing := false
@@ -34,9 +35,14 @@ func _init() -> void:
 	row.add_child(col)
 	_role = UiTheme.headline("", 16, Palette.RED)
 	col.add_child(_role)
+	# fala longa rola dentro da caixa em vez de empurrar o botão pra fora
+	_scroll = ScrollContainer.new()
+	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	col.add_child(_scroll)
 	_text = UiTheme.body("", 32)
-	_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.add_child(_text)
+	_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll.add_child(_text)
 	_continue = UiTheme.button("CONTINUAR >", Vector2(260, 48))
 	_continue.size_flags_horizontal = Control.SIZE_SHRINK_END
 	_continue.pressed.connect(_on_continue)
@@ -48,6 +54,7 @@ func show_speech(role: String, text: String, portrait: Texture2D) -> void:
 	_portrait.texture = portrait
 	_shown = 0.0
 	_text.visible_characters = 0
+	_scroll.scroll_vertical = 0
 	_typing = true
 	visible = true
 	_continue.grab_focus()

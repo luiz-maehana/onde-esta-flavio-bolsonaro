@@ -25,6 +25,9 @@ var _last_result: Dictionary = {}
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_case = GameManager.case
+	# remontada ao girar o aparelho durante a última fala: o caso já acabou
+	if _case.is_over():
+		GameManager.finish_case.call_deferred()
 	_build()
 	_refresh()
 	_show_info(GameManager.arrival_messages)
@@ -50,13 +53,15 @@ func _build() -> void:
 	_header = NewsHeader.new()
 	page.add_child(_header)
 
-	var body := HBoxContainer.new()
+	var portrait := Responsive.is_portrait()
+	var body := Responsive.flow_box()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 16)
 	page.add_child(body)
 
 	var left := Control.new()
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_child(left)
 
 	_scene_area = VBoxContainer.new()
@@ -74,7 +79,7 @@ func _build() -> void:
 	_scene_area.add_child(sky_frame)
 
 	var bottom := Control.new()
-	bottom.custom_minimum_size.y = 250
+	bottom.custom_minimum_size.y = 420 if portrait else 250
 	_scene_area.add_child(bottom)
 	_info_panel = UiTheme.panel()
 	_info_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -101,9 +106,19 @@ func _build() -> void:
 	_notes.closed.connect(_back_to_actions)
 	left.add_child(_notes)
 
-	var actions := VBoxContainer.new()
-	actions.custom_minimum_size.x = 300
-	actions.add_theme_constant_override("separation", 14)
+	# deitado: coluna à direita; em pé: grade de 3 embaixo
+	var actions: Container
+	if portrait:
+		var grid := GridContainer.new()
+		grid.columns = 3
+		grid.add_theme_constant_override("h_separation", 10)
+		grid.add_theme_constant_override("v_separation", 10)
+		actions = grid
+	else:
+		var column := VBoxContainer.new()
+		column.custom_minimum_size.x = 300
+		column.add_theme_constant_override("separation", 14)
+		actions = column
 	body.add_child(actions)
 	var defs := [
 		["INVESTIGAR", _open_investigate],
@@ -113,23 +128,28 @@ func _build() -> void:
 	]
 	for d in defs:
 		var b := UiTheme.button(d[0], Vector2(0, 76))
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.pressed.connect(d[1])
 		actions.add_child(b)
 		_actions.append(b)
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	actions.add_child(spacer)
-	var portrait_frame := PanelContainer.new()
-	portrait_frame.add_theme_stylebox_override("panel", UiTheme.box(Palette.PAPER_DARK))
-	var face := PixelPortrait.make_rect(PixelPortrait.flavio(), 96)
-	face.tooltip_text = "Procurado para entrevista"
-	portrait_frame.add_child(face)
-	actions.add_child(portrait_frame)
-	var menu := UiTheme.button("MENU (ESC)", Vector2(0, 44))
-	menu.add_theme_font_size_override("font_size", UiTheme.scaled(10))
+	if not portrait:
+		var spacer := Control.new()
+		spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		actions.add_child(spacer)
+		# celular deitado: botões de 48 px reais não deixam altura pro cartaz
+		if Responsive.touch_target() < 80.0:
+			actions.add_child(_wanted_poster())
+	# no toque não tem Esc nem motivo pra letra miúda
+	var compact := not portrait and not Responsive.is_touch()
+	var menu := UiTheme.button("MENU (ESC)" if compact else "MENU", Vector2(0, 44 if compact else 76))
+	menu.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if compact:
+		menu.add_theme_font_size_override("font_size", UiTheme.scaled(10))
 	menu.pressed.connect(_open_pause)
 	actions.add_child(menu)
 	_actions.append(menu)
+	if portrait:
+		actions.add_child(_wanted_poster())  # 6ª casa da grade 3x2
 
 	_investigate.visible = false
 	_witness.visible = false
@@ -142,6 +162,16 @@ func _build() -> void:
 	_tips = TipBox.new()
 	_tips.closed.connect(func(): UiTheme.focus_first(_actions + [_witness]))
 	add_child(_tips)
+
+## Cartaz de procurado do Flávio ao lado das ações.
+func _wanted_poster() -> PanelContainer:
+	var frame := PanelContainer.new()
+	frame.add_theme_stylebox_override("panel", UiTheme.box(Palette.PAPER_DARK))
+	var face := PixelPortrait.make_rect(PixelPortrait.flavio(), 96)
+	face.tooltip_text = "Procurado para entrevista"
+	face.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	frame.add_child(face)
+	return frame
 
 func _refresh() -> void:
 	var city := _case.current_city_data()
@@ -171,6 +201,10 @@ func _back_to_actions() -> void:
 	UiTheme.focus_first(_actions)
 
 func _open_investigate() -> void:
+	# dossiê/anotações abertos escondem a cena — o painel de locais fica nela
+	_dossier.visible = false
+	_notes.visible = false
+	_scene_area.visible = true
 	_info_panel.visible = false
 	_investigate.show_for(_case)
 

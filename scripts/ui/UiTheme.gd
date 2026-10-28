@@ -32,18 +32,28 @@ static func headline_font() -> FontVariation:
 		_headline_font.variation_opentype = {"wght": 700}
 	return _headline_font
 
+## Tamanho de fonte de título/botão: escala da Pixelify e, em tela pequena,
+## o aumento de texto do Responsive (RF37).
 static func scaled(size: int) -> int:
-	return int(round(size * HEADLINE_SCALE))
+	return int(round(size * HEADLINE_SCALE * Responsive.text_scale()))
+
+## Tamanho de texto corrido com o aumento de tela pequena.
+static func text_size(size: int) -> int:
+	return int(round(size * Responsive.text_scale()))
 
 static func theme() -> Theme:
 	if _theme == null:
 		_theme = _build_theme()
 	return _theme
 
+## Refaz o tema na próxima chamada (testes que simulam outro aparelho).
+static func reset_theme() -> void:
+	_theme = null
+
 static func _build_theme() -> Theme:
 	var t := Theme.new()
 	t.default_font = BODY_FONT
-	t.default_font_size = BODY_SIZE
+	t.default_font_size = text_size(BODY_SIZE)
 
 	t.set_stylebox("normal", "Button", box(Palette.PAPER))
 	t.set_stylebox("hover", "Button", box(Palette.YELLOW))
@@ -64,13 +74,13 @@ static func _build_theme() -> Theme:
 
 	t.set_color("default_color", "RichTextLabel", Palette.INK)
 	t.set_font("normal_font", "RichTextLabel", BODY_FONT)
-	t.set_font_size("normal_font_size", "RichTextLabel", BODY_SIZE)
+	t.set_font_size("normal_font_size", "RichTextLabel", text_size(BODY_SIZE))
 
 	t.set_stylebox("normal", "LineEdit", box(Palette.WHITE, Vector2.ZERO))
 	t.set_stylebox("focus", "LineEdit", box(Palette.WHITE, Vector2.ZERO, Palette.RED))
 	t.set_color("font_color", "LineEdit", Palette.INK)
 	t.set_color("caret_color", "LineEdit", Palette.RED)
-	t.set_font_size("font_size", "LineEdit", 36)
+	t.set_font_size("font_size", "LineEdit", text_size(36))
 
 	var bar := StyleBoxFlat.new()
 	bar.bg_color = Palette.INK_SOFT
@@ -126,19 +136,16 @@ static func body(text: String, size: int = BODY_SIZE, color: Color = Palette.INK
 	var l := Label.new()
 	l.text = text
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", text_size(size))
 	l.add_theme_color_override("font_color", color)
 	return l
 
-## Em tela de toque os botões crescem (RF34) — o jogo é desenhado em 1280x720
-## e num celular deitado tudo encolhe junto.
-const TOUCH_SCALE := 1.25
-
+## Em tela de toque o botão tem pelo menos 48 px reais de altura (RF37): o
+## jogo é desenhado em 720 no lado curto e num celular tudo encolhe junto.
 static func button(text: String, min_size: Vector2 = Vector2(0, 52)) -> Button:
 	var b := Button.new()
 	b.text = text
-	if DisplayServer.is_touchscreen_available():
-		min_size.y = maxf(min_size.y * TOUCH_SCALE, 60.0)
+	min_size.y = maxf(min_size.y, Responsive.touch_target())
 	b.custom_minimum_size = min_size
 	b.focus_mode = Control.FOCUS_ALL
 	b.pressed.connect(func(): AudioManager.play_sfx(AudioManager.SFX_CLICK))

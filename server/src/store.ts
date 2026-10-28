@@ -36,8 +36,10 @@ export interface Store {
   finishRun(id: string, fields: Pick<Run, "finished_at" | "outcome" | "score" | "hours" | "wrong_cities" | "city">): Promise<boolean>;
   insertScore(row: ScoreRow): Promise<boolean>;
   hasScore(runId: string): Promise<boolean>;
+  /** Melhor resultado de cada aparelho no período (empate: o mais antigo). */
   top(since: number, limit: number): Promise<ScoreRow[]>;
-  position(score: number, createdAt: number, since: number): Promise<number>;
+  /** Lugar desse resultado contra o melhor de cada um dos outros aparelhos. */
+  position(score: number, createdAt: number, since: number, device: string): Promise<number>;
 }
 
 // ---------------------------------------------------------------------------
@@ -95,16 +97,21 @@ export class D1Store implements Store {
 
   async top(since: number, limit: number): Promise<ScoreRow[]> {
     const res = await this.db
-      .prepare("SELECT * FROM scores WHERE created_at >= ? ORDER BY score DESC, created_at ASC LIMIT ?")
+      .prepare(
+        "SELECT s.* FROM scores s WHERE s.created_at >= ?1 AND NOT EXISTS (" +
+          "SELECT 1 FROM scores t WHERE t.device = s.device AND t.created_at >= ?1 AND " +
+          "(t.score > s.score OR (t.score = s.score AND (t.created_at < s.created_at OR (t.created_at = s.created_at AND t.run_id < s.run_id))))" +
+          ") ORDER BY s.score DESC, s.created_at ASC LIMIT ?2",
+      )
       .bind(since, limit)
       .all<ScoreRow>();
     return res.results ?? [];
   }
 
-  async position(score: number, createdAt: number, since: number): Promise<number> {
+  async position(score: number, createdAt: number, since: number, device: string): Promise<number> {
     const row = await this.db
-      .prepare("SELECT COUNT(*) AS n FROM scores WHERE created_at >= ? AND (score > ? OR (score = ? AND created_at < ?))")
-      .bind(since, score, score, createdAt)
+      .prepare("SELECT COUNT(DISTINCT device) AS n FROM scores WHERE created_at >= ? AND device != ? AND (score > ? OR (score = ? AND created_at < ?))")
+      .bind(since, device, score, score, createdAt)
       .first<{ n: number }>();
     return (row?.n ?? 0) + 1;
   }
@@ -154,13 +161,23 @@ export class MemoryStore implements Store {
   }
 
   async top(since: number, limit: number): Promise<ScoreRow[]> {
-    return this.scores
-      .filter((s) => s.created_at >= since)
-      .sort((a, b) => b.score - a.score || a.created_at - b.created_at)
-      .slice(0, limit);
+    const best = new Map<string, ScoreRow>();
+    for (const s of this.scores.filter((x) => x.created_at >= since).sort(byRank)) {
+      if (!best.has(s.device)) best.set(s.device, s);
+    }
+    return [...best.values()].sort(byRank).slice(0, limit);
   }
 
-  async position(score: number, createdAt: number, since: number): Promise<number> {
-    return 1 + this.scores.filter((s) => s.created_at >= since && (s.score > score || (s.score === score && s.created_at < createdAt))).length;
+  async position(score: number, createdAt: number, since: number, device: string): Promise<number> {
+    const ahead = new Set(
+      this.scores
+        .filter((s) => s.created_at >= since && s.device !== device && (s.score > score || (s.score === score && s.created_at < createdAt)))
+        .map((s) => s.device),
+    );
+    return 1 + ahead.size;
   }
+}
+
+function byRank(a: ScoreRow, b: ScoreRow): number {
+  return b.score - a.score || a.created_at - b.created_at || (a.run_id < b.run_id ? -1 : 1);
 }

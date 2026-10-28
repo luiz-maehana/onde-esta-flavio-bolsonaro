@@ -45,7 +45,17 @@ static func rank_for(solved: int) -> Dictionary:
 static func sanitize_name(value: Variant) -> String:
 	if typeof(value) != TYPE_STRING:
 		return ""
-	return (value as String).strip_edges().left(MAX_NAME_LENGTH)
+	# sem caractere de controle nem de direção do texto (save adulterado podia
+	# quebrar linha na manchete ou virar o nome de trás pra frente)
+	var clean := ""
+	for ch in (value as String):
+		var code := ch.unicode_at(0)
+		var invisible := code < 32 or code == 127 or (code >= 0x200B and code <= 0x200F) \
+			or (code >= 0x202A and code <= 0x202E) or (code >= 0x2066 and code <= 0x2069) or code == 0xFEFF
+		clean += " " if invisible else ch
+	while clean.contains("  "):
+		clean = clean.replace("  ", " ")
+	return clean.strip_edges().left(MAX_NAME_LENGTH).strip_edges()
 
 ## Registra um caso encerrado e devolve as conquistas desbloqueadas agora.
 func record_case(case: CaseState) -> Array:

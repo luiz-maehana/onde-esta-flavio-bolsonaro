@@ -3,6 +3,10 @@ extends Control
 ## com carreira + menu, aviso de paródia, e o cadastro do nome do repórter.
 
 const BACKGROUND := preload("res://assets/ui/title_background.png")
+## Altura da arte no topo com o celular em pé (720 de largura, proporção da arte).
+const PORTRAIT_ART_HEIGHT := 405
+## Distância do crachá de nome ao topo da tela no toque (teclado embaixo).
+const NAME_DIALOG_TOP := 24
 const DISCLAIMER := "PARÓDIA — piadas e situações são inventadas. Os boxes \"Entenda o caso\" resumem reportagens publicadas, com o status de cada apuração (investigação não é condenação). Sem afiliação com partidos ou com Carmen Sandiego."
 
 var _menu_buttons: Array = []
@@ -19,12 +23,22 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	AudioManager.play_music("title")
 
+	var ink := ColorRect.new()
+	ink.color = Palette.INK
+	ink.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(ink)
 	var bg := TextureRect.new()
 	bg.texture = BACKGROUND
 	bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	bg.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	if Responsive.is_portrait():
+		# em pé: arte inteira na largura, no topo (cobrir cortaria o letreiro)
+		bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		bg.set_anchors_preset(Control.PRESET_TOP_WIDE)
+		bg.custom_minimum_size.y = PORTRAIT_ART_HEIGHT
+	else:
+		bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 
 	_build_bottom_bar()
@@ -47,15 +61,24 @@ func _build_bottom_bar() -> void:
 	sb.border_width_top = 6
 	sb.set_content_margin_all(18)
 	bar.add_theme_stylebox_override("panel", sb)
-	bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	bar.offset_top = -200
+	var portrait := Responsive.is_portrait()
+	if portrait:
+		bar.set_anchors_preset(Control.PRESET_FULL_RECT)
+		bar.offset_top = PORTRAIT_ART_HEIGHT
+	else:
+		# cresce pra cima se o nome/cargo pedirem mais de 200 px
+		bar.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+		bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		bar.offset_top = -200
 	add_child(bar)
 
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 12)
+	# em pé a barra vai da arte até o fim da tela: menu no meio, sem buraco
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
 	bar.add_child(col)
 
-	var row := HBoxContainer.new()
+	var row := Responsive.flow_box()
 	row.add_theme_constant_override("separation", 18)
 	col.add_child(row)
 
@@ -64,28 +87,29 @@ func _build_bottom_bar() -> void:
 	row.add_child(_career_label)
 
 	var grid := GridContainer.new()
-	grid.columns = 4
+	grid.columns = 2 if portrait else 4
+	var button_size := Vector2(320, 72) if portrait else Vector2(178, 56)
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	row.add_child(grid)
 	var has_saved := GameManager.has_saved_case()
-	var resume := UiTheme.button("CONTINUAR CASO", Vector2(178, 56))
+	var resume := UiTheme.button("CONTINUAR CASO", button_size)
 	resume.pressed.connect(GameManager.continue_case)
 	resume.visible = has_saved
-	var new_case := UiTheme.button("NOVO CASO", Vector2(178, 56))
+	var new_case := UiTheme.button("NOVO CASO", button_size)
 	if has_saved:
 		UiTheme.make_confirm(new_case, "DESCARTAR O SALVO?", GameManager.start_new_case)
 	else:
 		new_case.pressed.connect(GameManager.start_new_case)
-	var ranking := UiTheme.button("RANKING", Vector2(178, 56))
+	var ranking := UiTheme.button("RANKING", button_size)
 	ranking.pressed.connect(GameManager.open_leaderboard)
-	var career := UiTheme.button("CARREIRA", Vector2(178, 56))
+	var career := UiTheme.button("CARREIRA", button_size)
 	career.pressed.connect(GameManager.open_career)
-	var options := UiTheme.button("OPÇÕES", Vector2(178, 56))
+	var options := UiTheme.button("OPÇÕES", button_size)
 	options.pressed.connect(_open_options)
-	var change := UiTheme.button("TROCAR REPÓRTER", Vector2(178, 56))
+	var change := UiTheme.button("TROCAR REPÓRTER", button_size)
 	change.pressed.connect(_open_name_dialog)
-	var quit := UiTheme.button("SAIR", Vector2(178, 56))
+	var quit := UiTheme.button("SAIR", button_size)
 	quit.pressed.connect(func(): get_tree().quit())
 	## No navegador "sair" não fecha nada — só some com o botão.
 	quit.visible = not OS.has_feature("web")
@@ -100,12 +124,22 @@ func _build_name_dialog() -> void:
 	_name_dialog.color = Color(Palette.INK, 0.6)
 	_name_dialog.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_name_dialog)
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_name_dialog.add_child(center)
+	# no toque o crachá fica no alto: o teclado virtual sobe por baixo (e no
+	# iPhone a página não encolhe pra abrir espaço)
+	var holder: Container
+	if Responsive.is_touch():
+		var top := MarginContainer.new()
+		top.add_theme_constant_override("margin_top", NAME_DIALOG_TOP)
+		holder = top
+	else:
+		holder = CenterContainer.new()
+	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_name_dialog.add_child(holder)
 	var card := UiTheme.panel()
 	card.custom_minimum_size = Vector2(620, 0)
-	center.add_child(card)
+	card.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	card.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	holder.add_child(card)
 
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 16)

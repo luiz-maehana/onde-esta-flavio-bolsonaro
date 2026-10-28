@@ -2,6 +2,10 @@ extends Control
 ## Raiz da árvore. Ouve GameManager.screen_requested e troca a tela atual
 ## com um fade curto pro preto — as telas nunca se referenciam (mesmo
 ## desenho do Main do PPKMN).
+##
+## Orientação (RF36): ao girar o aparelho, troca o tamanho-base (1280x720 /
+## 720x1280) e remonta a tela atual no arranjo da nova orientação — o estado
+## mora no GameManager, então nada se perde além de uma fala aberta.
 
 const SCREENS := {
 	"title": preload("res://scenes/TitleScreen.tscn"),
@@ -15,9 +19,10 @@ const SCREENS := {
 const FADE_SECONDS := 0.18
 
 var _current: Node
+var _current_name := ""
 var _fade: ColorRect
 var _switching := false
-var _rotate_hint: Control
+var _portrait := false
 
 func _ready() -> void:
 	theme = UiTheme.theme()
@@ -28,11 +33,11 @@ func _ready() -> void:
 	_fade.z_index = 100
 	add_child(_fade)
 	GameManager.screen_requested.connect(_on_screen_requested)
+	_portrait = Responsive.is_portrait()
+	get_window().content_scale_size = Responsive.base_size()
+	get_tree().root.size_changed.connect(_on_window_resized)
 	_swap("title")
 	_fade_to(0.0)
-	_build_rotate_hint()
-	get_tree().root.size_changed.connect(_update_rotate_hint)
-	_update_rotate_hint()
 
 func _on_screen_requested(screen_name: String) -> void:
 	if _switching:
@@ -48,9 +53,19 @@ func _on_screen_requested(screen_name: String) -> void:
 func _swap(screen_name: String) -> void:
 	if _current:
 		_current.queue_free()
+	_current_name = screen_name
 	_current = SCREENS[screen_name].instantiate()
 	add_child(_current)
 	move_child(_fade, -1)
+
+func _on_window_resized() -> void:
+	var portrait := Responsive.is_portrait()
+	if portrait == _portrait:
+		return
+	_portrait = portrait
+	get_window().content_scale_size = Responsive.base_size()
+	if not _switching and _current_name != "":
+		_swap(_current_name)
 
 func _fade_to(alpha: float) -> Signal:
 	var tween := create_tween()
@@ -64,29 +79,3 @@ func _unhandled_input(event: InputEvent) -> void:
 			GameManager.settings.fullscreen = not GameManager.settings.fullscreen
 			GameManager.save_settings()
 			get_viewport().set_input_as_handled()
-
-## Celular em pé (RF34): o jogo é 16:9, então pede pra girar o aparelho.
-func _build_rotate_hint() -> void:
-	_rotate_hint = ColorRect.new()
-	(_rotate_hint as ColorRect).color = Palette.INK
-	_rotate_hint.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_rotate_hint.mouse_filter = Control.MOUSE_FILTER_STOP
-	_rotate_hint.z_index = 200
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_rotate_hint.add_child(center)
-	var col := VBoxContainer.new()
-	col.add_theme_constant_override("separation", 30)
-	center.add_child(col)
-	var text := UiTheme.headline("GIRE O APARELHO", 36, Palette.PAPER)
-	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(text)
-	var sub := UiTheme.body("O jogo funciona com o celular deitado.", 34, Palette.YELLOW)
-	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(sub)
-	add_child(_rotate_hint)
-
-func _update_rotate_hint() -> void:
-	var window := DisplayServer.window_get_size()
-	_rotate_hint.visible = window.y > window.x
-	move_child(_rotate_hint, -1)

@@ -40,6 +40,8 @@ export function sanitizeNickname(input: unknown): string {
   if (typeof input !== "string") return ANONYMOUS;
   const clean = input
     .normalize("NFC")
+    // controle/direção do texto viram espaço (igual Career.sanitize_name no jogo)
+    .replace(/[\p{Cc}\p{Cf}]/gu, " ")
     .replace(/[^\p{L}\p{N} ._-]/gu, "")
     .replace(/\s+/g, " ")
     .trim()

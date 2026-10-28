@@ -20,6 +20,10 @@ func _initialize() -> void:
 	_test_settings_and_career()
 	_test_encoding()
 	_test_platform_config()
+	_test_invariants()
+	_test_always_winnable()
+	_test_content_deep()
+	_test_hostile_names()
 	print("\n%d verificações, %d falhas" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -372,6 +376,10 @@ func _test_platform_config() -> void:
 			web = section
 	_check(web != "", "preset Web existe")
 	_check(presets.get_value(web + ".options", "html/experimental_virtual_keyboard", false) == true, "teclado virtual ligado na versão Web")
+	var head: String = presets.get_value(web + ".options", "html/head_include", "")
+	# sem viewport-fit=cover o Safari mantém o jogo fora do notch (RF37)
+	_check(not head.contains("viewport-fit=cover"), "página Web respeita a área segura (sem viewport-fit=cover)")
+	_check(head.contains("status-wifi") and head.contains("Wi-Fi"), "carregamento avisa do tamanho e do Wi-Fi (RF39)")
 	var layout_path: String = ProjectSettings.get_setting("audio/buses/default_bus_layout", "")
 	_check(layout_path == "res://default_bus_layout.tres", "layout de áudio do projeto definido")
 	var layout := load(layout_path)
@@ -379,4 +387,313 @@ func _test_platform_config() -> void:
 	var text := FileAccess.get_file_as_string(layout_path)
 	for bus in ["Music", "SFX"]:
 		_check(text.contains('&"%s"' % bus), "barramento %s declarado no layout" % bus)
+	# versão nas Opções: definida no projeto e gravada pelo CI antes de exportar
+	_check(ProjectSettings.has_setting("application/config/version"), "projeto tem versão (application/config/version)")
+	var build := FileAccess.get_file_as_string("res://.github/workflows/build.yml")
+	_check(build.contains("git describe") and build.contains("config/version=") and build.contains("fetch-depth: 0"), "CI grava a versão do git antes de exportar")
 	_check(AudioServer.get_bus_index("Music") != -1 and AudioServer.get_bus_index("SFX") != -1, "barramentos existem desde a partida")
+
+## --- Spec 007 (T64): invariantes sob jogo aleatório -------------------------------
+
+const FUZZ_CASES := 2000
+const FUZZ_STEPS := 60
+## Casos (dos FUZZ_CASES) em que o save é refeito a cada passo (I6) — refazer
+## custa O(ações), então só numa parte.
+const FUZZ_REPLAY_CASES := 300
+
+## Joga ações aleatórias, válidas e inválidas, em todos os cargos e confere
+## I1–I7 depois de cada uma. Na primeira falha de um caso, imprime semente e
+## passo e pula pro próximo caso.
+func _test_invariants() -> void:
+	var ranks: Array = GameData.flavor()["ranks"]
+	var failed_cases := 0
+	for n in FUZZ_CASES:
+		var g := RandomNumberGenerator.new()
+		g.seed = 700000 + n
+		var s := CaseGenerator.generate(g, CaseGenerator.config_for_rank(ranks[n % ranks.size()]))
+		var r := RandomNumberGenerator.new()
+		r.seed = n
+		var err := _fuzz_case(s, r, n < FUZZ_REPLAY_CASES)
+		if err != "":
+			failed_cases += 1
+			_check(false, "invariante (semente %d): %s" % [700000 + n, err])
+	_check(failed_cases == 0, "fuzz: %d casos sem quebrar invariante" % FUZZ_CASES)
+
+func _fuzz_case(s: CaseState, r: RandomNumberGenerator, replay_each: bool) -> String:
+	var start_stop := s.stop_index
+	for step in FUZZ_STEPS:
+		var before := _snapshot(s)
+		var was_over := s.is_over()
+		var act := _fuzz_action(s, r)
+		var ok: bool = act["ok"]
+		var after := _snapshot(s)
+		var where := "passo %d, %s" % [step, act["desc"]]
+		# I1 relógio
+		if after["hours"] < before["hours"]:
+			return "%s: relógio voltou" % where
+		if s.clock.is_expired() and s.outcome != CaseState.Outcome.TIMEOUT:
+			return "%s: prazo estourado sem TIMEOUT" % where
+		# I2 fim é fim / I4 ação inválida sem efeito
+		if (was_over or not act["valid"]) and (ok or after != before):
+			return "%s: ação %s mudou o estado" % [where, "depois do fim" if was_over else "inválida"]
+		if act["valid"] and not was_over and not ok:
+			return "%s: ação válida recusada" % where
+		# I5 contadores
+		if s.stop_index < start_stop or s.stop_index < before["stop"] or s.stop_index > s.route.size() - 1:
+			return "%s: parada fora de ordem (%d)" % [where, s.stop_index]
+		var expected_wrong: int = before["wrong"] + (1 if act["kind"] == "t" and ok and not s.is_on_trail() else 0)
+		if after["wrong"] != expected_wrong:
+			return "%s: cidades erradas %d, esperado %d" % [where, after["wrong"], expected_wrong]
+		var seen := {}
+		for note in s.notes:
+			var k := "%s|%s|%s" % [note["city"], note["role"], note["text"]]
+			if seen.has(k):
+				return "%s: anotação duplicada" % where
+			seen[k] = true
+		# I3 viagem
+		if not s.is_over():
+			var opts := s.travel_options()
+			var unique := {}
+			for o in opts:
+				unique[o] = true
+			if unique.size() != opts.size() or opts.has(s.current_city):
+				return "%s: opções de viagem repetidas ou com a cidade atual: %s" % [where, opts]
+			if s.is_on_trail() and not s.is_final_stop() and not opts.has(s.route[s.stop_index + 1]):
+				return "%s: trilha sem a próxima parada" % where
+			if not s.is_on_trail() and not opts.has(s.route[s.stop_index]):
+				return "%s: cidade errada sem volta pra parada atual" % where
+		# I6/I7 save refeito dá o mesmo estado
+		if replay_each:
+			var back := CaseState.from_save(JSON.parse_string(JSON.stringify(s.to_save())))
+			if back == null:
+				return "%s: save não refaz" % where
+			if _snapshot(back) != after:
+				return "%s: save refeito diverge" % where
+	return ""
+
+## Estado observável do caso (o que o jogador vê e o que vai pro save).
+func _snapshot(s: CaseState) -> Dictionary:
+	return {
+		"hours": s.clock.hours, "outcome": s.outcome, "stop": s.stop_index, "city": s.current_city,
+		"pauta": s.pauta, "dossier": s.dossier.duplicate(), "visited": s.visited.duplicate(true),
+		"notes": s.notes.duplicate(true), "actions": s.actions.size(), "wrong": s.wrong_cities, "nights": s.nights,
+	}
+
+## Uma ação sorteada; ~1/4 inválidas de propósito. Devolve {kind, valid, ok, desc}.
+func _fuzz_action(s: CaseState, r: RandomNumberGenerator) -> Dictionary:
+	var roll := r.randi_range(0, 99)
+	var invalid := r.randi_range(0, 3) == 0
+	if roll < 45:
+		var loc: String = "cofre_do_banco"
+		if not invalid:
+			var locs := s.locations_here()
+			loc = locs[r.randi_range(0, locs.size() - 1)]
+		return {"kind": "i", "valid": not invalid, "ok": not s.investigate(loc).is_empty(), "desc": "investigar %s" % loc}
+	if roll < 80:
+		var to: String
+		if invalid:
+			var all: Array = GameData.cities().map(func(c): return c["id"]).filter(func(id): return not s.travel_options().has(id))
+			to = all[r.randi_range(0, all.size() - 1)]
+		else:
+			var opts := s.travel_options()
+			to = opts[r.randi_range(0, opts.size() - 1)]
+		return {"kind": "t", "valid": not invalid, "ok": not s.travel(to).is_empty(), "desc": "viajar %s" % to}
+	if roll < 92:
+		var t: String = GameData.trait_order()[r.randi_range(0, GameData.trait_order().size() - 1)]
+		var value := "valor_falso"
+		if not invalid:
+			var vals: Array = [""] + GameData.trait_values(t)
+			value = vals[r.randi_range(0, vals.size() - 1)]
+		return {"kind": "d", "valid": not invalid, "ok": s.set_dossier(t, value), "desc": "dossiê %s=%s" % [t, value]}
+	var id := "disfarce_falso"
+	if not invalid:
+		var ds := GameData.disguises()
+		id = ds[r.randi_range(0, ds.size() - 1)]["id"]
+	return {"kind": "p", "valid": not invalid, "ok": s.set_pauta(id), "desc": "pauta %s" % id}
+
+## I8: jogando com cuidado (os 3 locais de cada cidade, rota direta, pauta
+## certa) todo caso gerado é vencível, em todos os cargos.
+func _test_always_winnable() -> void:
+	var ranks: Array = GameData.flavor()["ranks"]
+	for rank in ranks:
+		var config := CaseGenerator.config_for_rank(rank)
+		var lost: Array = []
+		for n in 300:
+			var g := RandomNumberGenerator.new()
+			g.seed = 800000 + n
+			var s := CaseGenerator.generate(g, config)
+			s.set_pauta(s.disguise["id"])
+			while not s.is_over():
+				for loc in s.locations_here():
+					if not s.is_over():
+						s.investigate(loc)
+				if not s.is_over() and not s.is_final_stop():
+					s.travel(s.route[s.stop_index + 1])
+			if s.outcome != CaseState.Outcome.WIN:
+				lost.append(800000 + n)
+		_check(lost.is_empty(), "%s: jogo cuidadoso sempre vence (perdeu nas sementes %s)" % [rank["title"], str(lost.slice(0, 5))])
+
+## --- Spec 007 (T65): conteúdo e textos ---------------------------------------------
+
+## Marcadores que o código troca (manchetes da capa). Em qualquer outro texto
+## um {marcador} apareceria cru pro jogador.
+const HEADLINE_PLACEHOLDERS := ["{city}", "{spot}", "{player}"]
+
+func _test_content_deep() -> void:
+	# C1 — todo texto dos JSONs
+	var problems: Array = []
+	for path in ["res://data/cities.json", "res://data/disguises.json", "res://data/flavor.json", "res://data/scandals.json", "res://data/achievements.json"]:
+		_scan_text(JSON.parse_string(FileAccess.get_file_as_string(path)), path.get_file(), problems)
+	for p in problems.slice(0, 15):
+		printerr("  texto: ", p)
+	_check(problems.is_empty(), "textos dos JSONs sem espaço sobrando, pontuação torta ou marcador cru (%d problemas)" % problems.size())
+
+	# C1/C2 — falas geradas de verdade em 300 casos jogados
+	var bad_speech: Array = []
+	var ambiguous := 0
+	for n in 300:
+		var g := RandomNumberGenerator.new()
+		g.seed = 600000 + n
+		var s := CaseGenerator.generate(g, CaseGenerator.config_for_rank(GameData.flavor()["ranks"][n % 5]))
+		# C2: as pistas da parada i são da cidade route[i+1]
+		for i in s.route.size() - 1:
+			var next_clues: Array = GameData.city(s.route[i + 1])["clues"]
+			for clue in s.route_clues[i]:
+				if not next_clues.has(clue):
+					ambiguous += 1
+		s.set_pauta(s.disguise["id"])
+		s.travel(s.decoys[0][0])
+		var texts: Array = s.locations_here().map(func(loc): return s.investigate(loc).get("text", ""))
+		s.travel(s.route[0])
+		while not s.is_over():
+			for loc in s.locations_here():
+				if not s.is_over():
+					texts.append(s.investigate(loc).get("text", ""))
+			if not s.is_over() and not s.is_final_stop():
+				s.travel(s.route[s.stop_index + 1])
+		for t in texts:
+			if t.strip_edges() == "" or t.contains("{") or t.contains("}") or t.contains("  "):
+				bad_speech.append("semente %d: \"%s\"" % [600000 + n, t.left(60)])
+	for b in bad_speech.slice(0, 5):
+		printerr("  fala: ", b)
+	_check(bad_speech.is_empty(), "falas geradas completas (%d ruins)" % bad_speech.size())
+	_check(ambiguous == 0, "pistas de cada parada apontam a próxima cidade da rota")
+
+	# C2 — a mesma pista em duas cidades deixaria o jogador sem saber o destino
+	var owner := {}
+	var shared: Array = []
+	for c in GameData.cities():
+		for clue in c["clues"]:
+			if owner.has(clue) and owner[clue] != c["id"]:
+				shared.append("%s / %s: \"%s\"" % [owner[clue], c["id"], clue.left(50)])
+			owner[clue] = c["id"]
+	for x in shared:
+		printerr("  pista repetida: ", x)
+	_check(shared.is_empty(), "nenhuma pista usada por duas cidades")
+
+	# C4 — ids únicos, coordenadas no mapa, conquista com regra
+	for group in [["cidades", GameData.cities()], ["disfarces", GameData.disguises()], ["escândalos", GameData.scandals()], ["conquistas", Achievements.all()]]:
+		var ids := {}
+		for item in group[1]:
+			ids[item["id"]] = true
+		_check(ids.size() == group[1].size(), "ids únicos em %s" % group[0])
+	var map_src := FileAccess.get_file_as_string("res://scripts/art/WorldMapView.gd")
+	var lat_top: float = _const_value(map_src, "LAT_TOP")
+	var lat_bottom: float = _const_value(map_src, "LAT_BOTTOM")
+	for c in GameData.cities():
+		var on_map: bool = float(c["lon"]) >= -180.0 and float(c["lon"]) <= 180.0 and float(c["lat"]) <= lat_top and float(c["lat"]) >= lat_bottom
+		_check(on_map, "%s dentro do mapa" % c["id"])
+	var rules := FileAccess.get_file_as_string("res://scripts/core/Achievements.gd")
+	for a in Achievements.all():
+		_check(rules.contains("\"%s\":" % a["id"]), "conquista %s tem regra" % a["id"])
+
+	# C5 — sons e dicas usados no código existem (e toda dica é usada)
+	var code := ""
+	for path in _files("res://scripts"):
+		if path.ends_with(".gd"):
+			code += FileAccess.get_file_as_string(path)
+	# AudioManager é autoload (não existe em --script): listas lidas do fonte
+	var audio_src := FileAccess.get_file_as_string("res://scripts/autoload/AudioManager.gd")
+	var sfx: Array = _const_value(audio_src, "SFX")
+	var music: Array = _const_value(audio_src, "MUSIC")
+	for name in _calls(code, "play_sfx"):
+		_check(sfx.has(name), "efeito '%s' existe" % name)
+	for name in _calls(code, "play_music"):
+		_check(music.has(name), "música '%s' existe" % name)
+	for name in sfx + music:
+		var dir: String = _const_value(audio_src, "SFX_DIR") if sfx.has(name) else _const_value(audio_src, "MUSIC_DIR")
+		var files: Array = Array(DirAccess.get_files_at(dir)).filter(func(f): return f.get_basename() == name and not f.ends_with(".import"))
+		_check(not files.is_empty(), "arquivo de áudio de '%s'" % name)
+	var tips: Dictionary = GameData.flavor()["tips"]
+	var used_tips := _calls(code, "try_show")
+	for name in used_tips:
+		_check(tips.has(name), "dica '%s' tem texto" % name)
+	for name in tips:
+		_check(used_tips.has(name), "dica '%s' é usada no jogo" % name)
+
+## Valor literal de `const NOME := ...` num fonte GDScript.
+func _const_value(src: String, name: String) -> Variant:
+	var m := RegEx.create_from_string("const " + name + " := (.+)").search(src)
+	return str_to_var(m.get_string(1)) if m else null
+
+## Nomes literais passados a `fn("nome")` no código.
+func _calls(code: String, fn: String) -> Array:
+	var re := RegEx.create_from_string(fn + "\\(\"([a-z_]+)\"")
+	var out := {}
+	for m in re.search_all(code):
+		out[m.get_string(1)] = true
+	return out.keys()
+
+## Desce no JSON e confere cada string de texto.
+func _scan_text(value: Variant, where: String, problems: Array) -> void:
+	if value is Dictionary:
+		for k in value:
+			_scan_text(value[k], "%s.%s" % [where, k], problems)
+	elif value is Array:
+		for i in value.size():
+			_scan_text(value[i], "%s[%d]" % [where, i], problems)
+	elif value is String:
+		var s: String = value
+		var allowed: Array = HEADLINE_PLACEHOLDERS if where.contains("headlines") else []
+		var stripped := s
+		for p in allowed:
+			stripped = stripped.replace(p, "")
+		var issue := ""
+		if s != s.strip_edges():
+			issue = "espaço nas pontas"
+		elif s.contains("  "):
+			issue = "espaço duplo"
+		elif stripped.contains("{") or stripped.contains("}"):
+			issue = "marcador desconhecido"
+		elif RegEx.create_from_string(" [,.;:!?](?!\\.)").search(s):
+			issue = "espaço antes de pontuação"
+		elif RegEx.create_from_string("(?<!\\.)\\.\\.(?!\\.)|,,").search(s):
+			issue = "pontuação dobrada"
+		elif s.count("\"") % 2 == 1:
+			issue = "aspas sem fechar"
+		if issue != "":
+			problems.append("%s — %s: \"%s\"" % [where, issue, s.left(50)])
+
+## --- Spec 007 (T66): entradas hostis ------------------------------------------------
+
+## E1: nomes que já quebraram (ou quebrariam) manchete, layout ou save.
+const HOSTILE_NAMES := ["", "   ", "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW", "Ana\nFuro", "Ana\tFuro", "\u202Eoruf ana", "Ana\u200B\u200BFuro",
+	"{city}", "{player}", "[b]Ana[/b]", "Ana 🎤 Furo", "  Ana    Furo  ", "\u0000\u0001\u007F", "%s %d"]
+
+func _test_hostile_names() -> void:
+	for raw in HOSTILE_NAMES:
+		var name := Career.sanitize_name(raw)
+		var shown: String = raw.c_escape().left(30)
+		_check(name.length() <= Career.MAX_NAME_LENGTH, "nome '%s' cabe no limite" % shown)
+		_check(name == name.strip_edges() and not name.contains("  "), "nome '%s' sem espaço sobrando" % shown)
+		var invisible := false
+		for ch in name:
+			var code := ch.unicode_at(0)
+			if code < 32 or code == 127 or (code >= 0x200B and code <= 0x200F) or (code >= 0x202A and code <= 0x202E):
+				invisible = true
+		_check(not invisible, "nome '%s' sem caractere de controle/direção" % shown)
+		var back := Career.from_dict(Career.from_dict({"player_name": raw}).to_dict())
+		_check(back.player_name == name, "nome '%s' igual depois do save" % shown)
+	_check(Career.sanitize_name("  Ana    Furo  ") == "Ana Furo", "espaços internos colapsam")
+	_check(Career.sanitize_name("Ana\nFuro") == "Ana Furo", "quebra de linha vira espaço")
+	_check(Career.sanitize_name(42) == "" and Career.sanitize_name(null) == "", "nome que não é texto vira vazio")

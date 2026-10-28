@@ -11,8 +11,8 @@ aparelho".
 - **RF36** — Layout adaptativo em vez de escala fixa: `window/stretch/aspect
   = expand` e cada tela monta um arranjo por orientação:
   - **Paisagem** (atual), **retrato** (celular em pé):
-    - Cidade: paisagem em cima, fala/locais no meio, ações em grade 2×2
-      embaixo.
+    - Cidade: paisagem em cima, fala/locais no meio, ações em grade 3×2
+      embaixo (a 6ª casa é o cartaz do Flávio).
     - Viagem: mapa em cima (recortado na região dos destinos), destinos em
       lista vertical.
     - Título: arte recortada no topo, menu em coluna.
@@ -114,9 +114,14 @@ vez só, Turnstile (captcha invisível) opcional no start.
 
 ## Tarefas (quando aprovado)
 
-- [ ] T55 `ResponsiveLayout` + aspect expand + escala por lado curto (A)
-- [ ] T56 Arranjo retrato das 7 telas + prévias em 3 tamanhos (A)
-- [ ] T57 Área segura, teclado virtual, barra de carregamento (A)
+- [x] T55 `ResponsiveLayout` + aspect expand + escala por lado curto (A)
+  — `Responsive`: orientação, tamanho-base 1280x720/720x1280, alvo de toque
+  de 48 px reais e texto até 1,3x pelo lado curto da tela em px de CSS.
+- [x] T56 Arranjo retrato das 7 telas + prévias em 3 tamanhos (A)
+- [x] T57 Área segura, teclado virtual, barra de carregamento (A)
+  — área segura: a página não usa viewport-fit=cover (Safari mantém fora do
+  notch; teste garante); crachá de nome no alto no toque; aviso de ~40 MB /
+  Wi-Fi e barra nas cores do jogo via head_include.
 - [x] T58 Exportar vetores de paridade do Godot (semente + ações → estado) (B)
 - [x] T59 Porte do núcleo + PCG32 para TypeScript com teste de paridade (B)
 - [x] T60 Worker + Durable Object de presença + D1 + rotas (B)

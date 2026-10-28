@@ -329,7 +329,7 @@ export class CaseState {
   }
 
   setDossier(trait: string, value: string): boolean {
-    if (!disguiseData.trait_order.includes(trait)) return false;
+    if (this.isOver() || !disguiseData.trait_order.includes(trait)) return false;
     if (value !== "" && !traitValues(trait).includes(value)) return false;
     this.dossier.set(trait, value);
     this.actions.push(["d", trait, value]);

@@ -35,3 +35,9 @@ test(`${vectors.cases.length} casos refeitos chegam ao mesmo estado do Godot`, (
     assert.deepEqual(got, f, `caso ${i} (seed ${c.seed})`);
   }
 });
+
+test(`${vectors.rejects.length} saves recusados pelo Godot também são recusados aqui`, () => {
+  for (const [i, c] of vectors.rejects.entries()) {
+    assert.equal(replay(c.seed, c.config as Config, c.actions), null, `recusa ${i} (tipo ${c.kind}, seed ${c.seed}) foi aceita`);
+  }
+});
