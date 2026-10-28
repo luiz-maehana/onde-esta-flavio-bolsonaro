@@ -66,7 +66,8 @@ jobs:
           source ~/emsdk/emsdk_env.sh
           pip install --user --quiet "scons==$SCONS_VERSION"
           cd ~/godot-src
-          scons profile="$GITHUB_WORKSPACE/tools/web_template/custom.py" -j"$(nproc)"
+          # platform/target no perfil são ignorados (lidos antes dele): vão aqui
+          scons platform=web target=template_release profile="$GITHUB_WORKSPACE/tools/web_template/custom.py" -j"$(nproc)"
           ls -la bin/
           ZIP=$(ls bin/godot.web.template_release.*.zip)
           test "$(echo "$ZIP" | wc -l)" -eq 1
