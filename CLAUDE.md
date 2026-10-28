@@ -26,6 +26,8 @@ godot --headless --path . res://tests/UiTests.tscn         # testes de interface
 godot --headless --path . --script res://tools/build_audio.gd  # regera música/SFX
 godot --headless --path . --script res://tools/build_icon.gd   # regera ícone
 godot --headless --path . --script res://tools/build_portrait_sheet.gd  # build/portraits.png com todos os retratos
+godot --path . --script res://tools/build_skyline_sheet.gd      # build/skylines_day|night.png com todos os cenários (precisa de janela)
+godot --headless --path . --script res://tools/build_world.gd -- <ne_110m_land.geojson>  # contornos do mapa em data/world.json
 godot --headless --path . --script res://tools/build_og.gd    # imagem de compartilhamento (assets/web/og.jpg)
 godot --path . res://tools/RenderPreview.tscn              # PNG de cada tela em build/preview/<idioma>/<tamanho>/
 godot --headless --path . --export-release "Windows Desktop" build/OndeEstaFlavio.exe
@@ -74,7 +76,9 @@ No jogo, `Online` (autoload) desliga sozinho em `res://tests` e
 - `scripts/screens/` — uma tela por cena; `Main` troca com fade.
 - `scripts/ui/` — `UiTheme` (tema único), `Palette`, componentes com API
   própria (`NewsHeader`, `WitnessBox`, `NewspaperPage`, painéis).
-- `scripts/art/` — tudo desenhado por código: skyline + marcos, mapa-múndi,
+- `scripts/art/` — tudo desenhado por código: cenário (`SkylineView`, pixel
+  art em SubViewport com fator inteiro; terreno/estilo em
+  `data/scenery.json`) + marcos (`SkylineLandmarks`, um por cidade), mapa-múndi,
   retratos 48x48 (`PortraitPainter` primitivas, `PortraitFactory` camadas,
   `PixelPortrait` fachada com cache e override por `assets/portraits/`).
   Figurinos são dados: `disguises.json` (`portrait`) e `flavor.json`
@@ -82,7 +86,8 @@ No jogo, `Online` (autoload) desliga sozinho em `res://tests` e
 - `data/*.json` — todo o conteúdo (cidades, disfarces, falas, alvos em
   `targets.json` — o Flávio e os parceiros da spec 009; o servidor lê o
   mesmo arquivo). Cidade nova =
-  entrada em `cities.json` (+ marco novo em `SkylineLandmarks` se precisar).
+  entrada em `cities.json` + `scenery.json` + marco próprio em
+  `SkylineLandmarks` (os testes exigem um marco por cidade).
 
 ## 4. Convenções
 

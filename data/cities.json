@@ -6,7 +6,7 @@
     "lon": -47.9,
     "lat": -15.8,
     "coastal": false,
-    "landmark": "twin",
+    "landmark": "congress",
     "palette": [
       "#7EC8E3",
       "#E8E2D0",
@@ -36,7 +36,7 @@
     "lon": -43.2,
     "lat": -22.9,
     "coastal": true,
-    "landmark": "statue_arms",
+    "landmark": "redeemer",
     "palette": [
       "#59B7E8",
       "#F2C14E",
@@ -66,7 +66,7 @@
     "lon": -46.6,
     "lat": -23.5,
     "coastal": false,
-    "landmark": "spire",
+    "landmark": "masp",
     "palette": [
       "#9BB0C1",
       "#6D6D6D",
@@ -96,7 +96,7 @@
     "lon": -80.2,
     "lat": 25.8,
     "coastal": true,
-    "landmark": "palms",
+    "landmark": "deco",
     "palette": [
       "#FF9EC7",
       "#F7E7CE",
@@ -158,7 +158,7 @@
     "lon": -74,
     "lat": 40.7,
     "coastal": true,
-    "landmark": "statue_torch",
+    "landmark": "liberty",
     "palette": [
       "#A7C7E7",
       "#5A5A6E",
@@ -189,7 +189,7 @@
     "lon": -77,
     "lat": 38.9,
     "coastal": false,
-    "landmark": "dome",
+    "landmark": "capitol",
     "palette": [
       "#B0D4F1",
       "#F5F5F5",
@@ -311,7 +311,7 @@
     "lon": -3.7,
     "lat": 40.4,
     "coastal": false,
-    "landmark": "arch",
+    "landmark": "alcala",
     "palette": [
       "#FFD39B",
       "#F0E6D2",
@@ -342,7 +342,7 @@
     "lon": 2.35,
     "lat": 48.85,
     "coastal": false,
-    "landmark": "tower",
+    "landmark": "eiffel",
     "palette": [
       "#C9D6EA",
       "#E8DCCB",
@@ -372,7 +372,7 @@
     "lon": -0.12,
     "lat": 51.5,
     "coastal": false,
-    "landmark": "clock",
+    "landmark": "bigben",
     "palette": [
       "#B8C4CC",
       "#8B8378",
@@ -432,7 +432,7 @@
     "lon": 19.04,
     "lat": 47.5,
     "coastal": false,
-    "landmark": "dome",
+    "landmark": "parliament",
     "palette": [
       "#C6D8E8",
       "#EDE3D1",
@@ -556,7 +556,7 @@
     "lon": 139.7,
     "lat": 35.7,
     "coastal": true,
-    "landmark": "pagoda",
+    "landmark": "tokyo_tower",
     "palette": [
       "#FFC0CB",
       "#EDE7E3",
@@ -585,7 +585,7 @@
     "lon": 151.2,
     "lat": -33.9,
     "coastal": true,
-    "landmark": "sails",
+    "landmark": "opera",
     "palette": [
       "#7FD1F7",
       "#F7F7F7",
@@ -675,7 +675,7 @@
     "lon": 116.4,
     "lat": 39.9,
     "coastal": false,
-    "landmark": "pagoda",
+    "landmark": "temple_heaven",
     "palette": [
       "#E8D3A9",
       "#C9B79C",
@@ -704,7 +704,7 @@
     "lon": 77.2,
     "lat": 28.6,
     "coastal": false,
-    "landmark": "arch",
+    "landmark": "india_gate",
     "palette": [
       "#F6C77B",
       "#E8D5B5",
@@ -735,7 +735,7 @@
     "lon": -70.65,
     "lat": -33.45,
     "coastal": false,
-    "landmark": "burj",
+    "landmark": "costanera",
     "palette": [
       "#A9D3F5",
       "#D8D2C8",
@@ -857,7 +857,7 @@
     "lon": 13.4,
     "lat": 52.52,
     "coastal": false,
-    "landmark": "arch",
+    "landmark": "brandenburg",
     "palette": [
       "#C9D3DD",
       "#B8B2A7",

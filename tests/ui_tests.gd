@@ -45,6 +45,7 @@ func _run() -> void:
 	await _test_career_album()
 	await _test_partner_case()
 	await _test_layout_all_languages()
+	await _test_art_proportions()
 	await _test_rotation()
 	await _test_reentrancy()
 	await _test_monkey()
@@ -937,6 +938,66 @@ func _test_layout_all_languages() -> void:
 		Lang.apply(lang)
 		await _test_layout_fits()
 	Lang.apply("pt")
+
+## --- Spec 011 (T102): mapa e cenário sem esticar --------------------------------------
+
+## Perfis do "cabe na tela" + monitor 21:9 (base esticada pelo `expand`).
+const ART_PROFILES := LAYOUT_PROFILES + [["21:9 deitado", 0, 720.0, 0, Vector2(1680, 720)]]
+
+func _test_art_proportions() -> void:
+	for profile in ART_PROFILES:
+		Responsive.forced = profile[1]
+		Responsive.forced_short_side = profile[2]
+		Responsive.forced_touch = profile[3]
+		UiTheme.reset_theme()
+		var tag: String = profile[0]
+		_extreme_case()
+		var travel_box := await _layout_box(load("res://scenes/TravelScreen.tscn").instantiate())
+		if profile.size() > 4:
+			travel_box.size = profile[4]
+			await _frames(4)
+		var map: WorldMapView = travel_box.get_child(0)._map
+		var ppd := map.pixels_per_degree()
+		_check(absf(ppd.x - ppd.y) <= ppd.y * 0.01, "mapa com a mesma escala nos dois eixos (%s: %.2f x %.2f px/grau)" % [tag, ppd.x, ppd.y])
+		var frame := Rect2(Vector2.ZERO, map.size).grow(1)
+		var shown := [map.origin_id] + map.option_ids
+		_check(shown.all(func(id): return frame.has_point(map._city_pos(id))), "origem e destinos dentro do mapa (%s)" % tag)
+		if not Responsive.is_portrait():
+			var missing: Array = GameData.cities().filter(func(c): return not map._copies(c).any(func(p): return frame.has_point(p)))
+			_check(missing.is_empty(), "mundo inteiro visível deitado (%s; fora: %s)" % [tag, missing.map(func(c): return c["id"])])
+		await _free_box(travel_box)
+
+		var city_box := await _layout_box(load("res://scenes/CityScreen.tscn").instantiate())
+		if profile.size() > 4:
+			city_box.size = profile[4]
+			await _frames(4)
+		var sky: SkylineView = city_box.get_child(0)._skyline
+		var k := sky.art_scale()
+		var leftover := sky.size - sky.art_size() * k
+		_check(k >= 1 and (k == 1 or (sky.art_size().y >= SkylineView.REF_HEIGHT and sky.art_size().x >= SkylineView.REF_WIDTH)) and leftover.x >= 0 and leftover.y >= 0 and leftover.x < k and leftover.y < k,
+			"cenário em fator inteiro sem esticar (%s: %dx, arte %s, quadro %s)" % [tag, k, sky.art_size(), sky.size])
+		var scene := Rect2(Vector2.ZERO, sky.art_size()).grow(0.01)
+		for c in GameData.cities():
+			sky.city = c
+			_check(scene.encloses(sky.landmark_rect()), "marco de %s inteiro na cena (%s: %s em %s)" % [c["id"], tag, sky.landmark_rect(), sky.art_size()])
+		await _free_box(city_box)
+	Responsive.forced = -1
+	Responsive.forced_short_side = -1.0
+	Responsive.forced_touch = -1
+	UiTheme.reset_theme()
+
+	# RF75: rota que cruza a borda do mapa vai pelo caminho mais curto
+	var map := WorldMapView.new()
+	map.size = Vector2(1200, 460)
+	map.origin_id = "santiago"
+	map.option_ids = ["sydney", "toquio"]
+	add_child(map)
+	await _frames()
+	for id in map.option_ids:
+		var degrees := absf(map._city_pos(id).x - map._city_pos("santiago").x) / map.pixels_per_degree().x
+		_check(degrees <= 180.0, "Santiago -> %s pelo caminho mais curto (%.0f graus)" % [id, degrees])
+	map.queue_free()
+	await _frames()
 
 ## Marcas que só o português tem — texto visível com elas, com o jogo em
 ## inglês ou espanhol, é tradução esquecida. Nomes próprios ficam de fora.

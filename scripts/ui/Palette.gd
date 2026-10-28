@@ -15,3 +15,6 @@ const GREEN := Color("#009C3B")
 const WHITE := Color("#FFFFFF")
 const OCEAN := Color("#1D3557")
 const OCEAN_LINE := Color("#2C4A70")
+## Mapa-múndi (spec 011): ondas do oceano, sombra dos continentes.
+const OCEAN_WAVE := Color("#3A5C86")
+const LAND_SHADOW := Color("#0F1E36")

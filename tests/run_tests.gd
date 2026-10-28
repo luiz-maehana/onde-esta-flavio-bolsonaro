@@ -55,16 +55,37 @@ func _test_content() -> void:
 		r.seed = seed
 		used[CaseGenerator.generate(r, {"route_len": 4}).scandal["id"]] = true
 	_check(used.size() == GameData.scandals().size(), "todos os escândalos aparecem em 200 casos")
+	# spec 011: um marco próprio por cidade, que cabe na cena; cenário válido
+	var landmark_owner := {}
 	for c in GameData.cities():
 		_check(SkylineLandmarks.has(c["landmark"]), "marco '%s' de %s tem desenho" % [c["landmark"], c["id"]])
+		_check(not landmark_owner.has(c["landmark"]), "marco '%s' só em %s (também em %s)" % [c["landmark"], c["id"], landmark_owner.get(c["landmark"], "")])
+		landmark_owner[c["landmark"]] = c["id"]
+		var box := SkylineLandmarks.bounds(c["landmark"])
+		_check(box.size.x <= 126.0 and box.end.y <= 84.0, "marco de %s cabe em 126x84 (%s)" % [c["id"], box])
+		var scene := GameData.scenery(c["id"])
+		_check(SkylineView.TERRAINS.has(scene.get("terrain")) and SkylineView.BACKDROPS.has(scene.get("backdrop"))
+			and SkylineView.VEGETATION.has(scene.get("vegetation")) and SkylineView.STYLES.has(scene.get("style")),
+			"cenário de %s completo e válido (%s)" % [c["id"], scene])
 		_check(["h", "v", "disc", "hdisc", "diamond", "canton", "cross", "side", "star", "crescent"].has(c.get("flag", {}).get("type", "")), "bandeira de %s válida" % c["id"])
+	_check(JSON.parse_string(FileAccess.get_file_as_string(GameData.SCENERY_PATH)).size() == GameData.cities().size(), "scenery.json sem cidade sobrando")
 	# draw_colored_polygon não desenha nada se o polígono não triangula
-	# (contorno se cruzando), então isso pega erro de digitação no mapa.
-	for i in WorldShapes.LANDS.size():
-		var pts := PackedVector2Array()
-		for p in WorldShapes.LANDS[i]:
-			pts.append(Vector2(p[0], -p[1]))
-		_check(not Geometry2D.triangulate_polygon(pts).is_empty(), "continente %d triangula" % i)
+	# (contorno se cruzando) — vale pros contornos gerados (spec 011, RF86).
+	var rings: Array = WorldShapes.lands() + WorldShapes.holes()
+	_check(WorldShapes.lands().size() >= 50, "mapa com os contornos do Natural Earth (%d terras)" % WorldShapes.lands().size())
+	for i in rings.size():
+		_check(not Geometry2D.triangulate_polygon(rings[i]).is_empty(), "contorno %d do mapa triangula" % i)
+	# toda cidade cai em terra (ou a menos de 1,5° do litoral, no 1:110m)
+	for c in GameData.cities():
+		var p := Vector2(float(c["lon"]), -float(c["lat"]))
+		var near := WorldShapes.lands().any(func(r): return Geometry2D.is_point_in_polygon(p, r) or _ring_distance(p, r) < 1.5)
+		_check(near, "%s em terra no mapa" % c["id"])
+
+func _ring_distance(p: Vector2, ring: PackedVector2Array) -> float:
+	var best := INF
+	for i in ring.size():
+		best = minf(best, p.distance_to(Geometry2D.get_closest_point_to_segment(p, ring[i], ring[(i + 1) % ring.size()])))
+	return best
 
 func _test_clock() -> void:
 	var clock := GameClock.new()

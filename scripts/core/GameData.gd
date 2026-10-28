@@ -13,6 +13,8 @@ const DISGUISES_PATH := "res://data/disguises.json"
 const FLAVOR_PATH := "res://data/flavor.json"
 const SCANDALS_PATH := "res://data/scandals.json"
 const TARGETS_PATH := "res://data/targets.json"
+## Cenário de cada cidade (spec 011): só ids, sem texto — não tem tradução.
+const SCENERY_PATH := "res://data/scenery.json"
 ## Alvo padrão: o Flávio (os outros são os "parceiros", spec 009).
 const DEFAULT_TARGET := "flavio"
 const I18N_DIR := "res://data/i18n/"
@@ -23,6 +25,7 @@ static var _disguise_data: Dictionary = {}
 static var _flavor: Dictionary = {}
 static var _scandals: Array = []
 static var _targets: Array = []
+static var _scenery_by_id: Dictionary = {}
 
 static func cities() -> Array:
 	_ensure_loaded()
@@ -87,6 +90,13 @@ static func target(id: String) -> Dictionary:
 ## Parceiros: os alvos com escândalo próprio (todos menos o Flávio).
 static func partners() -> Array:
 	return targets().filter(func(t): return t.has("scandal"))
+
+## Terreno, fundo, vegetação e estilo dos prédios da cidade (spec 011).
+static func scenery(city_id: String) -> Dictionary:
+	if _scenery_by_id.is_empty():
+		for s in _read_json(SCENERY_PATH):
+			_scenery_by_id[s["id"]] = s
+	return _scenery_by_id.get(city_id, {})
 
 ## Escândalos reais que dão tema aos casos (spec 002).
 static func scandals() -> Array:

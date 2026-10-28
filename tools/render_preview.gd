@@ -23,6 +23,9 @@ func _run() -> void:
 			DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_dir))
 			get_window().size = SIZES[size_name]
 			await _frames(5)
+			# a janela real pode vir em outro tamanho (HiDPI, atraso do SO):
+			# a orientação sai do tamanho pedido
+			Responsive.forced = 1 if SIZES[size_name].y > SIZES[size_name].x else 0
 			# tamanhos de celular: simula tela de toque (botões de 48 px reais)
 			Responsive.forced_touch = 0 if size_name == "1280x720" else 1
 			UiTheme.reset_theme()
