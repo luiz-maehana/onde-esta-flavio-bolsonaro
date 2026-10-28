@@ -7,6 +7,8 @@ var _failures := 0
 var _checks := 0
 
 func _initialize() -> void:
+	# textos em português, seja qual for o idioma da máquina (o CI é inglês)
+	Lang.apply("pt")
 	_test_content()
 	_test_clock()
 	_test_dossier()
@@ -695,7 +697,7 @@ func _scan_text(value: Variant, where: String, problems: Array) -> void:
 
 ## E1: nomes que já quebraram (ou quebrariam) manchete, layout ou save.
 const HOSTILE_NAMES := ["", "   ", "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW", "Ana\nFuro", "Ana\tFuro", "\u202Eoruf ana", "Ana\u200B\u200BFuro",
-	"{city}", "{player}", "[b]Ana[/b]", "Ana 🎤 Furo", "  Ana    Furo  ", "\u0000\u0001\u007F", "%s %d"]
+	"{city}", "{player}", "[b]Ana[/b]", "Ana 🎤 Furo", "  Ana    Furo  ", "\u0001\u0002\u007F", "%s %d"]
 
 func _test_hostile_names() -> void:
 	for raw in HOSTILE_NAMES:

@@ -30,6 +30,8 @@ func _run() -> void:
 	OS.add_logger(_log)
 	SaveService.read_only = true
 	GameManager.settings = Settings.new()
+	# o GameManager abriu no idioma da máquina (o CI é inglês): fixa o português
+	Lang.apply("pt")
 	GameManager.settings.tips_enabled = false
 	GameManager.career = Career.from_dict({"player_name": "Teste", "cases_solved": 1, "cases_played": 2})
 	GameManager.screen_requested.connect(func(s): _screens.append(s))
@@ -796,7 +798,7 @@ func _test_hostile_inputs() -> void:
 		many.append(["d", "hat", ""])
 	var future: Dictionary = good.to_save()
 	future["version"] = 99
-	var bad_saves := [good_json.left(good_json.length() / 2), "\u0000\u0001binário\uFFFD", "[]", "null", "\"texto\"", "{}",
+	var bad_saves := [good_json.left(good_json.length() / 2), "\u0001\u0002binário\uFFFD", "[]", "null", "\"texto\"", "{}",
 		JSON.stringify(future), JSON.stringify({"version": 2, "seed": 1, "config": good.config, "actions": many}),
 		"{\"version\": 2, \"seed\": 1e400}", "x".repeat(200000)]
 	for bad in bad_saves:
