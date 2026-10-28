@@ -1,0 +1,84 @@
+{
+  "tips": {
+    "briefing": "Lee el recuadro ENTIENDE EL CASO: es el escándalo real detrás de este caso. El plazo aparece en tu pauta — el reloj solo avanza cuando investigas o viajas.",
+    "city": "Cada ciudad tiene 3 lugares. Investigar cuesta horas (2h, 3h, 4h). Los testigos hablan de la PRÓXIMA ciudad del senador: bandera, moneda, idioma, lugares turísticos.",
+    "clue": "Ten en mente la pista y abre VIAJAR: elige el destino que coincida con ella. Todo lo que dijeron los testigos queda en NOTAS.",
+    "trait": "¡Este testigo describió el DISFRAZ! Abre el EXPEDIENTE y márcalo. Con 2 características ya identificas el disfraz y puedes emitir la PAUTA.",
+    "travel": "Pasa el ratón (o toca) las ciudades del mapa para ver el país. Cada destino muestra las horas de vuelo.",
+    "cold": "Nadie vio al senador aquí: ¡ciudad equivocada! Vuelve por VIAJAR — la ciudad de la que viniste está entre las opciones.",
+    "near": "¡Está en esta ciudad! Uno de los lugares esconde al senador. Comprueba que la PAUTA correcta ya esté emitida antes de abordarlo."
+  },
+  "locations": {
+    "aeroporto": { "name": "Aeropuerto", "role": "Azafata" },
+    "hotel": { "name": "Hotel", "role": "Recepcionista" },
+    "banco": { "name": "Banco", "role": "Gerente del banco" },
+    "mercado": { "name": "Mercado", "role": "Vendedor del mercado" },
+    "museu": { "name": "Museo", "role": "Guía del museo" },
+    "porto": { "name": "Puerto", "role": "Marinero" },
+    "restaurante": { "name": "Restaurante", "role": "Camarero" },
+    "biblioteca": { "name": "Biblioteca", "role": "Bibliotecaria" },
+    "shopping": { "name": "Centro comercial", "role": "Dependiente" },
+    "embaixada": { "name": "Embajada", "role": "Diplomático" },
+    "cartorio": { "name": "Notaría", "role": "Notario" },
+    "taxi": { "name": "Parada de taxis", "role": "Taxista" }
+  },
+  "cold_trail": [
+    "¿Un senador? ¿Aquí? No he visto a nadie con gabardina roja, no.",
+    "Lo siento, hoy no pasó por aquí ningún brasileño huyendo de un micrófono.",
+    "Mmm... no. El único político que vi hoy aquí estaba en una valla publicitaria.",
+    "Nadie con ese perfil por aquí. ¿Seguro que es la ciudad correcta?",
+    "Nunca vi a ese hombre. Y mira que yo veo de todo."
+  ],
+  "near": [
+    "¡Cuidado! ¡Un tipo con sombrero y gabardina acaba de pasar corriendo!",
+    "Está en la ciudad, estoy seguro. Oí a alguien decir 'sin comentarios' aquí cerca.",
+    "¡Está aquí! Vi a un asesor cargando una maleta llena de panetones.",
+    "¡Está muy cerca! Se le cayó al suelo una nota que dice 'Cero Uno'.",
+    "Yo que tú me daría prisa. Preguntó dónde estaba la salida más cercana."
+  ],
+  "taunts": [
+    "Nota dejada en el mostrador: '¡Nunca me van a atrapar! Firmado: 01'",
+    "Garabateado en una servilleta: 'Sin comentarios. — F.'",
+    "Mensaje en el contestador: '¡Oye, reportero, ríndete! Jajaja'",
+    "Pósit amarillo: 'Vuelvo enseguida (no vuelvo).'"
+  ],
+  "gags": [
+    { "text": "Un asesor te ofreció un cafecito. Duró dos horas." },
+    { "text": "Te añadieron a un grupo familiar de WhatsApp y perdiste una hora leyendo cadenas." },
+    { "text": "Una caravana de motos bloqueó la calle. Esperaste una hora para cruzar." },
+    { "text": "Alguien te mandó el enlace de un directo de cuatro horas. Solo viste una." },
+    { "text": "Un coche negro con vidrios polarizados te siguió y diste un rodeo enorme para despistarlo." },
+    { "text": "Un abogado te entregó una notificación extrajudicial de 80 páginas. La leíste entera." }
+  ],
+  "sleep": [
+    "Ya son más de las once. Duermes en un hotel barato hasta las 7.",
+    "Agotado, echas una cabezada en un banco de la estación de autobuses hasta la mañana.",
+    "Hora de dormir. La redacción solo paga la jornada hasta las 23 h."
+  ],
+  "ranks": [
+    { "title": "Becario(a)" },
+    { "title": "Reportero(a) Júnior" },
+    { "title": "Reportero(a)" },
+    { "title": "Reportero(a) Sénior" },
+    { "title": "Editor(a) Jefe" }
+  ],
+  "headlines": {
+    "win": [
+      "¡PRIMICIA! {player} encuentra a Flávio en {city} y por fin hace la pregunta",
+      "PILLADO: hallan al senador {spot} en {city}",
+      "EXCLUSIVA: {player} le arranca un 'sin comentarios' cara a cara en {city}"
+    ],
+    "no_pauta": [
+      "¡SE ESCAPÓ! Sin pauta aprobada, {player} ve huir al senador en {city}",
+      "OTRA VEZ NO: Flávio se escurre entre los dedos de la prensa en {city}"
+    ],
+    "wrong_pauta": [
+      "¡RIDÍCULO! {player} entrevista al disfraz equivocado y el senador huye en {city}",
+      "METEDURA DE PATA: diario publica la foto del doble equivocado en {city}"
+    ],
+    "timeout": [
+      "PLAZO AGOTADO: la edición del domingo sale sin la primicia de {player}",
+      "DESAPARECIÓ DEL TODO: el rastro del senador se enfría tras una semana de búsqueda"
+    ]
+  }
+}

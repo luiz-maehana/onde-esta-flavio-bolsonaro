@@ -33,7 +33,11 @@ func _ready() -> void:
 	_show_info(GameManager.arrival_messages)
 	GameManager.arrival_messages = []
 	UiTheme.focus_first(_actions)
-	_tips.try_show("city")
+	if GameManager.consume_reopen_options():
+		_open_pause()
+		_pause._open_options()
+	else:
+		_tips.try_show("city")
 
 func _build() -> void:
 	var bg := ColorRect.new()
@@ -241,9 +245,9 @@ func _on_location_chosen(loc_id: String) -> void:
 
 	_speech_queue.clear()
 	if not result["gag"].is_empty():
-		_speech_queue.append(["IMPREVISTO (+%dh)" % result["gag"]["hours"], result["gag"]["text"], PixelPortrait.witness("gag", "taxi")])
+		_speech_queue.append([Lang.t("IMPREVISTO (+%dh)") % result["gag"]["hours"], result["gag"]["text"], PixelPortrait.witness("gag", "taxi")])
 	if result["slept"]:
-		_speech_queue.append(["Diário do repórter", GameData.random_line("sleep"), PixelPortrait.witness("reporter", "shopping")])
+		_speech_queue.append([Lang.t("Diário do repórter"), GameData.random_line("sleep"), PixelPortrait.witness("reporter", "shopping")])
 	var gag_hours: int = result["gag"].get("hours", 0)
 	var role := "%s · %dh" % [result["role"], result["hours"] - gag_hours]
 	_witness.show_speech(role, result["text"], portrait)
@@ -251,7 +255,7 @@ func _on_location_chosen(loc_id: String) -> void:
 func _on_speech_finished() -> void:
 	if not _speech_queue.is_empty():
 		var next: Array = _speech_queue.pop_front()
-		if next[0] == "Diário do repórter":
+		if next[0] == Lang.t("Diário do repórter"):
 			AudioManager.play_sfx("sleep")
 		_witness.show_speech(next[0], next[1], next[2])
 		return

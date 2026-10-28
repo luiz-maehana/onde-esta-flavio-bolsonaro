@@ -48,7 +48,7 @@ static func generate(rng: RandomNumberGenerator, config_in: Dictionary) -> CaseS
 			state.decoys.append(pick_decoys(rng, state.route, DECOYS_PER_STOP))
 		state.city_locations[state.route[i]] = pick_locations(rng, GameData.city(state.route[i]))
 	for i in route_len - 1:
-		var clues: Array = GameData.city(state.route[i + 1])["clues"].duplicate()
+		var clues: Array = range(GameData.city(state.route[i + 1])["clues"].size())
 		shuffle(rng, clues)
 		state.route_clues.append(clues.slice(0, LOCATIONS_PER_CITY))
 
@@ -59,8 +59,8 @@ static func generate(rng: RandomNumberGenerator, config_in: Dictionary) -> CaseS
 
 	var scandals := GameData.scandals()
 	state.scandal = scandals[rng.randi_range(0, scandals.size() - 1)]
-	state.reason = _pick(rng, state.scandal["reasons"])
-	state.found_spot = _pick(rng, state.scandal["found_spots"])
+	state.reason_index = rng.randi_range(0, state.scandal["reasons"].size() - 1)
+	state.found_spot_index = rng.randi_range(0, state.scandal["found_spots"].size() - 1)
 	state.hideout_slot = rng.randi_range(0, LOCATIONS_PER_CITY - 1)
 	return state
 
@@ -124,6 +124,3 @@ static func shuffle(rng: RandomNumberGenerator, arr: Array) -> void:
 		var tmp = arr[i]
 		arr[i] = arr[j]
 		arr[j] = tmp
-
-static func _pick(rng: RandomNumberGenerator, arr: Array) -> Variant:
-	return arr[rng.randi_range(0, arr.size() - 1)]

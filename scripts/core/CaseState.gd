@@ -34,19 +34,40 @@ var config: Dictionary = {}
 var route: Array = []
 ## decoys[i] = 3 cidades-isca oferecidas ao viajar a partir de route[i].
 var decoys: Array = []
-## route_clues[i] = 3 pistas (uma por local) sobre route[i + 1].
+## route_clues[i] = 3 pistas (uma por local) sobre route[i + 1]: índices em
+## `clues` daquela cidade.
 var route_clues: Array = []
 ## Parada -> {"trait": chave, "slot": índice do local que revela}.
 var trait_plan: Dictionary = {}
 ## Parada -> índice do local onde ele deixou um bilhete provocativo.
 var taunt_plan: Dictionary = {}
 var city_locations: Dictionary = {}
-var disguise: Dictionary = {}
+## Idiomas (spec 008): o caso guarda ids e índices, nunca texto — o texto é
+## buscado no idioma atual na hora de mostrar. Os sorteios só dependem do
+## tamanho das listas, então nada muda em save, replay ou servidor.
+var disguise_id := ""
+var disguise: Dictionary:
+	get:
+		return GameData.disguise(disguise_id)
+	set(value):
+		disguise_id = value.get("id", "")
 ## Escândalo real que dá tema ao caso (spec 002), de data/scandals.json.
-var scandal: Dictionary = {}
-var reason := ""
+var scandal_id := ""
+var scandal: Dictionary:
+	get:
+		return GameData.scandal(scandal_id)
+	set(value):
+		scandal_id = value.get("id", "")
+## Motivo da fuga e onde ele é achado: índices nas listas do escândalo.
+var reason_index := 0
+var reason: String:
+	get:
+		return scandal["reasons"][reason_index]
+var found_spot_index := 0
+var found_spot: String:
+	get:
+		return scandal["found_spots"][found_spot_index]
 var hideout_slot := 0
-var found_spot := ""
 
 ## --- Progresso ------------------------------------------------------------
 var stop_index := 0
@@ -56,6 +77,8 @@ var pauta := ""
 var dossier: Dictionary = {}
 var outcome := Outcome.NONE
 var visited: Dictionary = {}
+## Anotações: {"city": id, "speech": receita do ClueBuilder} — o texto sai no
+## idioma atual (ClueBuilder.render).
 var notes: Array = []
 ## Ações válidas na ordem: ["i", local] / ["t", cidade] / ["p", disfarce] /
 ## ["d", característica, valor].
@@ -113,7 +136,7 @@ func can_investigate(loc_id: String) -> bool:
 
 ## Visita um local da cidade atual. Retorna {role, text, kind, hours, slept,
 ## gag, trait} — `kind` é "clue", "cold", "near" ou "found" (ver
-## ClueBuilder); {} se a ação for inválida.
+## ClueBuilder), texto no idioma atual; {} se a ação for inválida.
 func investigate(loc_id: String) -> Dictionary:
 	if not can_investigate(loc_id):
 		return {}
@@ -129,7 +152,8 @@ func investigate(loc_id: String) -> Dictionary:
 	var key := "%s:%s" % [current_city, loc_id]
 	if not _witness_cache.has(key):
 		_witness_cache[key] = ClueBuilder.build(self, slot)
-	var result: Dictionary = _witness_cache[key].duplicate()
+	var speech: Dictionary = _witness_cache[key]
+	var result := ClueBuilder.render(self, speech)
 
 	var gag := {}
 	if first_visit and is_on_trail() and not is_final_stop() and rng.randi_range(0, 99) < GAG_PERCENT:
@@ -143,7 +167,7 @@ func investigate(loc_id: String) -> Dictionary:
 	if result["slept"]:
 		nights += 1
 	if first_visit and result["kind"] != "found":
-		notes.append({"city": current_city_data()["name"], "role": result["role"], "text": result["text"]})
+		notes.append({"city": current_city, "speech": speech})
 
 	if clock.is_expired():
 		outcome = Outcome.TIMEOUT

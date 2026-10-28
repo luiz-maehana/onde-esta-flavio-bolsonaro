@@ -3,6 +3,8 @@ extends Control
 ## entradas (mesmo aparelho) aparecem destacadas.
 
 const COLUMNS := [["#", 50], ["REPÓRTER", 300], ["CARGO", 230], ["PONTOS", 120], ["HORAS", 100], ["ONDE", 200]]
+## Apelido que o servidor põe no lugar de um recusado (server/src/nickname.ts).
+const ANONYMOUS := "Repórter Anônimo"
 ## Em pé (RF36) cabem só estas colunas (índices de COLUMNS).
 const PORTRAIT_COLUMNS := [0, 1, 3, 4]
 
@@ -23,6 +25,7 @@ func _ready() -> void:
 
 	# quebra linha em pé: o selo de online desce pra baixo das abas
 	var tabs := HFlowContainer.new()
+	Responsive.fill_row(tabs)
 	tabs.add_theme_constant_override("h_separation", 10)
 	tabs.add_theme_constant_override("v_separation", 10)
 	var group := ButtonGroup.new()
@@ -80,13 +83,27 @@ func _load() -> void:
 		var you: bool = e.get("is_you", false) == true
 		var city: Dictionary = GameData.city(str(e.get("city", "")))
 		_list.add_child(_row([
-			"%dº" % int(e.get("position", 0)),
-			str(e.get("nickname", "?")) + (" (você)" if you else ""),
-			str(e.get("rank_title", "")),
+			Lang.t("%dº") % int(e.get("position", 0)),
+			_nickname(e) + (Lang.t(" (você)") if you else ""),
+			_rank_title(e),
 			str(int(e.get("score", 0))),
 			"%dh" % int(e.get("hours", 0)),
 			city.get("name", "—"),
 		], Palette.RED_DARK if you else Palette.INK, false))
+
+## Cargo no idioma do jogador pelo índice que o servidor manda (spec 008);
+## servidor antigo só manda o título em português.
+func _rank_title(e: Dictionary) -> String:
+	var ranks: Array = GameData.flavor()["ranks"]
+	var i = e.get("rank")
+	if (typeof(i) == TYPE_INT or typeof(i) == TYPE_FLOAT) and int(i) >= 0 and int(i) < ranks.size():
+		return ranks[int(i)]["title"]
+	return str(e.get("rank_title", ""))
+
+## Apelido recusado pela moderação chega como "Repórter Anônimo": traduzido.
+func _nickname(e: Dictionary) -> String:
+	var nick := str(e.get("nickname", "?"))
+	return Lang.t(ANONYMOUS) if nick == ANONYMOUS else nick
 
 ## Linha da tabela com larguras fixas por coluna.
 func _row(values: Array, color: Color, header: bool) -> HBoxContainer:

@@ -2,9 +2,12 @@ extends Control
 ## Tela de título (US1/US2): arte do usuário de fundo, faixa de tinta embaixo
 ## com carreira + menu, aviso de paródia, e o cadastro do nome do repórter.
 
-const BACKGROUND := preload("res://assets/ui/title_background.png")
-## Arte própria pro celular em pé (9:16).
-const BACKGROUND_PORTRAIT := preload("res://assets/ui/title_background_portrait.png")
+## Arte do título por idioma e orientação (spec 008): deitado 16:9, em pé
+## 9:16. Carregada sob demanda (são 6 imagens grandes).
+const ART_PATH := "res://assets/ui/title_background%s%s.png"
+
+static func art_path(lang: String, portrait: bool) -> String:
+	return ART_PATH % ["_portrait" if portrait else "", "" if lang == "pt" else "_" + lang]
 ## Distância do crachá de nome ao topo da tela no toque (teclado embaixo).
 const NAME_DIALOG_TOP := 24
 const DISCLAIMER := "PARÓDIA — piadas e situações são inventadas. Os boxes \"Entenda o caso\" resumem reportagens publicadas, com o status de cada apuração (investigação não é condenação). Sem afiliação com partidos ou com Carmen Sandiego."
@@ -34,13 +37,13 @@ func _ready() -> void:
 		# em pé: arte retrato na largura toda, presa no topo. Cobrir a tela
 		# cortaria as laterais do letreiro nos celulares compridos; o que sobra
 		# embaixo fica sob a barra do menu.
-		bg.texture = BACKGROUND_PORTRAIT
+		bg.texture = load(art_path(Lang.current, true))
 		bg.stretch_mode = TextureRect.STRETCH_SCALE
 		bg.set_anchors_preset(Control.PRESET_TOP_WIDE)
-		var art := BACKGROUND_PORTRAIT.get_size()
+		var art := bg.texture.get_size()
 		bg.custom_minimum_size.y = Responsive.PORTRAIT_SIZE.x * art.y / art.x
 	else:
-		bg.texture = BACKGROUND
+		bg.texture = load(art_path(Lang.current, false))
 		bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
@@ -51,7 +54,9 @@ func _ready() -> void:
 	_build_online_badge()
 	GameManager.case_starting.connect(_on_case_starting)
 	_refresh()
-	if GameManager.has_player():
+	if GameManager.consume_reopen_options():
+		_open_options()
+	elif GameManager.has_player():
 		UiTheme.focus_first(_menu_buttons)
 	else:
 		_open_name_dialog()
@@ -87,10 +92,13 @@ func _build_bottom_bar() -> void:
 
 	var grid := GridContainer.new()
 	grid.columns = 2 if portrait else 4
-	var button_size := Vector2(320, 72) if portrait else Vector2(178, 56)
+	var button_size := Vector2(0, 72) if portrait else Vector2(178, 56)
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	row.add_child(grid)
+	Responsive.fill_row(grid)
+	if portrait:
+		grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var has_saved := GameManager.has_saved_case()
 	var resume := UiTheme.button("CONTINUAR CASO", button_size)
 	resume.pressed.connect(GameManager.continue_case)
@@ -191,8 +199,8 @@ func _refresh() -> void:
 		_career_label.text = "Nenhum repórter contratado ainda."
 		return
 	var next := c.next_rank()
-	var progress := "cargo máximo!" if next.is_empty() else _missing_text(next["min_cases"] - c.cases_solved)
-	_career_label.text = "%s — %s\n%d de %d casos resolvidos · %s" % [c.player_name, c.rank()["title"], c.cases_solved, c.cases_played, progress]
+	var progress := Lang.t("cargo máximo!") if next.is_empty() else _missing_text(next["min_cases"] - c.cases_solved)
+	_career_label.text = Lang.t("%s — %s\n%d de %d casos resolvidos · %s") % [c.player_name, c.rank()["title"], c.cases_solved, c.cases_played, progress]
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("ui_cancel"):
@@ -206,7 +214,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _missing_text(cases: int) -> String:
-	return "falta 1 p/ promoção" if cases == 1 else "faltam %d p/ promoção" % cases
+	return Lang.t("falta 1 p/ promoção") if cases == 1 else Lang.t("faltam %d p/ promoção") % cases
 
 func _build_options() -> void:
 	_options_overlay = Overlay.new()

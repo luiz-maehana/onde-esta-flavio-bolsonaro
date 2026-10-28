@@ -5,7 +5,8 @@ extends Control
 ##
 ## Orientação (RF36): ao girar o aparelho, troca o tamanho-base (1280x720 /
 ## 720x1280) e remonta a tela atual no arranjo da nova orientação — o estado
-## mora no GameManager, então nada se perde além de uma fala aberta.
+## mora no GameManager, então nada se perde além de uma fala aberta. Trocar o
+## idioma (spec 008) remonta do mesmo jeito.
 
 const SCREENS := {
 	"title": preload("res://scenes/TitleScreen.tscn"),
@@ -36,6 +37,7 @@ func _ready() -> void:
 	_portrait = Responsive.is_portrait()
 	get_window().content_scale_size = Responsive.base_size()
 	get_tree().root.size_changed.connect(_on_window_resized)
+	GameManager.language_changed.connect(_remount)
 	_swap("title")
 	_fade_to(0.0)
 
@@ -64,6 +66,11 @@ func _on_window_resized() -> void:
 		return
 	_portrait = portrait
 	get_window().content_scale_size = Responsive.base_size()
+	_remount()
+
+## Remonta a tela atual (girou o aparelho ou trocou o idioma): o estado mora
+## no GameManager, então só se perde uma fala aberta.
+func _remount() -> void:
 	if not _switching and _current_name != "":
 		_swap(_current_name)
 

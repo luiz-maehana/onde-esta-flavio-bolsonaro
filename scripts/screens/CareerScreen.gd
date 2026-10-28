@@ -15,12 +15,12 @@ func _ready() -> void:
 	page.set_texts("FICHA DO REPÓRTER", "%s — %s" % [c.player_name.to_upper(), c.rank()["title"].to_upper()])
 
 	var stats := [
-		"Casos resolvidos: %d de %d" % [c.cases_solved, c.cases_played],
-		"Casos sem pisar em cidade errada: %d" % c.clean_wins,
-		"Melhor tempo: %s" % ("%dh" % c.best_hours if c.best_hours > 0 else "—"),
-		"Disfarces flagrados: %d de %d" % [c.disguises_caught.size(), GameData.disguises().size()],
-		"Escândalos cobertos: %d de %d" % [c.scandals_covered.size(), GameData.scandals().size()],
-		"Cidades visitadas: %d de %d" % [c.cities_visited.size(), GameData.cities().size()],
+		Lang.t("Casos resolvidos: %d de %d") % [c.cases_solved, c.cases_played],
+		Lang.t("Casos sem pisar em cidade errada: %d") % c.clean_wins,
+		Lang.t("Melhor tempo: %s") % ("%dh" % c.best_hours if c.best_hours > 0 else "—"),
+		Lang.t("Disfarces flagrados: %d de %d") % [c.disguises_caught.size(), GameData.disguises().size()],
+		Lang.t("Escândalos cobertos: %d de %d") % [c.scandals_covered.size(), GameData.scandals().size()],
+		Lang.t("Cidades visitadas: %d de %d") % [c.cities_visited.size(), GameData.cities().size()],
 	]
 	page.add_paragraph("\n".join(stats), 26)
 	page.body_column.add_child(UiTheme.headline("ÁLBUM DE FLAGRANTES", 14, Palette.RED))

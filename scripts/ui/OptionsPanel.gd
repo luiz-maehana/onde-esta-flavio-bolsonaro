@@ -75,6 +75,7 @@ func _build() -> void:
 		_row(col, "TELA CHEIA", _web_fullscreen)
 
 	var speeds := HBoxContainer.new()
+	Responsive.fill_row(speeds, true)
 	speeds.add_theme_constant_override("separation", 8)
 	var group := ButtonGroup.new()
 	for speed in Settings.TEXT_SPEEDS:
@@ -90,7 +91,26 @@ func _build() -> void:
 		speeds.add_child(b)
 	_row(col, "TEXTO", speeds)
 
+	# idioma (spec 008): cada um escrito nele mesmo; troca na hora
+	var languages := HBoxContainer.new()
+	Responsive.fill_row(languages, true)
+	languages.add_theme_constant_override("separation", 8)
+	var language_group := ButtonGroup.new()
+	language_group.allow_unpress = false
+	for code in Lang.SUPPORTED:
+		var lb := UiTheme.button(Lang.NAMES[code], Vector2(150, 48))
+		lb.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+		lb.toggle_mode = true
+		lb.button_group = language_group
+		lb.button_pressed = code == Lang.current
+		lb.toggled.connect(func(on):
+			if on:
+				GameManager.set_language(code))
+		languages.add_child(lb)
+	_row(col, "IDIOMA", languages)
+
 	var tips := HBoxContainer.new()
+	Responsive.fill_row(tips, true)
 	tips.add_theme_constant_override("separation", 8)
 	var tips_toggle := UiTheme.toggle(TIPS_ON, TIPS_OFF, s.tips_enabled, func(on):
 		s.tips_enabled = on
@@ -102,6 +122,7 @@ func _build() -> void:
 	_row(col, "DICAS", tips)
 
 	var ranking := HBoxContainer.new()
+	Responsive.fill_row(ranking, true)
 	ranking.add_theme_constant_override("separation", 8)
 	var ranking_group := ButtonGroup.new()
 	ranking_group.allow_unpress = false
@@ -154,7 +175,7 @@ func _sync_web_fullscreen() -> void:
 ## em application/config/version antes de exportar — diz qual código está no
 ## ar. Rodando local é "dev".
 static func version_text() -> String:
-	return "Versão " + str(ProjectSettings.get_setting("application/config/version", "dev"))
+	return Lang.t("Versão %s") % str(ProjectSettings.get_setting("application/config/version", "dev"))
 
 ## Rever dicas: zera as vistas e religa as dicas — o botão de liga/desliga ao
 ## lado passa a mostrar LIGADAS, e o próprio botão confirma por um instante

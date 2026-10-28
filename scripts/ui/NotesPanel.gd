@@ -36,6 +36,7 @@ func open(case: CaseState) -> void:
 		_list.add_child(UiTheme.body("Nada anotado ainda. Vá investigar!", 28, Palette.GREY))
 	for i in range(case.notes.size() - 1, -1, -1):
 		var n: Dictionary = case.notes[i]
-		_list.add_child(UiTheme.body("%s · %s: \"%s\"" % [n["city"].to_upper(), n["role"], n["text"]], 26))
+		var speech := ClueBuilder.render(case, n["speech"])
+		_list.add_child(UiTheme.body("%s · %s: \"%s\"" % [GameData.city(n["city"])["name"].to_upper(), speech["role"], speech["text"]], 26))
 	visible = true
 	_close.call_deferred("grab_focus")

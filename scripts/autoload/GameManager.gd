@@ -6,6 +6,8 @@ extends Node
 
 signal screen_requested(screen_name: String)
 signal settings_changed
+## Idioma trocado nas Opções: Main remonta a tela atual (spec 008).
+signal language_changed
 ## Caso novo sendo preparado (pode esperar o servidor do ranking).
 signal case_starting
 ## Resposta do servidor do ranking pro caso que acabou de terminar.
@@ -37,6 +39,7 @@ var _starting := false
 func _ready() -> void:
 	career = SaveService.load()
 	settings = Settings.load_or_default()
+	Lang.apply(language())
 	apply_settings.call_deferred()
 
 func has_player() -> bool:
@@ -57,6 +60,27 @@ func apply_settings() -> void:
 		if DisplayServer.window_get_mode() != mode:
 			DisplayServer.window_set_mode(mode)
 	settings_changed.emit()
+
+## Idioma em uso: o escolhido, ou o do sistema/navegador na primeira vez.
+func language() -> String:
+	return settings.language if settings.language != "" else Lang.detect(OS.get_locale())
+
+func set_language(lang: String) -> void:
+	if Lang.sanitize(lang) == "" or lang == Lang.current:
+		return
+	settings.language = lang
+	settings.save()
+	Lang.apply(lang)
+	reopen_options = true
+	language_changed.emit()
+
+## Trocou o idioma pelas Opções: a tela remontada reabre as Opções.
+var reopen_options := false
+
+func consume_reopen_options() -> bool:
+	var was := reopen_options
+	reopen_options = false
+	return was
 
 func save_settings() -> void:
 	settings.save()
@@ -116,7 +140,7 @@ func continue_case() -> void:
 		SaveService.clear_case()
 		screen_requested.emit(TITLE)
 		return
-	arrival_messages = ["Caso retomado em %s. %s." % [case.current_city_data()["name"], case.clock.time_text()]]
+	arrival_messages = [Lang.t("Caso retomado em %s. %s.") % [case.current_city_data()["name"], case.clock.time_text()]]
 	screen_requested.emit(CITY)
 
 func save_case() -> void:
@@ -137,7 +161,7 @@ func travel_to(city_id: String) -> void:
 		return
 	save_case()
 	var city_name: String = GameData.city(city_id)["name"]
-	arrival_messages = ["Voo de %dh. Você desembarca em %s." % [result["hours"], city_name]]
+	arrival_messages = [Lang.t("Voo de %dh. Você desembarca em %s.") % [result["hours"], city_name]]
 	if result["slept"]:
 		arrival_messages.append(GameData.random_line("sleep"))
 	if case.is_over():

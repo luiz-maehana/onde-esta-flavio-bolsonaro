@@ -20,6 +20,8 @@ var seen_tips: Array = []
 ## Ranking online (spec 006): "ask" = perguntar no primeiro caso vencido.
 const RANKING_CHOICES := ["ask", "yes", "no"]
 var ranking := "ask"
+## Idioma escolhido (spec 008); "" = ainda não escolheu, segue o sistema.
+var language := ""
 
 func chars_per_second() -> float:
 	return CHARS_PER_SECOND[text_speed]
@@ -29,7 +31,7 @@ func to_dict() -> Dictionary:
 		"music_volume": music_volume, "sfx_volume": sfx_volume, "muted": muted,
 		"fullscreen": fullscreen, "text_speed": text_speed,
 		"tips_enabled": tips_enabled, "seen_tips": seen_tips,
-		"ranking": ranking,
+		"ranking": ranking, "language": language,
 	}
 
 static func from_dict(d: Dictionary) -> Settings:
@@ -39,6 +41,7 @@ static func from_dict(d: Dictionary) -> Settings:
 	s.muted = _bool(d.get("muted"), false)
 	s.fullscreen = _bool(d.get("fullscreen"), false)
 	s.tips_enabled = _bool(d.get("tips_enabled"), true)
+	s.language = Lang.sanitize(d.get("language"))
 	var rk = d.get("ranking")
 	if typeof(rk) == TYPE_STRING and RANKING_CHOICES.has(rk):
 		s.ranking = rk

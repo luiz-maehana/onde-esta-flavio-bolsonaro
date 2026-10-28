@@ -1,0 +1,137 @@
+[
+  {
+    "id": "rachadinha",
+    "title": "Las 'rachadinhas' de la Alerj",
+    "summary": "La Fiscalía de Río de Janeiro (MP-RJ) acusó al entonces diputado estatal de quedarse con parte de los sueldos de los asesores de su despacho en la Asamblea Legislativa de Río (Alerj), en un esquema que habría tenido a Fabrício Queiroz como operador. En 2021 el Superior Tribunal de Justicia (STJ) anuló el levantamiento del secreto bancario y fiscal del caso y, en 2022, el Tribunal de Justicia de Río (TJ-RJ) archivó la denuncia. El senador siempre negó irregularidades.",
+    "status": "Denuncia archivada en 2022 tras la anulación de pruebas; en septiembre de 2026 se pidió al MP-RJ reabrir el caso.",
+    "reasons": [
+      "salió corriendo cuando un reportero pidió 'dividir la cuenta' del cafecito",
+      "desapareció en plena rueda de prensa justo después de que alguien preguntara por Queiroz"
+    ],
+    "found_spots": [
+      "repartiendo un sándwich mixto en doce partes iguales con sus asesores",
+      "detrás de una pila de recibos de sueldo"
+    ],
+    "taunts": [
+      "Nota: 'Aquí lo repartimos todo, hasta la propina. — 01'",
+      "Mensaje: '¿Dónde está Queiroz? ¡Pregúntale a él, no a mí!'"
+    ],
+    "gags": [
+      { "text": "Doce asesores aparecieron para dividir tu cuenta del almuerzo. La cuenta tardó dos horas." }
+    ],
+    "near": [
+      "¡Está aquí! Pidió doce facturas separadas por un solo pan de queso."
+    ],
+    "headlines_win": [
+      "SIN REPARTIR: {player} se queda con la primicia entera en {city}"
+    ]
+  },
+  {
+    "id": "chocolate",
+    "title": "La tienda de chocolates",
+    "summary": "En 2019 la Fiscalía de Río (MP-RJ) registró una franquicia de chocolates Kopenhagen de la que el senador era socio en Barra da Tijuca, señalando la tienda como posible vía de lavado de dinero en el caso de las 'rachadinhas'. Él devolvió la franquicia en 2020. La acusación formaba parte de la denuncia de las 'rachadinhas', archivada en 2022.",
+    "status": "Investigación incluida en la denuncia de las 'rachadinhas', archivada en 2022.",
+    "reasons": [
+      "se escapó de la rueda de prensa por la puerta trasera de una tienda de chocolates",
+      "huyó con una caja de bombones 'para regalo' bajo el brazo"
+    ],
+    "found_spots": [
+      "detrás de una pila de cajas de bombones",
+      "dentro de un huevo de Pascua gigante"
+    ],
+    "taunts": [
+      "Envoltorio de bombón con un mensaje: 'Este ya viene lavado. — 01'",
+      "Nota manchada de chocolate: 'Dulce es la vida de quien no da entrevistas.'"
+    ],
+    "gags": [
+      { "text": "Una vendedora te ofreció una degustación de 40 sabores de bombón. Los probaste todos." }
+    ],
+    "near": [
+      "¡Está cerca! Hay un rastro de envoltorios de bombón en esa dirección."
+    ],
+    "headlines_win": [
+      "DULCE PRIMICIA: {player} encuentra al senador en {city} con la boca llena de chocolate"
+    ]
+  },
+  {
+    "id": "mansao",
+    "title": "La mansión del Lago Sul",
+    "summary": "En 2021 el senador compró una casa de unos R$ 6 millones en el Lago Sul, en Brasilia, con un préstamo de R$ 3,1 millones del banco público BRB a un interés por debajo del promedio del banco, según reportajes. La Policía Federal (PF) empezó a investigar las condiciones del préstamo en el marco del caso Banco Master. El préstamo se pagó antes del plazo.",
+    "status": "En investigación por la PF (octubre de 2026); no hay decisión judicial sobre el caso.",
+    "reasons": [
+      "salió a 'echar un vistazo a la piscina' y no volvió más",
+      "huyó de la rueda de prensa cuando le preguntaron la tasa de interés del préstamo"
+    ],
+    "found_spots": [
+      "flotando en una piscina con forma de signo de dólar",
+      "escondido en el vestidor de una mansión de doce suites"
+    ],
+    "taunts": [
+      "Folleto inmobiliario con un mensaje: 'Interés bajito, ¿eh? — 01'",
+      "Nota: 'Fui a ver un inmueble. Solo R$ 6 millones, una ganga.'"
+    ],
+    "gags": [
+      { "text": "Un agente inmobiliario te mostró un piso 'con interés especial'. La visita duró dos horas." }
+    ],
+    "near": [
+      "¡Está aquí! Le preguntó al portero dónde está la sucursal bancaria más cercana."
+    ],
+    "headlines_win": [
+      "PRIMICIA DE R$ 6 MILLONES: {player} encuentra al senador en {city}"
+    ]
+  },
+  {
+    "id": "darkhorse",
+    "title": "La película Dark Horse",
+    "summary": "En mayo de 2026 varios reportajes revelaron que el senador negoció el patrocinio del banquero Daniel Vorcaro, del Banco Master, para la película 'Dark Horse', sobre Jair Bolsonaro. Admitió haber buscado patrocinio privado, pero negó ofrecer ventajas o usar dinero público. La productora niega haber recibido fondos del banquero.",
+    "status": "Caso bajo investigación en el Supremo Tribunal Federal (STF); no hay denuncia ni condena.",
+    "reasons": [
+      "dejó la rueda de prensa diciendo que iba a 'grabar una escena' y desapareció",
+      "huyó por la puerta del cine en pleno preestreno"
+    ],
+    "found_spots": [
+      "detrás de una claqueta gigante en un set de rodaje",
+      "escondido en la cabina de proyección de un cine"
+    ],
+    "taunts": [
+      "Entrada de cine con un mensaje: '¿Patrocinio? ¿Qué patrocinio? — 01'",
+      "Nota: 'Este caso todavía va a acabar en película. Uy.'"
+    ],
+    "gags": [
+      { "text": "Te invitaron a ver un tráiler. Era un tráiler de dos horas." }
+    ],
+    "near": [
+      "¡Está aquí! Pidió palomitas y preguntó si aceptaban patrocinio de bancos."
+    ],
+    "headlines_win": [
+      "FIN DE LA PELÍCULA: {player} encuentra al senador en {city} y salen los créditos"
+    ]
+  },
+  {
+    "id": "apostas",
+    "title": "La casa de apuestas del amigo",
+    "summary": "En octubre de 2026 la Policía Federal (PF) llevó al Supremo Tribunal Federal (STF) la investigación sobre si el senador sería socio oculto de BestBet, vinculada a su abogado y amigo Willer Tomaz; los investigadores señalan que tenía acceso de 'usuario máster' a una cuenta de un holding de Tomaz. El senador niega tener una cuenta conjunta o participación en empresas vinculadas a la casa de apuestas; Tomaz también niega irregularidades.",
+    "status": "Investigación abierta en el STF en octubre de 2026; no hay denuncia ni condena.",
+    "reasons": [
+      "le apostó a su equipo que nadie lo encontraría y desapareció",
+      "huyó de la rueda de prensa cuando le preguntaron qué es un 'usuario máster'"
+    ],
+    "found_spots": [
+      "mirando el marcador de un partido detrás de una máquina de apuestas",
+      "escondido en la cabina privada de un jet ejecutivo"
+    ],
+    "taunts": [
+      "Boleto de apuesta: 'Cuota de 100 a 1 a que no me encuentras. — 01'",
+      "Mensaje: '¿Socio oculto? ¡Oculto estoy yo ahora!'"
+    ],
+    "gags": [
+      { "text": "Un anuncio de apuestas no paraba de saltar en tu móvil. Perdiste una hora intentando cerrarlo." }
+    ],
+    "near": [
+      "¡Está aquí! Preguntó cuál es la cuota de que un reportero lo encuentre hoy."
+    ],
+    "headlines_win": [
+      "APUESTA PERDIDA: {player} encuentra al senador en {city}"
+    ]
+  }
+]

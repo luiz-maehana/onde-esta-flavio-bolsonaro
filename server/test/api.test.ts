@@ -183,6 +183,7 @@ test("ranking: uma linha por jogador, com o melhor resultado", async () => {
     const mine = board.data.entries.filter((e: { is_you: boolean }) => e.is_you);
     assert.equal(mine.length, 1);
     assert.equal(mine[0].score, Math.max(...scores), "fica o melhor resultado");
+    assert.equal(mine[0].rank, 0, "índice do cargo pro jogo traduzir (spec 008)");
     assert.deepEqual(board.data.entries.map((e: { position: number }) => e.position), [1, 2]);
   }
   // posição de B conta só o melhor de cada outro aparelho

@@ -1,0 +1,49 @@
+{
+  "trait_labels": { "hat": "En la cabeza", "ride": "Transporte", "hobby": "Pasatiempo", "snack": "Merienda" },
+  "traits": {
+    "hat": {
+      "bone": { "label": "Gorra", "witness": ["Llevaba una gorra verde y amarilla medio torcida.", "Iba de gorra, de esas de campaña."] },
+      "panama": { "label": "Sombrero panamá", "witness": ["Tenía un sombrero panamá elegantísimo.", "Llevaba un sombrero de paja muy fino, tipo panamá."] },
+      "capacete": { "label": "Casco", "witness": ["No se quitó el casco ni para hablar conmigo.", "Andaba con casco todo el tiempo, hasta dentro del edificio."] },
+      "peruca": { "label": "Peluca rubia", "witness": ["Tenía un pelo rubio raro... creo que era peluca.", "El flequillo rubio se le veía medio torcido, ¿sabes?"] },
+      "cowboy": { "label": "Sombrero vaquero", "witness": ["Llevaba un sombrero de rodeo enorme, de ala doblada.", "Tenía un sombrero de vaquero que apenas pasaba por la puerta."] }
+    },
+    "ride": {
+      "jetski": { "label": "Moto de agua", "witness": ["Preguntó dónde alquilar una moto de agua.", "Dijo que ahora solo anda en moto de agua."] },
+      "moto": { "label": "Caravana de motos", "witness": ["Llegó en una moto ruidosa, tocando la bocina.", "Dijo que iría en moto, \"en caravana, como en los viejos tiempos\"."] },
+      "iate": { "label": "Yate", "witness": ["Comentó que su yate estaba anclado cerca.", "Preguntó dónde atracar un yate."] },
+      "patinete": { "label": "Patinete", "witness": ["Se fue de aquí en patinete eléctrico.", "Pidió un patinete por la aplicación."] },
+      "jatinho": { "label": "Jet privado", "witness": ["Dijo que su jet privado lo esperaba en el hangar.", "Preguntó dónde aterrizar un jet privado."] }
+    },
+    "hobby": {
+      "jiujitsu": { "label": "Jiu-jitsu", "witness": ["Se puso a mostrarle llaves de jiu-jitsu al guardia.", "Preguntó si había un gimnasio de jiu-jitsu cerca."] },
+      "karaoke": { "label": "Karaoke", "witness": ["Cantó música sertaneja en el karaoke hasta que el micrófono pidió clemencia.", "Preguntó dónde había un karaoke abierto."] },
+      "golfe": { "label": "Golf", "witness": ["Cargaba una bolsa de palos de golf.", "Solo hablaba de hoyos, par y birdie — golf, ¿sabes?"] },
+      "selfie": { "label": "Selfi", "witness": ["Se sacó unas trescientas selfis en diez minutos.", "Andaba con un palo de selfi gigante."] },
+      "churrasco": { "label": "Asado", "witness": ["Solo hablaba de picaña y del punto de la carne.", "Preguntó dónde comprar carbón y una parrilla."] }
+    },
+    "snack": {
+      "leite": { "label": "Pan c/ leche condensada", "witness": ["Pidió pan con leche condensada. Otra vez.", "Preguntó si había leche condensada para untar el pan."] },
+      "panetone": { "label": "Panetón", "witness": ["Compró tres panetones, aunque no era temporada.", "Tenía la boca llena de panetón."] },
+      "chocolate": { "label": "Bombón", "witness": ["Se llenó los bolsillos de bombones de chocolate.", "Pagó con una caja de bombones, ¿te lo puedes creer?"] },
+      "pastel": { "label": "Pastel frito", "witness": ["Pidió un pastel frito de queso y jugo de caña.", "Tenía la mano llena de aceite de pastel frito."] },
+      "paodequeijo": { "label": "Pan de queso", "witness": ["Pidió una docena de panes de queso para llevar.", "Tenía migas de pan de queso por todo el abrigo."] }
+    }
+  },
+  "disguises": [
+    { "id": "turista", "name": "Turista de Riñonera", "reveal": "con riñonera, calcetines blancos con sandalias y un palo de selfi en la mano" },
+    { "id": "motoboy", "name": "Repartidor de Aplicación", "reveal": "con chaleco reflectante y mochila térmica, tarareando música sertaneja" },
+    { "id": "surfista", "name": "Surfista Bronceado", "reveal": "con bermudas, peluca rubia y un bronceado claramente de spray" },
+    { "id": "magnata", "name": "Magnate del Golf", "reveal": "con pantalón a cuadros, sombrero panamá y un palo de golf dorado" },
+    { "id": "influencer", "name": "Influencer Fitness", "reveal": "con camiseta de tirantes, gorra hacia atrás y grabando un story" },
+    { "id": "pagodeiro", "name": "Pagodero de Traje Blanco", "reveal": "con traje blanco, sombrero panamá y un pandero bajo el brazo" },
+    { "id": "piloto", "name": "Piloto de Moto de Agua", "reveal": "con chaleco salvavidas naranja y casco con cámara incorporada" },
+    { "id": "diva", "name": "Diva del Crucero", "reveal": "con una peluca rubia voluminosa, vestido de lentejuelas y micrófono en la mano" },
+    { "id": "peao", "name": "Vaquero de Rodeo", "reveal": "con sombrero vaquero, hebilla gigante en el cinturón y camisa a cuadros" },
+    { "id": "coach", "name": "Coach de Jet Privado", "reveal": "con blazer sobre camiseta negra, sombrero panamá y hablando de 'mindset'" },
+    { "id": "mergulhador", "name": "Buzo de Escafandra", "reveal": "dentro de una escafandra de bronce, goteando agua sobre la alfombra" },
+    { "id": "rainha", "name": "Reina de la Música Sertaneja", "reveal": "con una peluca morena voluminosa, chaqueta de flecos y botas altas" },
+    { "id": "gaucho", "name": "Asador Gaúcho", "reveal": "con bombachas, pañuelo al cuello y un espetón de picaña en la mano" },
+    { "id": "mineiro", "name": "Mineiro de Vacaciones", "reveal": "con gorra, gafas de sol y una bolsa de pan de queso bajo el brazo" }
+  ]
+}

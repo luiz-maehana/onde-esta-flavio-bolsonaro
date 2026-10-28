@@ -12,10 +12,13 @@ static var _all: Array = []
 
 static func all() -> Array:
 	if _all.is_empty():
-		var file := FileAccess.open(PATH, FileAccess.READ)
-		var parsed = JSON.parse_string(file.get_as_text()) if file else null
+		var parsed = GameData.localized(PATH)
 		_all = parsed if typeof(parsed) == TYPE_ARRAY else []
 	return _all
+
+## Troca de idioma: relê os textos.
+static func reload() -> void:
+	_all = []
 
 static func info(id: String) -> Dictionary:
 	for a in all():

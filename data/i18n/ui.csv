@@ -1,0 +1,166 @@
+keys,en,es
+" (revisitar)"," (revisit)"," (volver)"
+" (você)"," (you)"," (tú)"
+%dh até o fechamento da edição de domingo,%dh until the Sunday edition goes to press,%dh para el cierre de la edición del domingo
+%dº,#%d,%dº
+"%s
+%dh de voo","%s
+%dh flight","%s
+%dh de vuelo"
+%s %s — %d caso(s) resolvido(s) em %d.,%s %s — %d case(s) solved out of %d.,%s %s — %d caso(s) resuelto(s) de %d.
+"%s — %s
+%d de %d casos resolvidos · %s","%s — %s
+%d of %d cases solved · %s","%s — %s
+%d de %d casos resueltos · %s"
+"%s — A pauta dizia ""%s"", mas o senador estava disfarçado de %s. A matéria caiu e ele aproveitou a confusão para sumir de novo.","%s — The assignment said ""%s"", but the senator was disguised as the %s. The story was spiked and he used the confusion to vanish again.","%s — La pauta decía ""%s"", pero el senador iba disfrazado de %s. La nota se cayó y él aprovechó la confusión para desaparecer otra vez."
+"%s — O senador foi encontrado %s, mas sem pauta aprovada a redação não liberou a entrevista. Enquanto o editor ligava de volta, ele escapuliu — %s.","%s — The senator was found %s, but with no approved assignment the newsroom wouldn't clear the interview. While the editor called back, he slipped away — %s.","%s — Encontraron al senador %s, pero sin pauta aprobada la redacción no autorizó la entrevista. Mientras el editor devolvía la llamada, se escabulló — %s."
+"%s, %s — Após uma semana de perseguição, %s encontrou o senador %s, disfarçado de %s. Questionado, ele respondeu: ""Sem comentários."" Mas a foto já estava tirada.","%s, %s — After a week-long chase, %s found the senator %s, disguised as the %s. Asked for comment, he replied: ""No comment."" But the photo was already taken.","%s, %s — Tras una semana de persecución, %s encontró al senador %s, disfrazado de %s. Al ser preguntado, respondió: ""Sin comentarios."" Pero la foto ya estaba tomada."
+"%s, %s — O senador Flávio ""Zero Um"" Bolsonaro %s. Ele foi visto pela última vez em %s.","%s, %s — Senator Flávio ""Zero One"" Bolsonaro %s. He was last seen in %s.","%s, %s — El senador Flávio ""Cero Uno"" Bolsonaro %s. Fue visto por última vez en %s."
+A edição de domingo fechou às 17h sem o furo. O último paradeiro conhecido do senador era %s. Fontes dizem que ele usava um disfarce de %s.,The Sunday edition went to press at 17:00 without the scoop. The senator was last known to be in %s. Sources say he was disguised as the %s.,La edición del domingo cerró a las 17:00 sin la primicia. El último paradero conocido del senador era %s. Fuentes dicen que iba disfrazado de %s.
+ABANDONAR CASO,ABANDON CASE,ABANDONAR CASO
+AGORA NÃO,NOT NOW,AHORA NO
+ANOTAÇÕES,NOTES,NOTAS
+ASSINAR CONTRATO,SIGN CONTRACT,FIRMAR CONTRATO
+Atenção: um repórter novo começa a carreira do zero.,Heads up: a new reporter starts their career from scratch.,Atención: un reportero nuevo empieza la carrera desde cero.
+Bem-vindo(a) à Agência F.U.R.O. — Força Unificada de Repórteres Obstinados. Qual é o seu nome?,"Welcome to the F.U.R.O. Agency (Portuguese for ""scoop"") — the Unified Force of Relentless Reporters. What's your name?",Bienvenido(a) a la Agencia F.U.R.O. — Fuerza Unificada de Reporteros Obstinados. ¿Cómo te llamas?
+Buscando o ranking...,Loading the leaderboard...,Cargando el ranking...
+CADERNO DE ANOTAÇÕES,REPORTER'S NOTEBOOK,LIBRETA DE NOTAS
+CANCELAR,CANCEL,CANCELAR
+CARGO,TITLE,CARGO
+CARREIRA,CAREER,CARRERA
+CLASSIFICADOS DA REDAÇÃO,NEWSROOM CLASSIFIEDS,CLASIFICADOS DE LA REDACCIÓN
+CONECTANDO...,CONNECTING...,CONECTANDO...
+CONFIRMAR ABANDONO?,CONFIRM ABANDON?,¿CONFIRMAR ABANDONO?
+CONQUISTA: %s — %s,ACHIEVEMENT: %s — %s,LOGRO: %s — %s
+CONQUISTAS,ACHIEVEMENTS,LOGROS
+CONTINUAR,RESUME,CONTINUAR
+CONTINUAR >,CONTINUE >,CONTINUAR >
+CONTINUAR CASO,CONTINUE CASE,CONTINUAR CASO
+CRACHÁ DE IMPRENSA,PRESS BADGE,CREDENCIAL DE PRENSA
+Caso retomado em %s. %s.,Case resumed in %s. %s.,Caso retomado en %s. %s.
+Casos resolvidos: %d de %d,Cases solved: %d of %d,Casos resueltos: %d de %d
+Casos sem pisar em cidade errada: %d,Cases without a wrong city: %d,Casos sin pisar una ciudad equivocada: %d
+Cidades visitadas: %d de %d,Cities visited: %d of %d,Ciudades visitadas: %d de %d
+Compatíveis (%d): %s,Matching (%d): %s,Compatibles (%d): %s
+Conectando à redação...,Calling the newsroom...,Conectando con la redacción...
+DA SEMANA,THIS WEEK,DE LA SEMANA
+DESCARTAR O SALVO?,DISCARD SAVED CASE?,¿DESCARTAR EL GUARDADO?
+DESISTIR,GIVE UP,RENDIRSE
+DESLIGADAS,OFF,DESACTIVADOS
+DESLIGAR DICAS,TURN OFF TIPS,DESACTIVAR CONSEJOS
+DICA DO EDITOR,EDITOR'S TIP,CONSEJO DEL EDITOR
+DICAS,TIPS,CONSEJOS
+DICAS REATIVADAS,TIPS BACK ON,CONSEJOS REACTIVADOS
+DOSSIÊ,DOSSIER,EXPEDIENTE
+DOSSIÊ DO DISFARCE,DISGUISE DOSSIER,EXPEDIENTE DEL DISFRAZ
+Disfarces flagrados: %d de %d,Disguises caught: %d of %d,Disfraces pillados: %d de %d
+Diário do repórter,Reporter's diary,Diario del reportero
+Domingo,Sunday,Domingo
+EDIÇÃO ESPECIAL · %s,SPECIAL EDITION · %s,EDICIÓN ESPECIAL · %s
+EDIÇÃO EXTRA · %s · Caso nº %03d,EXTRA EDITION · %s · Case #%03d,EDICIÓN EXTRA · %s · Caso nº %03d
+EFEITOS,EFFECTS,EFECTOS
+EMBARCAR PARA %s,FLY TO %s,VOLAR A %s
+EMITIR PAUTA,ISSUE ASSIGNMENT,EMITIR PAUTA
+ENTENDA O CASO: %s,THE CASE IN BRIEF: %s,ENTIENDE EL CASO: %s
+ENTENDI,GOT IT,ENTENDIDO
+ENTRAR NO RANKING?,JOIN THE LEADERBOARD?,¿ENTRAR EN EL RANKING?
+ESCAPOU,GOT AWAY,SE ESCAPÓ
+Escândalos cobertos: %d de %d,Scandals covered: %d of %d,Escándalos cubiertos: %d de %d
+FECHAR,CLOSE,CERRAR
+FICAR,STAY,QUEDARSE
+FICHA DO REPÓRTER,REPORTER FILE,FICHA DEL REPORTERO
+FLAGRANTE: %s,CAUGHT: %s,PILLADO: %s
+FOTO OFICIAL: o senador,OFFICIAL PHOTO: the senator,FOTO OFICIAL: el senador
+FURO!,SCOOP!,¡PRIMICIA!
+Ficha do caso: %d cidade(s) investigada(s) de %d na rota · %d anotações · pauta: %s.,Case file: %d of %d cities on the route investigated · %d notes · assignment: %s.,Ficha del caso: %d de %d ciudades de la ruta investigadas · %d notas · pauta: %s.
+Flávio Bolsonaro — paradeiro desconhecido,Flávio Bolsonaro — whereabouts unknown,Flávio Bolsonaro — paradero desconocido
+Fontes: %s,Sources: %s,Fuentes: %s
+GERAL,ALL TIME,GENERAL
+HORAS,HOURS,HORAS
+IDIOMA,LANGUAGE,IDIOMA
+IMPREVISTO (+%dh),SETBACK (+%dh),IMPREVISTO (+%dh)
+INSTANTÂNEO,INSTANT,INSTANTÁNEO
+INVESTIGAR,INVESTIGATE,INVESTIGAR
+LENTO,SLOW,LENTO
+LIGADAS,ON,ACTIVADOS
+LIGADO,ON,ACTIVADO
+"Lá está ele, %s! Flávio Bolsonaro, disfarçado de %s — %s.","There he is, %s! Flávio Bolsonaro, disguised as the %s — %s.","¡Ahí está, %s! Flávio Bolsonaro, disfrazado de %s — %s."
+MENU,MENU,MENÚ
+MENU (ESC),MENU (ESC),MENÚ (ESC)
+MUDO,MUTED,SILENCIO
+"Marque o que as testemunhas contaram. Com um único disfarce possível, emita a pauta.","Mark what the witnesses told you. Once only one disguise fits, issue the assignment.","Marca lo que contaron los testigos. Cuando quede un solo disfraz posible, emite la pauta."
+Melhor tempo: %s,Best time: %s,Mejor tiempo: %s
+MÚSICA,MUSIC,MÚSICA
+NORMAL,NORMAL,NORMAL
+NOVO CASO,NEW CASE,NUEVO CASO
+Nada anotado ainda. Vá investigar!,Nothing written down yet. Go investigate!,Nada anotado todavía. ¡A investigar!
+Nenhum repórter contratado ainda.,No reporter hired yet.,Ningún reportero contratado todavía.
+Ninguém no ranking ainda — seja o primeiro!,Nobody on the leaderboard yet — be the first!,Nadie en el ranking todavía: ¡sé el primero!
+NÃO,NO,NO
+NÃO (F11),NO (F11),NO (F11)
+NÃO PARTICIPAR,DON'T JOIN,NO PARTICIPAR
+O FURO,O FURO,O FURO
+O caso é salvo automaticamente a cada ação.,The case is saved automatically after every action.,El caso se guarda automáticamente en cada acción.
+ONDE,WHERE,DÓNDE
+ONDE INVESTIGAR?,WHERE TO INVESTIGATE?,¿DÓNDE INVESTIGAR?
+OPÇÕES,OPTIONS,OPCIONES
+PARA ONDE?,WHERE TO?,¿A DÓNDE?
+PARTICIPAR,JOIN,PARTICIPAR
+"PARÓDIA — piadas e situações são inventadas. Os boxes ""Entenda o caso"" resumem reportagens publicadas, com o status de cada apuração (investigação não é condenação). Sem afiliação com partidos ou com Carmen Sandiego.","PARODY — jokes and situations are made up. The ""The case in brief"" boxes summarize published news reports, with the status of each inquiry (an investigation is not a conviction). Not affiliated with any party or with Carmen Sandiego.","PARODIA — los chistes y las situaciones son inventados. Los recuadros ""Entiende el caso"" resumen reportajes publicados, con el estado de cada investigación (investigación no es condena). Sin afiliación con partidos ni con Carmen Sandiego."
+PAUSA,PAUSED,PAUSA
+PAUTA APROVADA: %s,ASSIGNMENT APPROVED: %s,PAUTA APROBADA: %s
+PAUTA: nenhuma emitida,ASSIGNMENT: none issued,PAUTA: ninguna emitida
+PONTOS,POINTS,PUNTOS
+PROCURADO PARA ENTREVISTA,WANTED FOR AN INTERVIEW,BUSCADO PARA UNA ENTREVISTA
+PROMOÇÃO! A redação te nomeou %s.,PROMOTION! The newsroom named you %s.,¡ASCENSO! La redacción te nombró %s.
+Pontuação: %d (fora do ranking),Score: %d (not on the leaderboard),Puntuación: %d (fuera del ranking)
+Procurado para entrevista,Wanted for an interview,Buscado para una entrevista
+Quarta,Wednesday,Miércoles
+Quinta,Thursday,Jueves
+RANKING,LEADERBOARD,RANKING
+RANKING DOS REPÓRTERES,REPORTER LEADERBOARD,RANKING DE REPORTEROS
+RANKING: %d pontos · %dº lugar na semana,LEADERBOARD: %d points · #%d this week,RANKING: %d puntos · %dº lugar en la semana
+REPÓRTER,REPORTER,REPORTERO
+REVER DICAS,REPLAY TIPS,VOLVER A VER CONSEJOS
+Ranking indisponível agora.,Leaderboard unavailable right now.,Ranking no disponible ahora.
+Ranking indisponível agora. Tente de novo mais tarde.,Leaderboard unavailable right now. Try again later.,Ranking no disponible ahora. Inténtalo más tarde.
+"Ranking online: envia o nome do repórter, a pontuação e um código aleatório do aparelho. Nenhum dado pessoal.","Online leaderboard: sends the reporter's name, the score and a random device code. No personal data.","Ranking en línea: envía el nombre del reportero, la puntuación y un código aleatorio del dispositivo. Ningún dato personal."
+Ranking: conferindo o caso no servidor...,Leaderboard: checking the case on the server...,Ranking: verificando el caso en el servidor...
+Ranking: o resultado não conferiu no servidor.,Leaderboard: the result didn't check out on the server.,Ranking: el resultado no coincidió en el servidor.
+SAIR,QUIT,SALIR
+SALVAR E SAIR,SAVE AND QUIT,GUARDAR Y SALIR
+SIM,YES,SÍ
+SIM (F11),YES (F11),SÍ (F11)
+"SIM, QUERO","YES, I'M IN","SÍ, QUIERO"
+SOM,SOUND,SONIDO
+"SUA PAUTA, %s %s: siga a trilha, descubra o disfarce (cabeça, transporte, passatempo, lanche), emita a PAUTA no Dossiê e encontre-o até %s, para fazer só uma perguntinha sobre %s.","YOUR ASSIGNMENT, %s %s: follow the trail, figure out the disguise (headwear, ride, hobby, snack), issue the ASSIGNMENT in the Dossier and find him by %s, to ask just one little question about %s.","TU PAUTA, %s %s: sigue el rastro, descubre el disfraz (cabeza, transporte, pasatiempo, merienda), emite la PAUTA en el Expediente y encuéntralo a más tardar el %s, para hacerle solo una preguntita sobre %s."
+Saindo de %s — escolha o próximo voo,Leaving %s — pick the next flight,Saliendo de %s — elige el próximo vuelo
+Segunda,Monday,Lunes
+Seu nome,Your name,Tu nombre
+"Seus casos vencidos podem aparecer no ranking online como ""%s"". Dá pra mudar depois em Opções.","Your solved cases can show up on the online leaderboard as ""%s"". You can change this later in Options.","Tus casos resueltos pueden aparecer en el ranking en línea como ""%s"". Puedes cambiarlo después en Opciones."
+Sexta,Friday,Viernes
+"Sobre %s, na vida real: %s","About %s, in real life: %s","Sobre %s, en la vida real: %s"
+Status: %s,Status: %s,Estado: %s
+Sábado,Saturday,Sábado
+TELA CHEIA,FULLSCREEN,PANTALLA COMPLETA
+TEXTO,TEXT,TEXTO
+TROCAR REPÓRTER,CHANGE REPORTER,CAMBIAR REPORTERO
+Terça,Tuesday,Martes
+URGENTE,URGENT,URGENTE
+URGENTE: FLÁVIO BOLSONARO SOME DO MAPA,BREAKING: FLÁVIO BOLSONARO DROPS OFF THE MAP,URGENTE: FLÁVIO BOLSONARO DESAPARECE DEL MAPA
+VIAJAR,TRAVEL,VIAJAR
+VOLTAR,BACK,VOLVER
+VOLTAR À REDAÇÃO,BACK TO THE NEWSROOM,VOLVER A LA REDACCIÓN
+Versão %s,Version %s,Versión %s
+Você,You,Tú
+Você desembarca em %s. Hora de trabalhar.,You land in %s. Time to get to work.,Aterrizas en %s. Hora de trabajar.
+Voo de %dh. Você desembarca em %s.,%dh flight. You land in %s.,Vuelo de %dh. Aterrizas en %s.
+cargo máximo!,top title!,¡cargo máximo!
+falta 1 p/ promoção,1 to go for a promotion,falta 1 para el ascenso
+faltam %d p/ promoção,%d to go for a promotion,faltan %d para el ascenso
+nenhuma,none,ninguna
+ÁLBUM DE FLAGRANTES,CAUGHT-IN-THE-ACT ALBUM,ÁLBUM DE PILLADAS
+%d repórteres na rua agora,%d reporters on the street now,%d reporteros en la calle ahora
+1 repórter na rua agora,1 reporter on the street now,1 reportero en la calle ahora
+"Onde Está Flávio Bolsonaro?","Where Is Flávio Bolsonaro?","¿Dónde Está Flávio Bolsonaro?"
+Repórter Anônimo,Anonymous Reporter,Reportero Anónimo

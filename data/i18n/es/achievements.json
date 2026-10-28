@@ -1,0 +1,13 @@
+[
+  { "id": "primeiro_furo", "title": "Primera primicia", "description": "Resuelve tu primer caso." },
+  { "id": "sem_errar", "title": "GPS humano", "description": "Resuelve un caso sin pisar ninguna ciudad equivocada." },
+  { "id": "relampago", "title": "Guardia relámpago", "description": "Resuelve un caso usando como máximo 72 horas." },
+  { "id": "colecionador", "title": "Álbum de disfraces", "description": "Pilla al senador con todos los disfraces." },
+  { "id": "todos_escandalos", "title": "Cobertura completa", "description": "Resuelve un caso de cada escándalo." },
+  { "id": "globetrotter", "title": "Millas acumuladas", "description": "Visita 20 ciudades distintas a lo largo de la carrera." },
+  { "id": "editor_chefe", "title": "Jefe de redacción", "description": "Llega al cargo de Editor(a) Jefe." },
+  { "id": "persistente", "title": "Sección fija", "description": "Juega 10 casos." },
+  { "id": "insone", "title": "Café en vena", "description": "Duerme 5 noches en un mismo caso." },
+  { "id": "vexame", "title": "Metida de pata", "description": "Aborda al senador con la pauta del disfraz equivocado." },
+  { "id": "sem_pauta", "title": "Olvidé la credencial", "description": "Encuentra al senador sin haber emitido la pauta." }
+]

@@ -1,0 +1,84 @@
+{
+  "tips": {
+    "briefing": "Read the box called THE CASE IN BRIEF: it's the real scandal behind this case. Your deadline is on your assignment — the clock only moves when you investigate or travel.",
+    "city": "Each city has 3 places. Investigating costs hours (2h, 3h, 4h). Witnesses talk about the senator's NEXT city: flag, currency, language, landmarks.",
+    "clue": "Keep the clue in mind and open TRAVEL: pick the destination that matches it. Everything the witnesses said is saved in NOTES.",
+    "trait": "This witness described the DISGUISE! Open the DOSSIER and mark it. With 2 traits you can already pin down the disguise and issue the ASSIGNMENT.",
+    "travel": "Hover over (or tap) the cities on the map to see the country. Each destination shows the flight hours.",
+    "cold": "Nobody saw the senator here: wrong city! Go back through TRAVEL — the city you came from is among the options.",
+    "near": "He's in this city! One of the places is hiding the senator. Make sure the right ASSIGNMENT is issued before you approach him."
+  },
+  "locations": {
+    "aeroporto": { "name": "Airport", "role": "Flight attendant" },
+    "hotel": { "name": "Hotel", "role": "Receptionist" },
+    "banco": { "name": "Bank", "role": "Bank manager" },
+    "mercado": { "name": "Market", "role": "Market vendor" },
+    "museu": { "name": "Museum", "role": "Museum guide" },
+    "porto": { "name": "Harbor", "role": "Sailor" },
+    "restaurante": { "name": "Restaurant", "role": "Waiter" },
+    "biblioteca": { "name": "Library", "role": "Librarian" },
+    "shopping": { "name": "Mall", "role": "Shop clerk" },
+    "embaixada": { "name": "Embassy", "role": "Diplomat" },
+    "cartorio": { "name": "Notary Office", "role": "Notary" },
+    "taxi": { "name": "Taxi Stand", "role": "Taxi driver" }
+  },
+  "cold_trail": [
+    "A senator? Here? I haven't seen anyone in a red trench coat, no.",
+    "Sorry, no Brazilian running away from a microphone came by here today.",
+    "Hmm... no. The only politician I saw here today was on a billboard.",
+    "Nobody like that around here. Are you sure it's the right city?",
+    "Never seen that man. And believe me, I see everything."
+  ],
+  "near": [
+    "Careful! A guy in a hat and trench coat just ran past!",
+    "He's in town, I'm sure of it. I heard someone saying 'no comment' nearby.",
+    "He's here! I saw an aide carrying a suitcase full of panettones.",
+    "He's very close! He dropped a note that says 'Zero One' on the floor.",
+    "If I were you, I'd hurry. He asked where the nearest exit was."
+  ],
+  "taunts": [
+    "Note left on the counter: 'You'll never catch me! Signed: 01'",
+    "Scribbled on a napkin: 'No comment. — F.'",
+    "Message on the answering machine: 'Hey, reporter, give up! Hahaha'",
+    "Yellow sticky note: 'Be right back (I won't be).'"
+  ],
+  "gags": [
+    { "text": "An aide offered you a little coffee. It lasted two hours." },
+    { "text": "You got added to a family WhatsApp group and lost an hour reading chain messages." },
+    { "text": "A motorcycle rally blocked the street. You waited an hour to cross." },
+    { "text": "Someone sent you a link to a four-hour livestream. You only watched one." },
+    { "text": "A black car with tinted windows followed you and you took a huge detour to shake it off." },
+    { "text": "A lawyer handed you an 80-page cease-and-desist letter. You read the whole thing." }
+  ],
+  "sleep": [
+    "It's past eleven. You sleep in a cheap hotel until 7 a.m.",
+    "Exhausted, you doze off on a bus station bench until morning.",
+    "Bedtime. The newsroom only pays for the day until 11 p.m."
+  ],
+  "ranks": [
+    { "title": "Intern" },
+    { "title": "Junior Reporter" },
+    { "title": "Reporter" },
+    { "title": "Senior Reporter" },
+    { "title": "Editor-in-Chief" }
+  ],
+  "headlines": {
+    "win": [
+      "SCOOP! {player} finds Flávio in {city} and finally asks the question",
+      "CAUGHT RED-HANDED: senator found {spot} in {city}",
+      "EXCLUSIVE: {player} gets a face-to-face 'no comment' in {city}"
+    ],
+    "no_pauta": [
+      "GOT AWAY! With no approved assignment, {player} watches the senator flee in {city}",
+      "NOT AGAIN: Flávio slips through the press's fingers in {city}"
+    ],
+    "wrong_pauta": [
+      "FIASCO! {player} interviews the wrong disguise and the senator flees in {city}",
+      "BOTCHED: paper runs a photo of the wrong look-alike in {city}"
+    ],
+    "timeout": [
+      "DEADLINE MISSED: Sunday edition goes out without {player}'s scoop",
+      "GONE FOR GOOD: the senator's trail goes cold after a week-long search"
+    ]
+  }
+}

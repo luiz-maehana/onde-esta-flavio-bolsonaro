@@ -74,6 +74,7 @@ func _init() -> void:
 	flow.alignment = FlowContainer.ALIGNMENT_END
 	flow.add_theme_constant_override("h_separation", 16)
 	flow.add_theme_constant_override("v_separation", 12)
+	Responsive.fill_row(flow)
 	actions = flow
 	page.add_child(actions)
 
@@ -121,10 +122,13 @@ func add_fact_box(title: String, summary: String, status: String, outlet: String
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 4)
 	box.add_child(col)
-	col.add_child(UiTheme.headline(title, 12, Palette.RED))
+	# quebra linha: em inglês/espanhol o título fica bem mais comprido
+	var heading := UiTheme.headline(title, 12, Palette.RED)
+	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	col.add_child(heading)
 	col.add_child(UiTheme.body(summary, 23))
-	col.add_child(UiTheme.body("Status: " + status, 23, Palette.RED_DARK))
-	col.add_child(UiTheme.body("Fontes: " + outlet, 20, Palette.GREY))
+	col.add_child(UiTheme.body(Lang.t("Status: %s") % status, 23, Palette.RED_DARK))
+	col.add_child(UiTheme.body(Lang.t("Fontes: %s") % outlet, 20, Palette.GREY))
 	body_column.add_child(box)
 
 func _rule(thickness: int) -> ColorRect:

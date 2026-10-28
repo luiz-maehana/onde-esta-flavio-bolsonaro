@@ -36,14 +36,14 @@ func hour_of_day() -> int:
 	return hours % 24
 
 func day_name() -> String:
-	return DAY_NAMES[clampi(hours / 24, 0, DAY_NAMES.size() - 1)]
+	return Lang.t(DAY_NAMES[clampi(hours / 24, 0, DAY_NAMES.size() - 1)])
 
 func time_text() -> String:
 	return "%s %02d:00" % [day_name(), hour_of_day()]
 
 ## Texto do prazo ("Domingo 17:00") pro briefing.
 func deadline_text() -> String:
-	return "%s %02d:00" % [DAY_NAMES[clampi(deadline / 24, 0, DAY_NAMES.size() - 1)], deadline % 24]
+	return "%s %02d:00" % [Lang.t(DAY_NAMES[clampi(deadline / 24, 0, DAY_NAMES.size() - 1)]), deadline % 24]
 
 ## 0..1 do quanto do prazo já foi consumido (barra do HUD).
 func progress() -> float:

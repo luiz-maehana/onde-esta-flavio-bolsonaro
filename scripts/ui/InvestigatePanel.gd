@@ -37,7 +37,7 @@ func show_for(case: CaseState) -> void:
 		var info := GameData.location_info(loc_id)
 		var label := "%s\n\n%dh" % [info["name"].to_upper(), case.investigate_cost(loc_id)]
 		if case.was_visited(loc_id):
-			label += " (revisitar)"
+			label += Lang.t(" (revisitar)")
 		var b := UiTheme.button(label, Vector2(0, 90 if Responsive.is_portrait() or Responsive.is_touch() else 110))
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.pressed.connect(func(): location_chosen.emit(loc_id))

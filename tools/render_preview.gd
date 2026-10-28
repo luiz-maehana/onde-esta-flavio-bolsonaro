@@ -3,7 +3,7 @@ extends Node
 ## precisar jogar (abre uma janela por alguns segundos; não envia tecla
 ## nenhuma). Roda em modo somente leitura: nunca grava nos saves reais.
 ## Gera cada tela em 3 tamanhos de janela (RF36): PC, celular deitado e
-## celular em pé, cada um numa subpasta.
+## celular em pé, nos 3 idiomas (spec 008): build/preview/<idioma>/<tamanho>/.
 ## Roda com: godot --path . res://tools/RenderPreview.tscn
 
 const OUT := "res://build/preview/"
@@ -16,16 +16,18 @@ func _ready() -> void:
 
 func _run() -> void:
 	SaveService.read_only = true
-	for size_name in SIZES:
-		_dir = OUT + size_name + "/"
-		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_dir))
-		get_window().size = SIZES[size_name]
-		await _frames(5)
-		# tamanhos de celular: simula tela de toque (botões de 48 px reais)
-		Responsive.forced_touch = 0 if size_name == "1280x720" else 1
-		UiTheme.reset_theme()
-		get_window().content_scale_size = Responsive.base_size()
-		await _render_all()
+	for lang in Lang.SUPPORTED:
+		Lang.apply(lang)
+		for size_name in SIZES:
+			_dir = OUT + lang + "/" + size_name + "/"
+			DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(_dir))
+			get_window().size = SIZES[size_name]
+			await _frames(5)
+			# tamanhos de celular: simula tela de toque (botões de 48 px reais)
+			Responsive.forced_touch = 0 if size_name == "1280x720" else 1
+			UiTheme.reset_theme()
+			get_window().content_scale_size = Responsive.base_size()
+			await _render_all()
 	get_tree().quit()
 
 func _render_all() -> void:

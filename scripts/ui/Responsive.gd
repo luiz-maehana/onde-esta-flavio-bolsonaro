@@ -63,6 +63,20 @@ static func touch_target() -> float:
 static func text_scale() -> float:
 	return clampf(COMFORT_SCALE / screen_per_base(), 1.0, TEXT_SCALE_MAX)
 
+## Fileira de botões (RF53, spec 008): em pé — ou sempre, com `always` —
+## cada filho estica pra fileira ocupar a largura toda, sem sobra de um lado
+## só. Vale também pros filhos adicionados depois.
+static func fill_row(row: Container, always := false) -> void:
+	if not (always or is_portrait()):
+		return
+	for child in row.get_children():
+		_stretch(child)
+	row.child_entered_tree.connect(_stretch)
+
+static func _stretch(node: Node) -> void:
+	if node is Control:
+		node.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
 ## Caixa horizontal deitado, vertical em pé — pra arranjos lado a lado que
 ## viram empilhados.
 static func flow_box() -> BoxContainer:

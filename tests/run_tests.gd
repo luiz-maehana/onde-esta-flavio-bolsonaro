@@ -24,6 +24,11 @@ func _initialize() -> void:
 	_test_always_winnable()
 	_test_content_deep()
 	_test_hostile_names()
+	_test_fonts_cover_languages()
+	_test_i18n_catalog()
+	_test_i18n_data()
+	_test_language_detect()
+	_test_lower_first()
 	print("\n%d verificações, %d falhas" % [_checks, _failures])
 	quit(1 if _failures > 0 else 0)
 
@@ -446,7 +451,8 @@ func _fuzz_case(s: CaseState, r: RandomNumberGenerator, replay_each: bool) -> St
 			return "%s: cidades erradas %d, esperado %d" % [where, after["wrong"], expected_wrong]
 		var seen := {}
 		for note in s.notes:
-			var k := "%s|%s|%s" % [note["city"], note["role"], note["text"]]
+			var spoken := ClueBuilder.render(s, note["speech"])
+			var k := "%s|%s|%s" % [note["city"], spoken["role"], spoken["text"]]
 			if seen.has(k):
 				return "%s: anotação duplicada" % where
 			seen[k] = true
@@ -542,8 +548,19 @@ const HEADLINE_PLACEHOLDERS := ["{city}", "{spot}", "{player}"]
 func _test_content_deep() -> void:
 	# C1 — todo texto dos JSONs
 	var problems: Array = []
-	for path in ["res://data/cities.json", "res://data/disguises.json", "res://data/flavor.json", "res://data/scandals.json", "res://data/achievements.json"]:
-		_scan_text(JSON.parse_string(FileAccess.get_file_as_string(path)), path.get_file(), problems)
+	# português e as traduções (spec 008) passam pela mesma revisão
+	for dir in ["res://data/", "res://data/i18n/en/", "res://data/i18n/es/"]:
+		for f in ["cities", "disguises", "flavor", "scandals", "achievements"]:
+			var path: String = dir + f + ".json"
+			_scan_text(JSON.parse_string(FileAccess.get_file_as_string(path)), path.trim_prefix("res://data/"), problems)
+	var csv := FileAccess.open("res://data/i18n/ui.csv", FileAccess.READ)
+	csv.get_csv_line()
+	while not csv.eof_reached():
+		var row := csv.get_csv_line()
+		for i in range(1, row.size()):
+			# sufixo colado em outro texto (" (você)") começa com espaço de propósito
+			var value: String = row[i].strip_edges() if row[0] != row[0].strip_edges() else row[i]
+			_scan_text(value, "ui.csv[%s].%s" % [row[0].left(20), ["", "en", "es"][i]], problems)
 	for p in problems.slice(0, 15):
 		printerr("  texto: ", p)
 	_check(problems.is_empty(), "textos dos JSONs sem espaço sobrando, pontuação torta ou marcador cru (%d problemas)" % problems.size())
@@ -559,7 +576,7 @@ func _test_content_deep() -> void:
 		for i in s.route.size() - 1:
 			var next_clues: Array = GameData.city(s.route[i + 1])["clues"]
 			for clue in s.route_clues[i]:
-				if not next_clues.has(clue):
+				if typeof(clue) != TYPE_INT or clue < 0 or clue >= next_clues.size():
 					ambiguous += 1
 		s.set_pauta(s.disguise["id"])
 		s.travel(s.decoys[0][0])
@@ -697,3 +714,149 @@ func _test_hostile_names() -> void:
 	_check(Career.sanitize_name("  Ana    Furo  ") == "Ana Furo", "espaços internos colapsam")
 	_check(Career.sanitize_name("Ana\nFuro") == "Ana Furo", "quebra de linha vira espaço")
 	_check(Career.sanitize_name(42) == "" and Career.sanitize_name(null) == "", "nome que não é texto vira vazio")
+
+## --- Spec 008 (T80): fontes cobrem todo caractere dos 3 idiomas -------------------
+
+## Texto corrido (VT323) e títulos/botões (Pixelify Sans). A Press Start 2P
+## só desenha os logotipos ASCII ("O FURO", "F.U.R.O.").
+const TEXT_FONTS := ["res://assets/fonts/VT323-Regular.ttf", "res://assets/fonts/PixelifySans.ttf"]
+
+func _test_fonts_cover_languages() -> void:
+	var chars := {}
+	var paths: Array = ["res://data/i18n/ui.csv"]
+	for f in ["cities", "disguises", "flavor", "scandals", "achievements"]:
+		paths.append("res://data/%s.json" % f)
+		for lang in ["en", "es"]:
+			paths.append("res://data/i18n/%s/%s.json" % [lang, f])
+	for path in paths:
+		for ch in FileAccess.get_file_as_string(path):
+			if ch.unicode_at(0) > 126:
+				chars[ch] = true
+	for font_path in TEXT_FONTS:
+		var font: FontFile = load(font_path)
+		var missing := ""
+		for ch in chars:
+			if not font.has_char(ch.unicode_at(0)):
+				missing += ch
+		_check(missing == "", "%s desenha todos os caracteres dos 3 idiomas (faltam: %s)" % [font_path.get_file(), missing])
+
+## --- Spec 008 (T82): catálogo e dados por idioma ------------------------------------
+
+const LANG_DATA_FILES := ["cities", "disguises", "flavor", "scandals", "achievements"]
+
+## Catálogo da interface: toda chave usada em Lang.t() existe, e toda linha
+## tem inglês e espanhol.
+func _test_i18n_catalog() -> void:
+	var catalog := {}
+	var file := FileAccess.open("res://data/i18n/ui.csv", FileAccess.READ)
+	var header := file.get_csv_line()
+	_check(header == PackedStringArray(["keys", "en", "es"]), "ui.csv com colunas keys,en,es")
+	while not file.eof_reached():
+		var row := file.get_csv_line()
+		if row.size() < 3:
+			continue
+		catalog[row[0]] = true
+		_check(row[1].strip_edges() != "" and row[2].strip_edges() != "", "tradução completa de '%s'" % row[0].left(40))
+	var re := RegEx.create_from_string("Lang\\.t\\(\"((?:[^\"\\\\]|\\\\.)*)\"\\)")
+	var missing: Array = []
+	var found := 0
+	for path in _files("res://scripts"):
+		if not path.ends_with(".gd"):
+			continue
+		for m in re.search_all(FileAccess.get_file_as_string(path)):
+			found += 1
+			var key := m.get_string(1).replace("\\\"", "\"").replace("\\n", "\n")
+			if not catalog.has(key):
+				missing.append(key.left(50))
+	_check(found >= 40, "achou os Lang.t() do código (%d)" % found)
+	_check(missing.is_empty(), "toda chave de Lang.t() está no catálogo (faltam: %s)" % str(missing.slice(0, 5)))
+
+## Dados traduzidos: mesmos ids, listas do mesmo tamanho (os sorteios
+## dependem disso), mesmos marcadores, nenhum campo que o português não tem.
+func _test_i18n_data() -> void:
+	for lang in ["en", "es"]:
+		for f in LANG_DATA_FILES:
+			var base = JSON.parse_string(FileAccess.get_file_as_string("res://data/%s.json" % f))
+			var path := "res://data/i18n/%s/%s.json" % [lang, f]
+			_check(FileAccess.file_exists(path), "%s existe" % path)
+			var errors: Array = []
+			_compare_lang(base, JSON.parse_string(FileAccess.get_file_as_string(path)), "%s/%s" % [lang, f], errors)
+			for e in errors.slice(0, 5):
+				printerr("  ", e)
+			_check(errors.is_empty(), "%s/%s com a mesma estrutura do português (%d problemas)" % [lang, f, errors.size()])
+	# o caso guarda índice: trocar o idioma não muda o caso, só o texto
+	var g := RandomNumberGenerator.new()
+	g.seed = 31
+	var s := CaseGenerator.generate(g, {"route_len": 5})
+	s.investigate(s.locations_here()[0])
+	var before := _snapshot(s)
+	var texts := {}
+	for lang in Lang.SUPPORTED:
+		Lang.apply(lang)
+		texts[lang] = ClueBuilder.render(s, s.notes[0]["speech"])["text"]
+		_check(_snapshot(s) == before, "trocar pra %s não muda o caso" % lang)
+		_check(s.disguise["name"] != "" and s.reason != "" and s.found_spot != "", "caso tem textos em %s" % lang)
+	Lang.apply("pt")
+	_check(texts["pt"] != texts["en"] and texts["en"] != texts["es"], "anotação muda de idioma junto com o jogo")
+	var back := CaseState.from_save(JSON.parse_string(JSON.stringify(s.to_save())))
+	Lang.apply("es")
+	_check(back != null and _snapshot(back) == before, "save feito em português é retomado em espanhol")
+	Lang.apply("pt")
+
+func _compare_lang(base: Variant, over: Variant, where: String, errors: Array) -> void:
+	if over is Array:
+		if not base is Array:
+			errors.append("%s: devia ser lista" % where)
+			return
+		if not over.is_empty() and over[0] is Dictionary and over[0].has("id"):
+			var by_id := {}
+			for b in base:
+				by_id[b["id"]] = b
+			if over.size() != base.size():
+				errors.append("%s: %d de %d itens" % [where, over.size(), base.size()])
+			for o in over:
+				if not by_id.has(o["id"]):
+					errors.append("%s: id %s não existe" % [where, o["id"]])
+				else:
+					_compare_lang(by_id[o["id"]], o, "%s[%s]" % [where, o["id"]], errors)
+			return
+		if over.size() != base.size():
+			errors.append("%s: tamanho %d em vez de %d" % [where, over.size(), base.size()])
+			return
+		for i in over.size():
+			_compare_lang(base[i], over[i], "%s[%d]" % [where, i], errors)
+	elif over is Dictionary:
+		if not base is Dictionary:
+			errors.append("%s: devia ser objeto" % where)
+			return
+		for k in over:
+			if k == "id":
+				continue
+			if not base.has(k):
+				errors.append("%s.%s: campo que o português não tem" % [where, k])
+			else:
+				_compare_lang(base[k], over[k], "%s.%s" % [where, k], errors)
+	elif over is String:
+		if not base is String:
+			errors.append("%s: devia ser texto" % where)
+		elif over.strip_edges() == "":
+			errors.append("%s: vazio" % where)
+		elif _placeholders(base) != _placeholders(over):
+			errors.append("%s: marcadores diferentes" % where)
+
+func _placeholders(s: String) -> Array:
+	var out: Array = []
+	for m in RegEx.create_from_string("\\{[a-z]+\\}").search_all(s):
+		out.append(m.get_string())
+	out.sort()
+	return out
+
+## RF43: primeira vez segue o idioma do sistema/navegador.
+func _test_language_detect() -> void:
+	for pair in [["pt_BR", "pt"], ["pt-PT", "pt"], ["es_AR", "es"], ["es", "es"], ["en_US", "en"], ["fr_FR", "en"], ["", "en"]]:
+		_check(Lang.detect(pair[0]) == pair[1], "idioma do sistema %s vira %s" % pair)
+	_check(Settings.from_dict({"language": "klingon"}).language == "" and Settings.from_dict({"language": "es"}).language == "es", "idioma salvo é sanitizado")
+
+func _test_lower_first() -> void:
+	_check(Lang.lower_first("A mansão do Lago Sul") == "a mansão do Lago Sul", "só a primeira letra do título vira minúscula")
+	_check(Lang.lower_first("") == "", "título vazio continua vazio")

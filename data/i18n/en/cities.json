@@ -1,0 +1,392 @@
+[
+ {
+  "id": "brasilia",
+  "name": "Brasília",
+  "country": "Brazil",
+  "description": "The planned capital shaped like an airplane. Two twin towers, two domes and very dry air — and an office in the Senate with the lights off.",
+  "clues": [
+   "He said he had to get back to the Central Plateau before anyone noticed the empty chair.",
+   "He asked if he could still take the Monumental Axis without traffic.",
+   "He said the air there is so dry even his staff gets dehydrated.",
+   "He wanted to know where Congress's twin towers, designed by Niemeyer, are.",
+   "He said he was going to the airplane-shaped city, with a green-and-yellow flag in his suitcase."
+  ]
+ },
+ {
+  "id": "rio",
+  "name": "Rio de Janeiro",
+  "country": "Brazil",
+  "description": "The Marvelous City, hometown of Zero One. Christ with open arms, packed beaches and a crunchy beach snack nobody can stop eating.",
+  "clues": [
+   "He said he was homesick and craving a crunchy tapioca biscuit on the beach.",
+   "He asked if Christ the Redeemer still had his arms open for him.",
+   "He wanted to know the cable car schedule for Sugarloaf Mountain.",
+   "He said he'd stop by Barra da Tijuca to 'sort some things out'.",
+   "He asked for tips on a Carnival street party with no photographers."
+  ]
+ },
+ {
+  "id": "saopaulo",
+  "name": "São Paulo",
+  "country": "Brazil",
+  "description": "The concrete jungle that never sleeps. Endless traffic, street-market pastel and a red building suspended over Paulista Avenue.",
+  "clues": [
+   "He asked where the red museum hanging over Paulista Avenue is.",
+   "He complained he'd be stuck in traffic on the Marginal again.",
+   "He wanted a pastel at the street market with sugarcane juice.",
+   "He said he was going to Brazil's biggest city, where 'nobody notices anybody'.",
+   "He mentioned he'd face the drizzle in a coat, like a true paulistano."
+  ]
+ },
+ {
+  "id": "miami",
+  "name": "Miami",
+  "country": "United States",
+  "description": "Pastel art deco buildings, palm trees and more Brazilians per square meter than many national capitals.",
+  "clues": [
+   "He said he was going where every Brazilian goes to shop in dollars.",
+   "He asked if South Beach still had pink art deco buildings.",
+   "He wanted to know if they take Pix down in Florida.",
+   "He said he'd meet some friends who 'moved for reasons beyond their control'.",
+   "He said he needed floral shorts and SPF 100 sunscreen."
+  ]
+ },
+ {
+  "id": "orlando",
+  "name": "Orlando",
+  "country": "United States",
+  "description": "The theme park capital of the world. Two-hour lines, mouse ears and a fairy-tale castle.",
+  "clues": [
+   "He asked how long the line is to take a photo with the world's most famous mouse.",
+   "He said he was going to the theme parks in Florida 'to relax'.",
+   "He wanted to know if the princess castle had an emergency exit.",
+   "He bought a pair of mouse ears and paid in dollars.",
+   "He said he'd ride a roller coaster to escape the tough questions."
+  ]
+ },
+ {
+  "id": "newyork",
+  "name": "New York",
+  "country": "United States",
+  "description": "The Big Apple. Skyscrapers, yellow cabs and a green statue holding a torch in the harbor.",
+  "clues": [
+   "He asked how to get to the green statue holding a torch.",
+   "He wanted a yellow cab and a hot dog in Times Square.",
+   "He said he was going to the Big Apple, but that he doesn't eat apples.",
+   "He said he had to stop by Wall Street 'to check on some investments'.",
+   "He wanted to know if you can hide behind a tree in Central Park."
+  ]
+ },
+ {
+  "id": "washington",
+  "name": "Washington",
+  "country": "United States",
+  "description": "The capital of the United States. The Capitol's white dome, a giant obelisk and lots of people in suits talking in code.",
+  "clues": [
+   "He said he was going to the U.S. capital to ask some friends in suits for advice.",
+   "He asked if you can visit the White House without booking.",
+   "He wanted to see the Capitol, that building with the white dome.",
+   "He talked about a flag with red and white stripes and stars in a blue corner.",
+   "He said they have a Senate there too, 'but with less excitement'."
+  ]
+ },
+ {
+  "id": "mexico",
+  "name": "Mexico City",
+  "country": "Mexico",
+  "description": "A metropolis built on top of ancient Tenochtitlán. Aztec pyramids, mariachis and tacos for breakfast.",
+  "clues": [
+   "He asked where to buy a giant sombrero and how much it costs in Mexican pesos.",
+   "He wanted to climb the Pyramid of the Sun at Teotihuacán.",
+   "He said he was going to the capital of mariachis.",
+   "He talked about a green, white and red flag with an eagle eating a snake.",
+   "He said he'd try tacos al pastor and tequila."
+  ]
+ },
+ {
+  "id": "buenosaires",
+  "name": "Buenos Aires",
+  "country": "Argentina",
+  "description": "The Paris of South America. Tango in San Telmo, bife de chorizo and a white obelisk in the middle of the world's widest avenue.",
+  "clues": [
+   "He wanted to swap reais for Argentine pesos — 'at the blue rate, preferably'.",
+   "He asked where to learn tango in San Telmo.",
+   "He talked about a sky-blue and white flag with a sun in the middle.",
+   "He said he'd eat bife de chorizo with dulce de leche for dessert.",
+   "He wanted a photo at the Obelisk on 9 de Julio Avenue."
+  ]
+ },
+ {
+  "id": "lisboa",
+  "name": "Lisbon",
+  "country": "Portugal",
+  "description": "Seven hills, a yellow tram, fado and a red bridge over the Tagus that looks like the Golden Gate's cousin.",
+  "clues": [
+   "He asked if a pastel de Belém is the same as a street-market pastel (it isn't).",
+   "He said he was going to the land of fado and salt cod.",
+   "He wanted to ride tram 28 up the hills.",
+   "He talked about euros and a green and red flag with a coat of arms.",
+   "He said that there 'at least they speak Portuguese, just with a different accent'."
+  ]
+ },
+ {
+  "id": "madri",
+  "name": "Madrid",
+  "country": "Spain",
+  "description": "The Spanish capital of 11 p.m. dinners, painting museums and a monumental gate in the middle of a square.",
+  "clues": [
+   "He asked what time people have dinner there — '11 p.m. works for me'.",
+   "He wanted to visit the Prado Museum.",
+   "He talked about a red and yellow flag.",
+   "He said he'd eat churros with chocolate and paella.",
+   "He mentioned he needed a few flamenco lessons."
+  ]
+ },
+ {
+  "id": "paris",
+  "name": "Paris",
+  "country": "France",
+  "description": "The City of Light. An iron tower, buttery croissants and waiters who pretend not to understand your French.",
+  "clues": [
+   "He asked how to say 'no comment' in French.",
+   "He wanted to go up the most famous iron tower in the world.",
+   "He talked about a blue, white and red flag with vertical stripes.",
+   "He said he'd eat a croissant and see the Mona Lisa at the Louvre.",
+   "He mentioned a boat ride on the Seine."
+  ]
+ },
+ {
+  "id": "londres",
+  "name": "London",
+  "country": "United Kingdom",
+  "description": "Five o'clock tea, red double-decker buses and a clock tower that's never late (unlike the senator's answers).",
+  "clues": [
+   "He wanted to change money into pounds sterling.",
+   "He asked what time five o'clock tea is.",
+   "He said he'd see Big Ben and ride a red double-decker bus.",
+   "He talked about a flag with blue, white and red crosses.",
+   "He said he'd bring an umbrella because it always rains there."
+  ]
+ },
+ {
+  "id": "roma",
+  "name": "Rome",
+  "country": "Italy",
+  "description": "The Eternal City. The Colosseum, fountains where people toss coins and al dente pasta on every corner.",
+  "clues": [
+   "He asked if tossing a coin in the Trevi Fountain fixes problems with the courts.",
+   "He wanted to see the Colosseum and the costumed gladiators.",
+   "He talked about a green, white and red flag with vertical stripes.",
+   "He said he'd eat carbonara 'without cream, or the Italians get mad'.",
+   "He mentioned stopping by the Vatican to ask for a blessing."
+  ]
+ },
+ {
+  "id": "budapeste",
+  "name": "Budapest",
+  "country": "Hungary",
+  "description": "Pearl of the Danube. A neo-Gothic Parliament on the riverbank, thermal baths and a government the senator admires.",
+  "clues": [
+   "He asked the exchange rate from reais to Hungarian forints.",
+   "He said he'd visit the Parliament on the banks of the Danube.",
+   "He wanted to soak in the Széchenyi thermal baths.",
+   "He talked about a red, white and green flag with horizontal stripes.",
+   "He said he'd visit 'a prime minister who's a friend of the family'."
+  ]
+ },
+ {
+  "id": "jerusalem",
+  "name": "Jerusalem",
+  "country": "Israel",
+  "description": "An ancient city of pale stone walls and a golden dome that shines in the sun.",
+  "clues": [
+   "He said he was going to the Old City, surrounded by stone walls.",
+   "He asked the exchange rate for the shekel.",
+   "He wanted to see the golden dome that shines in the sun.",
+   "He talked about a white flag with two blue stripes and a star in the middle.",
+   "He said he'd float in the Dead Sea, 'which is anything but dead'."
+  ]
+ },
+ {
+  "id": "dubai",
+  "name": "Dubai",
+  "country": "United Arab Emirates",
+  "description": "Skyscrapers in the desert, palm-shaped islands and the tallest building in the world pointing at the sky.",
+  "clues": [
+   "He asked how much a dirham is worth in reais.",
+   "He wanted to go up the tallest building in the world.",
+   "He said he'd go skiing in a mall in the middle of the desert.",
+   "He talked about a green, white and black flag with a red band.",
+   "He mentioned seeing the palm-shaped artificial islands."
+  ]
+ },
+ {
+  "id": "cairo",
+  "name": "Cairo",
+  "country": "Egypt",
+  "description": "On the banks of the Nile, the city of the Giza pyramids and the Sphinx, which keeps secrets better than any press office.",
+  "clues": [
+   "He asked where to rent a camel to see the pyramids of Giza.",
+   "He said he'd take a boat ride on the Nile.",
+   "He wanted to ask the Sphinx how to keep quiet for millennia.",
+   "He talked about Egyptian pounds and a red, white and black flag with an eagle.",
+   "He mentioned visiting the mummies at the museum."
+  ]
+ },
+ {
+  "id": "toquio",
+  "name": "Tokyo",
+  "country": "Japan",
+  "description": "Neon, conveyor-belt sushi, punctual bullet trains and multi-story temples among cherry trees.",
+  "clues": [
+   "He wanted to change money into yen.",
+   "He asked if the bullet train is ever late (it isn't).",
+   "He talked about a white flag with a red circle in the middle.",
+   "He said he'd eat conveyor-belt sushi and sing at a real karaoke.",
+   "He mentioned seeing the cherry blossoms and Mount Fuji."
+  ]
+ },
+ {
+  "id": "sydney",
+  "name": "Sydney",
+  "country": "Australia",
+  "description": "Kangaroos, surf beaches and an opera house shaped like white sails on the bay.",
+  "clues": [
+   "He asked if you can pet a kangaroo.",
+   "He wanted to see the Opera House with its sail-shaped roof.",
+   "He said he was going to the other side of the world, where it's summer at Christmas.",
+   "He talked about Australian dollars and a blue flag with the Southern Cross stars.",
+   "He mentioned surfing at Bondi Beach."
+  ]
+ },
+ {
+  "id": "moscou",
+  "name": "Moscow",
+  "country": "Russia",
+  "description": "Red Square, colorful onion domes and a winter that freezes even official statements.",
+  "clues": [
+   "He asked how much a ruble is worth.",
+   "He wanted to see the colorful onion domes in Red Square.",
+   "He said he'd need a fur coat and a really big hat.",
+   "He talked about a white, blue and red flag with horizontal stripes.",
+   "He said he'd buy a matryoshka, 'a doll inside a doll, just like an inquiry'."
+  ]
+ },
+ {
+  "id": "cidadedocabo",
+  "name": "Cape Town",
+  "country": "South Africa",
+  "description": "Penguins on the beach, vineyards and a flat-topped mountain like a table covered with a tablecloth of clouds.",
+  "clues": [
+   "He wanted to see penguins on an African beach.",
+   "He asked how to go up Table Mountain, the flat-topped one.",
+   "He said he'd go to the Cape of Good Hope — 'hope is something I've got plenty of'.",
+   "He talked about South African rand and a flag with a colorful sideways Y.",
+   "He mentioned tasting wine in Stellenbosch."
+  ]
+ },
+ {
+  "id": "pequim",
+  "name": "Beijing",
+  "country": "China",
+  "description": "The Forbidden City, the Great Wall an hour's drive away and a blue-roofed Temple of Heaven — where even the internet has a wall.",
+  "clues": [
+   "He asked how much a yuan is worth in reais.",
+   "He wanted to walk on the Great Wall.",
+   "He talked about a red flag with yellow stars in the corner.",
+   "He said he'd eat Peking duck with chopsticks.",
+   "He asked if you can get on social media there (you can't)."
+  ]
+ },
+ {
+  "id": "novadelhi",
+  "name": "New Delhi",
+  "country": "India",
+  "description": "India's capital: India Gate, rickshaws everywhere and the Taj Mahal a few hours away by train.",
+  "clues": [
+   "He wanted to change money into rupees.",
+   "He asked how to get to the Taj Mahal.",
+   "He talked about an orange, white and green flag with a blue wheel in the middle.",
+   "He said he'd ride a rickshaw and eat a very spicy curry.",
+   "He mentioned seeing India Gate, a giant stone arch."
+  ]
+ },
+ {
+  "id": "santiago",
+  "name": "Santiago",
+  "country": "Chile",
+  "description": "At the foot of the Andes, with the tallest building in South America and wineries just around the corner.",
+  "clues": [
+   "He asked how much a Chilean peso is worth.",
+   "He wanted to go skiing in the Andes.",
+   "He talked about a white and red flag with a star in a blue square.",
+   "He said he'd taste carménère wine and eat an empanada.",
+   "He said he was going to the longest, narrowest country in the world."
+  ]
+ },
+ {
+  "id": "toronto",
+  "name": "Toronto",
+  "country": "Canada",
+  "description": "Canada's biggest city, with a giant needle tower by the lake and winters of minus twenty degrees.",
+  "clues": [
+   "He wanted to change money into Canadian dollars.",
+   "He asked if the CN Tower has a glass floor.",
+   "He talked about a red and white flag with a maple leaf.",
+   "He said he'd eat poutine and pancakes with maple syrup.",
+   "He mentioned seeing Niagara Falls, 'those ones rather than Iguaçu'."
+  ]
+ },
+ {
+  "id": "istambul",
+  "name": "Istanbul",
+  "country": "Turkey",
+  "description": "Half in Europe, half in Asia: mosques with minarets, the Grand Bazaar and tea served in little glass cups.",
+  "clues": [
+   "He asked how much a Turkish lira is worth.",
+   "He wanted to cross the Bosphorus from Europe to Asia by boat.",
+   "He talked about a red flag with a white crescent moon and star.",
+   "He said he'd haggle at the Grand Bazaar and eat a kebab.",
+   "He mentioned seeing the Blue Mosque and its minarets."
+  ]
+ },
+ {
+  "id": "atenas",
+  "name": "Athens",
+  "country": "Greece",
+  "description": "The cradle of democracy, with the Parthenon atop the Acropolis and ruins on every corner.",
+  "clues": [
+   "He asked where the Parthenon is.",
+   "He said he was going to the cradle of democracy — 'just to check it out'.",
+   "He talked about a flag with blue and white stripes and a cross in the corner.",
+   "He wanted to eat gyros and a Greek salad with olive oil.",
+   "He mentioned visiting the islands with little white houses and blue roofs."
+  ]
+ },
+ {
+  "id": "berlim",
+  "name": "Berlin",
+  "country": "Germany",
+  "description": "The German capital of museums, beer and a neoclassical gate that watched a wall come down.",
+  "clues": [
+   "He asked where the Berlin Wall used to be.",
+   "He wanted a photo at the Brandenburg Gate.",
+   "He talked about a black, red and yellow flag.",
+   "He said he'd eat currywurst and drink wheat beer.",
+   "He said he'd pay for everything in euros and show up right on time."
+  ]
+ },
+ {
+  "id": "amsterda",
+  "name": "Amsterdam",
+  "country": "Netherlands",
+  "description": "Canals, bicycles and narrow, crooked little houses — and more bikes than people.",
+  "clues": [
+   "He asked where to rent a bicycle.",
+   "He wanted a boat ride through the canals.",
+   "He talked about a red, white and blue flag with horizontal stripes.",
+   "He said he'd go see the windmills and the tulips.",
+   "He mentioned buying wooden clogs and gouda cheese."
+  ]
+ }
+]

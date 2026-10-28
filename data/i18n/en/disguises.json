@@ -1,0 +1,49 @@
+{
+  "trait_labels": { "hat": "On his head", "ride": "Ride", "hobby": "Hobby", "snack": "Snack" },
+  "traits": {
+    "hat": {
+      "bone": { "label": "Cap", "witness": ["He wore a green-and-yellow cap, a bit crooked.", "He had a cap on, one of those campaign ones."] },
+      "panama": { "label": "Panama hat", "witness": ["He had a super fancy Panama hat.", "He wore a fine straw hat, Panama style."] },
+      "capacete": { "label": "Helmet", "witness": ["He didn't take the helmet off even to talk to me.", "He kept his helmet on the whole time, even indoors."] },
+      "peruca": { "label": "Blond wig", "witness": ["He had weird blond hair... I think it was a wig.", "His blond bangs were kind of crooked, you know?"] },
+      "cowboy": { "label": "Cowboy hat", "witness": ["He wore a huge rodeo hat with a curled brim.", "He had a cowboy hat that barely fit through the door."] }
+    },
+    "ride": {
+      "jetski": { "label": "Jet ski", "witness": ["He asked where to rent a jet ski.", "He said he only rides jet skis these days."] },
+      "moto": { "label": "Motorcade", "witness": ["He showed up on a loud motorbike, honking.", "He said he'd go by motorbike, \"in a convoy, like the good old days\"."] },
+      "iate": { "label": "Yacht", "witness": ["He mentioned his yacht was anchored nearby.", "He asked where to moor a yacht."] },
+      "patinete": { "label": "Scooter", "witness": ["He left here on an electric scooter.", "He rented a scooter through the app."] },
+      "jatinho": { "label": "Private jet", "witness": ["He said his private jet was waiting at the hangar.", "He asked where to land a private jet."] }
+    },
+    "hobby": {
+      "jiujitsu": { "label": "Jiu-jitsu", "witness": ["He kept showing jiu-jitsu moves to the security guard.", "He asked if there was a jiu-jitsu gym nearby."] },
+      "karaoke": { "label": "Karaoke", "witness": ["He sang country ballads at karaoke until the mic begged for mercy.", "He asked where there was a karaoke bar open."] },
+      "golfe": { "label": "Golf", "witness": ["He was carrying a bag of golf clubs.", "All he talked about was holes, par and birdies — golf, you know?"] },
+      "selfie": { "label": "Selfie", "witness": ["He took about three hundred selfies in ten minutes.", "He was walking around with a giant selfie stick."] },
+      "churrasco": { "label": "Barbecue", "witness": ["All he talked about was picanha and how done the meat was.", "He asked where to buy charcoal and a grill."] }
+    },
+    "snack": {
+      "leite": { "label": "Bread w/ condensed milk", "witness": ["He ordered a bread roll with condensed milk. Again.", "He asked if there was condensed milk to spread on bread."] },
+      "panetone": { "label": "Panettone", "witness": ["He bought three panettones, even out of season.", "His mouth was full of panettone."] },
+      "chocolate": { "label": "Bonbon", "witness": ["He stuffed his pockets with chocolate bonbons.", "He paid with a box of bonbons, can you believe it?"] },
+      "pastel": { "label": "Pastel", "witness": ["He ordered a cheese pastel and sugarcane juice.", "His hands were greasy from a fried pastel."] },
+      "paodequeijo": { "label": "Cheese bread", "witness": ["He ordered a dozen cheese breads to go.", "He had cheese-bread crumbs all over his coat."] }
+    }
+  },
+  "disguises": [
+    { "id": "turista", "name": "Fanny-Pack Tourist", "reveal": "wearing a fanny pack, white socks with sandals and a selfie stick in hand" },
+    { "id": "motoboy", "name": "App Delivery Rider", "reveal": "in a reflective vest with a big thermal backpack, humming country songs" },
+    { "id": "surfista", "name": "Tanned Surfer", "reveal": "in board shorts, a blond wig and a tan that's clearly spray-on" },
+    { "id": "magnata", "name": "Golf Tycoon", "reveal": "in plaid pants, a Panama hat and with a golden golf club" },
+    { "id": "influencer", "name": "Fitness Influencer", "reveal": "in a tank top and backwards cap, recording a story" },
+    { "id": "pagodeiro", "name": "White-Suit Samba Singer", "reveal": "in a white suit, a Panama hat and a tambourine under his arm" },
+    { "id": "piloto", "name": "Jet Ski Racer", "reveal": "in an orange life vest and a helmet with a camera on top" },
+    { "id": "diva", "name": "Cruise Ship Diva", "reveal": "in a big blond wig, a sequin dress and a microphone in hand" },
+    { "id": "peao", "name": "Rodeo Cowboy", "reveal": "in a rodeo hat, a giant belt buckle and a plaid shirt" },
+    { "id": "coach", "name": "Private-Jet Life Coach", "reveal": "in a blazer over a black T-shirt and a Panama hat, talking about 'mindset'" },
+    { "id": "mergulhador", "name": "Deep-Sea Diver", "reveal": "inside a bronze diving suit, dripping water on the carpet" },
+    { "id": "rainha", "name": "Queen of Country Music", "reveal": "in a big brunette wig, a fringe jacket and knee-high boots" },
+    { "id": "gaucho", "name": "Gaucho Grill Master", "reveal": "in baggy gaucho pants, a neckerchief and a picanha skewer in hand" },
+    { "id": "mineiro", "name": "Vacationing Mineiro", "reveal": "in a cap, sunglasses and a bag of cheese bread under his arm" }
+  ]
+}

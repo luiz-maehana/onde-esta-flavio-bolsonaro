@@ -3,11 +3,16 @@ extends RefCounted
 ## Conteúdo do jogo (cidades, disfarces, falas) lido de data/*.json (RNF03).
 ## Carrega uma vez só (cache estático) — telas e lógica pedem por aqui em vez
 ## de cada uma abrir arquivo por conta própria.
+##
+## Idiomas (spec 008): o português de data/*.json é a fonte (ids, estrutura,
+## números); data/i18n/<idioma>/<arquivo>.json traz só os textos, nos mesmos
+## ids e com listas do mesmo tamanho, e é aplicado por cima.
 
 const CITIES_PATH := "res://data/cities.json"
 const DISGUISES_PATH := "res://data/disguises.json"
 const FLAVOR_PATH := "res://data/flavor.json"
 const SCANDALS_PATH := "res://data/scandals.json"
+const I18N_DIR := "res://data/i18n/"
 
 static var _cities: Array = []
 static var _city_by_id: Dictionary = {}
@@ -54,6 +59,12 @@ static func flavor() -> Dictionary:
 	_ensure_loaded()
 	return _flavor
 
+static func scandal(id: String) -> Dictionary:
+	for s in scandals():
+		if s["id"] == id:
+			return s
+	return {}
+
 ## Escândalos reais que dão tema aos casos (spec 002).
 static func scandals() -> Array:
 	_ensure_loaded()
@@ -65,12 +76,55 @@ static func location_info(loc_id: String) -> Dictionary:
 static func _ensure_loaded() -> void:
 	if not _cities.is_empty():
 		return
-	_cities = _read_json(CITIES_PATH)
+	_cities = localized(CITIES_PATH)
 	for c in _cities:
 		_city_by_id[c["id"]] = c
-	_disguise_data = _read_json(DISGUISES_PATH)
-	_flavor = _read_json(FLAVOR_PATH)
-	_scandals = _read_json(SCANDALS_PATH)
+	_disguise_data = localized(DISGUISES_PATH)
+	_flavor = localized(FLAVOR_PATH)
+	_scandals = localized(SCANDALS_PATH)
+
+## Esquece o cache (troca de idioma): a próxima consulta relê no idioma atual.
+static func reload() -> void:
+	_cities = []
+	_city_by_id = {}
+
+## Arquivo de dados no idioma atual: português + tradução por cima.
+static func localized(path: String) -> Variant:
+	var base: Variant = _read_json(path)
+	if Lang.current == "pt":
+		return base
+	var over_path := I18N_DIR + Lang.current + "/" + path.get_file()
+	if not FileAccess.file_exists(over_path):
+		return base
+	return overlay(base, _read_json(over_path))
+
+## Aplica os textos de `over` em `base`: dicionário por chave, lista de
+## objetos por "id", lista de textos por posição (só se tiver o mesmo
+## tamanho — os sorteios dependem do tamanho). Só troca texto por texto:
+## número, id e chave que não existe no português ficam como estão.
+static func overlay(base: Variant, over: Variant) -> Variant:
+	if base is Dictionary and over is Dictionary:
+		for k in over:
+			if base.has(k):
+				base[k] = overlay(base[k], over[k])
+		return base
+	if base is Array and over is Array:
+		if not base.is_empty() and base[0] is Dictionary and base[0].has("id"):
+			var by_id := {}
+			for item in over:
+				if item is Dictionary and item.has("id"):
+					by_id[item["id"]] = item
+			for i in base.size():
+				if by_id.has(base[i].get("id")):
+					base[i] = overlay(base[i], by_id[base[i]["id"]])
+			return base
+		if base.size() == over.size():
+			for i in base.size():
+				base[i] = overlay(base[i], over[i])
+		return base
+	if base is String and over is String and over != "":
+		return over
+	return base
 
 static func _read_json(path: String) -> Variant:
 	var file := FileAccess.open(path, FileAccess.READ)

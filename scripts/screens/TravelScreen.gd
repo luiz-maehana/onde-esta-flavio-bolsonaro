@@ -26,7 +26,7 @@ func _ready() -> void:
 	margin.add_child(page)
 
 	var header := NewsHeader.new()
-	header.show_place("PARA ONDE?", "Saindo de %s — escolha o próximo voo" % _case.current_city_data()["name"])
+	header.show_place("PARA ONDE?", Lang.t("Saindo de %s — escolha o próximo voo") % _case.current_city_data()["name"])
 	header.show_clock(_case.clock)
 	page.add_child(header)
 
@@ -50,7 +50,7 @@ func _ready() -> void:
 	page.add_child(row)
 	for id in _case.travel_options():
 		var city := GameData.city(id)
-		var b := UiTheme.button("%s\n%dh de voo" % [city["name"].to_upper(), _case.travel_hours(id)], Vector2(0, 76 if portrait else 84))
+		var b := UiTheme.button(Lang.t("%s\n%dh de voo") % [city["name"].to_upper(), _case.travel_hours(id)], Vector2(0, 76 if portrait else 84))
 		b.add_theme_font_size_override("font_size", UiTheme.scaled(12))
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.focus_entered.connect(_highlight.bind(id))

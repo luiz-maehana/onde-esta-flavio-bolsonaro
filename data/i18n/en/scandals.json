@@ -1,0 +1,137 @@
+[
+  {
+    "id": "rachadinha",
+    "title": "The Alerj salary kickbacks ('rachadinhas')",
+    "summary": "Rio de Janeiro's state prosecutors (MP-RJ) accused the then state lawmaker of collecting part of his staffers' salaries at the Rio state assembly (Alerj), in a scheme allegedly run by Fabrício Queiroz. In 2021 the Superior Court of Justice (STJ) annulled the case's bank and tax record searches, and in 2022 the Rio state court (TJ-RJ) dismissed the charges. The senator has always denied wrongdoing.",
+    "status": "Charges dismissed in 2022 after evidence was annulled; a request to reopen the case was filed with the MP-RJ in September 2026.",
+    "reasons": [
+      "ran off when a reporter asked to 'split the bill' for coffee",
+      "vanished mid-press conference right after someone asked about Queiroz"
+    ],
+    "found_spots": [
+      "splitting a ham-and-cheese toastie into twelve equal pieces with his staff",
+      "behind a pile of pay stubs"
+    ],
+    "taunts": [
+      "Note: 'Around here we split everything, even the tip. — 01'",
+      "Message: 'Where's Queiroz? Ask him, not me!'"
+    ],
+    "gags": [
+      { "text": "Twelve staffers showed up to split your lunch bill. The math took two hours." }
+    ],
+    "near": [
+      "He's here! He asked for twelve separate receipts for a single cheese bread."
+    ],
+    "headlines_win": [
+      "NO SPLITTING: {player} keeps the whole scoop in {city}"
+    ]
+  },
+  {
+    "id": "chocolate",
+    "title": "The chocolate shop",
+    "summary": "In 2019 Rio state prosecutors (MP-RJ) searched a Kopenhagen chocolate franchise the senator co-owned in Barra da Tijuca, pointing to the shop as a possible money-laundering channel in the kickbacks case. He gave up the franchise in 2020. The accusation was part of the kickbacks charges, dismissed in 2022.",
+    "status": "Inquiry folded into the kickbacks charges, dismissed in 2022.",
+    "reasons": [
+      "slipped out of the press conference through the back door of a chocolate shop",
+      "fled with a box of bonbons 'as a gift' under his arm"
+    ],
+    "found_spots": [
+      "behind a stack of bonbon boxes",
+      "inside a giant Easter egg"
+    ],
+    "taunts": [
+      "Bonbon wrapper with a note: 'This one comes pre-laundered. — 01'",
+      "Chocolate-smeared note: 'Sweet is the life of those who give no interviews.'"
+    ],
+    "gags": [
+      { "text": "A saleswoman offered you a tasting of 40 bonbon flavors. You tried them all." }
+    ],
+    "near": [
+      "He's close! There's a trail of bonbon wrappers going that way."
+    ],
+    "headlines_win": [
+      "SWEET SCOOP: {player} finds the senator in {city} with chocolate on his face"
+    ]
+  },
+  {
+    "id": "mansao",
+    "title": "The Lago Sul mansion",
+    "summary": "In 2021 the senator bought a house worth about R$ 6 million in Lago Sul, Brasília, with a R$ 3.1 million loan from the state bank BRB at interest below the bank's average rate, according to news reports. The Federal Police (PF) began looking into the loan terms as part of the Banco Master case. The loan was paid off early.",
+    "status": "Under Federal Police inquiry (October 2026); there is no court ruling on the case.",
+    "reasons": [
+      "stepped out to 'take a quick look at the pool' and never came back",
+      "fled the press conference when asked about the loan's interest rate"
+    ],
+    "found_spots": [
+      "floating in a dollar-sign-shaped pool",
+      "hiding in the walk-in closet of a twelve-suite mansion"
+    ],
+    "taunts": [
+      "Real-estate flyer with a note: 'Super low interest, eh? — 01'",
+      "Note: 'Went to see a property. Only R$ 6 million, a bargain.'"
+    ],
+    "gags": [
+      { "text": "A realtor showed you an apartment 'with special interest rates'. The tour took two hours." }
+    ],
+    "near": [
+      "He's here! He asked the doorman where the nearest bank branch is."
+    ],
+    "headlines_win": [
+      "R$ 6 MILLION SCOOP: {player} finds the senator in {city}"
+    ]
+  },
+  {
+    "id": "darkhorse",
+    "title": "The movie Dark Horse",
+    "summary": "In May 2026 news reports revealed that the senator negotiated sponsorship from banker Daniel Vorcaro, of Banco Master, for the movie 'Dark Horse', about Jair Bolsonaro. He admitted seeking private sponsorship but denied offering favors or using public money. The production company denies receiving funds from the banker.",
+    "status": "Case under investigation at the Supreme Federal Court (STF); no charges and no conviction.",
+    "reasons": [
+      "left the press conference saying he was going to 'shoot a scene' and vanished",
+      "fled through the movie theater doors in the middle of the premiere"
+    ],
+    "found_spots": [
+      "behind a giant clapperboard on a film set",
+      "hiding in a movie theater's projection booth"
+    ],
+    "taunts": [
+      "Movie ticket with a note: 'Sponsorship? What sponsorship? — 01'",
+      "Note: 'This case is going to become a movie someday. Oops.'"
+    ],
+    "gags": [
+      { "text": "You were invited to watch a trailer. It was a two-hour trailer." }
+    ],
+    "near": [
+      "He's here! He ordered popcorn and asked if they take bank sponsorships."
+    ],
+    "headlines_win": [
+      "THE END: {player} finds the senator in {city} and rolls the credits"
+    ]
+  },
+  {
+    "id": "apostas",
+    "title": "His friend's betting site",
+    "summary": "In October 2026 the Federal Police (PF) took to the Supreme Federal Court (STF) an inquiry into whether the senator was a hidden partner in BestBet, linked to his lawyer and friend Willer Tomaz; investigators say he had 'master user' access to an account of a holding company owned by Tomaz. The senator denies having a joint account or any stake in companies linked to the betting site; Tomaz also denies wrongdoing.",
+    "status": "Inquiry opened at the STF in October 2026; no charges and no conviction.",
+    "reasons": [
+      "bet his staff that nobody would find him and vanished",
+      "fled the press conference when asked what a 'master user' is"
+    ],
+    "found_spots": [
+      "checking a game's score behind a betting machine",
+      "hiding in the private cabin of an executive jet"
+    ],
+    "taunts": [
+      "Betting slip: 'Odds of 100 to 1 that you won't find me. — 01'",
+      "Note: 'Hidden partner? The only thing hidden now is me!'"
+    ],
+    "gags": [
+      { "text": "A betting ad kept popping up on your phone. You lost an hour trying to close it." }
+    ],
+    "near": [
+      "He's here! He asked what the odds are of a reporter finding him today."
+    ],
+    "headlines_win": [
+      "LOSING BET: {player} finds the senator in {city}"
+    ]
+  }
+]

@@ -21,6 +21,7 @@ func _init() -> void:
 	_text = UiTheme.body("", 30)
 	col.add_child(_text)
 	var row := HBoxContainer.new()
+	Responsive.fill_row(row)
 	row.alignment = BoxContainer.ALIGNMENT_END
 	row.add_theme_constant_override("separation", 12)
 	col.add_child(row)

@@ -27,7 +27,7 @@ godot --headless --path . --script res://tools/build_audio.gd  # regera música/
 godot --headless --path . --script res://tools/build_icon.gd   # regera ícone
 godot --headless --path . --script res://tools/build_portrait_sheet.gd  # build/portraits.png com todos os retratos
 godot --headless --path . --script res://tools/build_og.gd    # imagem de compartilhamento (assets/web/og.jpg)
-godot --path . res://tools/RenderPreview.tscn              # PNG de cada tela em build/preview/<tamanho>/ (PC, celular deitado e em pé)
+godot --path . res://tools/RenderPreview.tscn              # PNG de cada tela em build/preview/<idioma>/<tamanho>/
 godot --headless --path . --export-release "Windows Desktop" build/OndeEstaFlavio.exe
 ```
 
@@ -85,6 +85,12 @@ No jogo, `Online` (autoload) desliga sozinho em `res://tests` e
 ## 4. Convenções
 
 - Conteúdo/texto: conferir [LORE.md](LORE.md) (tom e limites da sátira).
+- Idiomas (spec 008, pt/en/es): texto de interface vai em
+  `data/i18n/ui.csv` com o português como chave (botão/label com texto fixo é
+  traduzido sozinho; texto montado com % passa por `Lang.t()`). Dados
+  traduzidos em `data/i18n/<idioma>/` com os mesmos ids e listas do mesmo
+  tamanho (os sorteios dependem disso). O caso guarda ids/índices, nunca
+  texto. Texto novo sem tradução quebra os testes.
 - Layout montado em código a partir de componentes; `.tscn` só com raiz +
   script.
 - Cores só de `Palette`; estilo só via `UiTheme` (nada de StyleBox solto).

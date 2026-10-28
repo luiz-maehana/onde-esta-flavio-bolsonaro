@@ -40,13 +40,15 @@ func _run() -> void:
 	await _test_title_screen()
 	await _test_city_flow()
 	await _test_screens_build()
-	await _test_layout_fits()
+	await _test_layout_all_languages()
 	await _test_rotation()
 	await _test_reentrancy()
 	await _test_monkey()
 	await _test_full_game_by_click()
 	await _test_hostile_inputs()
 	await _test_keyboard()
+	await _test_no_portuguese_left()
+	await _test_language_switch()
 	await _test_online()
 	_check(_log.errors.is_empty(), "nenhum erro do motor durante os testes: %s" % "; ".join(_log.errors.slice(0, 5)))
 
@@ -316,14 +318,14 @@ func _test_layout_fits() -> void:
 		Responsive.forced_short_side = profile[2]
 		Responsive.forced_touch = profile[3]
 		UiTheme.reset_theme()
-		var tag: String = profile[0]
+		var tag: String = "%s [%s]" % [profile[0], Lang.current]
 		_extreme_case()
 		var title := await _layout_box(load("res://scenes/TitleScreen.tscn").instantiate())
 		_check_fits(title, "Título " + tag)
 		var art: Array = title.find_children("*", "TextureRect", true, false).map(func(t): return t.texture)
 		var screen: Control = title.get_child(0)
-		var expected: Texture2D = screen.BACKGROUND_PORTRAIT if Responsive.is_portrait() else screen.BACKGROUND
-		_check(art.has(expected), "título usa a arte %s (%s)" % ["retrato" if Responsive.is_portrait() else "paisagem", tag])
+		var expected: String = screen.art_path(Lang.current, Responsive.is_portrait())
+		_check(art.any(func(t): return t != null and t.resource_path == expected), "título usa a arte %s (%s)" % [expected.get_file(), tag])
 		title.get_child(0)._open_name_dialog()
 		await _frames(3)
 		_check_fits(title, "Crachá " + tag)
@@ -380,13 +382,13 @@ func _test_layout_fits() -> void:
 	UiTheme.reset_theme()
 	GameManager.career = Career.from_dict({"player_name": "Teste", "cases_solved": 1, "cases_played": 2})
 
-var _longest_speech_cache := ""
+var _longest_speech_cache := {}
 
 ## A fala mais longa que o jogo gera de fato: 300 casos jogados inteiros
 ## (todo local de toda cidade, com desvio) + imprevistos e diário de sono.
 func _longest_speech() -> String:
-	if _longest_speech_cache != "":
-		return _longest_speech_cache
+	if _longest_speech_cache.has(Lang.current):
+		return _longest_speech_cache[Lang.current]
 	var texts: Array = GameData.flavor()["sleep"].duplicate()
 	for g in GameData.flavor()["gags"]:
 		texts.append(g["text"])
@@ -406,8 +408,8 @@ func _longest_speech() -> String:
 					texts.append(s.investigate(loc).get("text", ""))
 			if not s.is_over() and not s.is_final_stop():
 				s.travel(s.route[s.stop_index + 1])
-	_longest_speech_cache = _longest(texts)
-	return _longest_speech_cache
+	_longest_speech_cache[Lang.current] = _longest(texts)
+	return _longest_speech_cache[Lang.current]
 
 ## Carreira com o nome mais largo possível e o cargo de título mais longo.
 func _longest_career() -> Career:
@@ -436,15 +438,16 @@ func _extreme_case() -> void:
 		if (s["title"] + s["summary"] + s["status"]).length() > (longest_scandal["title"] + longest_scandal["summary"] + longest_scandal["status"]).length():
 			longest_scandal = s
 	case.scandal = longest_scandal
-	case.reason = _longest(longest_scandal["reasons"])
-	case.found_spot = _longest(longest_scandal["found_spots"])
+	case.reason_index = _longest_index(longest_scandal["reasons"])
+	case.found_spot_index = _longest_index(longest_scandal["found_spots"])
 	var longest_disguise: Dictionary = GameData.disguises()[0]
 	for d in GameData.disguises():
 		if d["name"].length() > longest_disguise["name"].length():
 			longest_disguise = d
 	case.disguise = longest_disguise
+	var longest_clue := _longest_index(longest_city["clues"])
 	for i in 30:
-		case.notes.append({"city": longest_city["name"], "role": "Testemunha", "text": _longest(GameData.flavor()["taunts"])})
+		case.notes.append({"city": longest_city["id"], "speech": {"loc": "banco", "kind": "clue", "parts": [["clue", longest_city["id"], longest_clue]]}})
 	GameManager.case = case
 
 func _finish_extreme_case() -> void:
@@ -460,6 +463,13 @@ func _longest(values: Array) -> String:
 		var text := str(v)
 		if text.length() > best.length():
 			best = text
+	return best
+
+func _longest_index(values: Array) -> int:
+	var best := 0
+	for i in values.size():
+		if str(values[i]).length() > str(values[best]).length():
+			best = i
 	return best
 
 func _longest_key(d: Dictionary) -> String:
@@ -487,11 +497,39 @@ func _check_fits(box: Control, what: String) -> void:
 	var limit := box.get_global_rect().grow(1)
 	var out := _overflowing(box, limit)
 	_check(out == null, "%s cabe na tela (vazou: %s)" % [what, _describe(out, limit) if out else ""])
+	if Responsive.is_portrait():
+		_check_symmetry(box, what)
 	# RF37: no toque, todo botão visível com pelo menos 48 px reais de altura
 	if Responsive.is_touch():
 		var small: Array = box.find_children("*", "Button", true, false).filter(func(b):
 			return b.is_visible_in_tree() and b.size.y * Responsive.screen_per_base() < Responsive.TOUCH_TARGET_CSS - 1.0)
 		_check(small.is_empty(), "%s: botões com 48 px reais (pequenos: %s)" % [what, small.map(func(b): return "%s=%dpx" % [b.text.left(16), int(b.size.y * Responsive.screen_per_base())]).slice(0, 4)])
+
+## RF53/54 (spec 008): em pé, fileira de botões não deixa sobra de um lado
+## só. Fileira = contêiner cujos filhos visíveis são todos botões; a sobra é
+## medida contra o pai quando ele é uma coluna (fileira encolhida fica
+## encostada num lado dela).
+## (6: fileira que quebra linha divide a largura com arredondamento)
+const SYMMETRY_TOLERANCE := 6.0
+
+func _check_symmetry(box: Control, what: String) -> void:
+	var lopsided: Array = []
+	for row in box.find_children("*", "Container", true, false):
+		if not row.is_visible_in_tree() or row is ScrollContainer:
+			continue
+		var kids: Array = row.get_children().filter(func(c): return c is Control and c.is_visible_in_tree())
+		if kids.is_empty() or not kids.all(func(c): return c is BaseButton):
+			continue
+		var used := Rect2(kids[0].get_global_rect())
+		for k in kids:
+			used = used.merge(k.get_global_rect())
+		var parent: Control = row.get_parent() as Control
+		var span: Rect2 = parent.get_global_rect() if parent is VBoxContainer or parent is MarginContainer or parent is PanelContainer else row.get_global_rect()
+		var left := used.position.x - span.position.x
+		var right := span.end.x - used.end.x
+		if absf(left - right) > SYMMETRY_TOLERANCE:
+			lopsided.append("%s [%s] sobra %d|%d" % [row.get_class(), str(kids[0].get("text")).left(14), int(left), int(right)])
+	_check(lopsided.is_empty(), "%s: botões sem sobra de um lado só (%s)" % [what, "; ".join(lopsided.slice(0, 4))])
 
 func _describe(c: Control, limit: Rect2) -> String:
 	var r := c.get_global_rect()
@@ -504,13 +542,13 @@ func _overflowing(node: Node, limit: Rect2) -> Control:
 	for child in node.get_children():
 		if not (child is Control and child.is_visible_in_tree()):
 			continue
+		var inner: Control = null
+		if not (child is ScrollContainer or child.clip_contents):
+			inner = _overflowing(child, limit)
+		if inner:
+			return inner  # o mais fundo que vaza é o culpado
 		if not limit.encloses(child.get_global_rect()):
 			return child
-		if child is ScrollContainer or child.clip_contents:
-			continue
-		var inner := _overflowing(child, limit)
-		if inner:
-			return inner
 	return null
 
 ## U4: girar o aparelho no meio de cada coisa. O caso não muda, nenhuma
@@ -610,6 +648,9 @@ func _test_full_game_by_click() -> void:
 		GameManager.settings.tips_enabled = false
 		GameManager.settings.text_speed = "instantanea"
 		GameManager.settings.ranking = "no"
+		GameManager.settings.language = "es" if orientation == 1 else "pt"
+		Lang.apply(GameManager.settings.language)
+		tag += " [%s]" % Lang.current
 		GameManager.career = Career.from_dict({"player_name": "Clique", "cases_solved": 0, "cases_played": 0})
 		var main: Control = load("res://scenes/Main.tscn").instantiate()
 		add_child(main)
@@ -632,7 +673,8 @@ func _play_by_click(main: Control, tag: String) -> bool:
 	if not await _step(main, "NOVO CASO", "briefing", tag):
 		return false
 	var case: CaseState = GameManager.case
-	if not await _step(main, "EMBARCAR PARA", "city", tag):
+	# botão montado já traduzido ("EMBARCAR PARA %s")
+	if not await _step(main, Lang.t("EMBARCAR PARA %s").replace("%s", ""), "city", tag):
 		return false
 	var saved_once := false
 	while true:
@@ -874,6 +916,162 @@ func _check_tab_cycle(root: Control, what: String) -> void:
 	var missed: Array = targets.filter(func(b): return not reached.has(b)).map(func(b): return b.text if b is Button else b.get_class())
 	_check(missed.is_empty(), "%s: Tab alcança todos os botões (faltou %s)" % [what, missed])
 
+## --- Spec 008 (T82): idiomas na interface --------------------------------------------
+
+## RF55: "cabe na tela" e simetria em cada idioma (textos em espanhol e
+## inglês costumam ser mais longos).
+func _test_layout_all_languages() -> void:
+	for lang in Lang.SUPPORTED:
+		Lang.apply(lang)
+		await _test_layout_fits()
+	Lang.apply("pt")
+
+## Marcas que só o português tem — texto visível com elas, com o jogo em
+## inglês ou espanhol, é tradução esquecida. Nomes próprios ficam de fora.
+## ("da"/"do" ficam de fora: "da" é verbo em espanhol.)
+const PORTUGUESE_MARKS := "(ção|ções|ões|ã|õ|ê|\\bvocê\\b|\\bnão\\b|\\buma\\b|\\bcom\\b|\\bàs\\b|\\bao\\b)"
+const PROPER_NAMES := ["são paulo", "joão", "barra da tijuca"]
+
+func _test_no_portuguese_left() -> void:
+	var marks := RegEx.create_from_string(PORTUGUESE_MARKS)
+	for lang in ["en", "es"]:
+		Lang.apply(lang)
+		GameManager.settings.tips_enabled = false
+		var found: Array = []
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 17
+		GameManager.case = CaseGenerator.generate(rng, {"route_len": 4})
+		var case: CaseState = GameManager.case
+		Online.mock = func(_m, path, _b):
+			if path.begins_with("/leaderboard"):
+				return {"ok": true, "status": 200, "data": {"entries": [
+					{"position": 1, "nickname": "Repórter Anônimo", "rank_title": "Repórter", "rank": 2, "score": 900, "hours": 80, "city": "paris", "is_you": false},
+				]}}
+			return {"ok": true, "status": 200, "data": {"online": 7, "interval": 60}}
+		await Online.heartbeat()
+		Online._timer.stop()
+
+		var title: Control = await _mount(load("res://scenes/TitleScreen.tscn").instantiate())
+		_collect_portuguese(title, marks, "título", found)
+		title._open_options()
+		await _frames(3)
+		_collect_portuguese(title, marks, "opções", found)
+		title._options_overlay.visible = false
+		title._open_name_dialog()
+		await _frames(2)
+		_collect_portuguese(title, marks, "crachá", found)
+		title.queue_free()
+
+		for scene in ["BriefingScreen", "TravelScreen", "CareerScreen", "LeaderboardScreen"]:
+			var node: Control = await _mount(load("res://scenes/%s.tscn" % scene).instantiate())
+			await _frames(3)
+			_collect_portuguese(node, marks, scene, found)
+			node.queue_free()
+
+		var city: Control = await _mount(load("res://scenes/CityScreen.tscn").instantiate())
+		_collect_portuguese(city, marks, "cidade", found)
+		for loc in case.locations_here():
+			city._on_location_chosen(loc)
+			await _frames(2)
+			_collect_portuguese(city, marks, "fala", found)
+			city._back_to_actions()
+		for panel in ["_open_dossier", "_open_notes", "_open_investigate", "_open_pause"]:
+			city.call(panel)
+			await _frames(2)
+			_collect_portuguese(city, marks, panel, found)
+			city._pause.close()
+			city._back_to_actions()
+		city.queue_free()
+
+		var tips := TipBox.new()
+		await _mount(tips)
+		GameManager.settings.tips_enabled = true
+		GameManager.settings.seen_tips.clear()
+		for tip_id in GameData.flavor()["tips"]:
+			tips.try_show(tip_id)
+			_collect_portuguese(tips, marks, "dica " + tip_id, found)
+		GameManager.settings.tips_enabled = false
+		tips.queue_free()
+
+		case.set_pauta(case.disguise["id"])
+		while not case.is_final_stop():
+			case.travel(case.route[case.stop_index + 1])
+		case.investigate(case.locations_here()[case.hideout_slot])
+		GameManager.last_unlocked = ["primeiro_furo", "sem_errar"]
+		GameManager.settings.ranking = "ask"
+		GameManager.last_online_result = {"status": "done", "published": false, "score": 500, "outcome": CaseState.Outcome.WIN}
+		var end: Control = await _mount(load("res://scenes/EndScreen.tscn").instantiate())
+		_collect_portuguese(end, marks, "capa", found)
+		end.queue_free()
+		GameManager.last_online_result = {}
+		Online.mock = Callable()
+		await _frames()
+		for f in found.slice(0, 8):
+			printerr("  [", lang, "] ", f)
+		_check(found.is_empty(), "nenhum texto em português com o jogo em %s (%d achados)" % [lang, found.size()])
+	Lang.apply("pt")
+
+## Texto mostrado (com a tradução automática do Godot) de cada label/botão
+## visível que tenha marca de português.
+func _collect_portuguese(root: Node, marks: RegEx, where: String, found: Array) -> void:
+	for node in root.find_children("*", "Control", true, false):
+		# tradução automática desligada = de propósito (ex.: nomes dos idiomas)
+		if not node.is_visible_in_tree() or node.auto_translate_mode == Node.AUTO_TRANSLATE_MODE_DISABLED:
+			continue
+		var raw = node.get("text") if (node is Label or node is Button) else node.get("placeholder_text") if node is LineEdit else null
+		if raw == null or str(raw) == "":
+			continue
+		var shown: String = TranslationServer.translate(str(raw))
+		var lower := shown.to_lower()
+		for name in PROPER_NAMES:
+			lower = lower.replace(name, "")
+		var m := marks.search(lower)
+		if m:
+			found.append("%s: \"%s\" (%s)" % [where, shown.replace("\n", " ").left(70), m.get_string()])
+
+## RF42: trocar o idioma pelas Opções remonta a tela no idioma novo e reabre
+## as Opções; no meio do caso, o caso continua igual.
+func _test_language_switch() -> void:
+	GameManager.settings = Settings.new()
+	GameManager.settings.tips_enabled = false
+	GameManager.settings.text_speed = "instantanea"
+	var main: Control = load("res://scenes/Main.tscn").instantiate()
+	add_child(main)
+	await _wait(0.5)
+	main._current._open_options()
+	await _frames(3)
+	_click(_find_button(main._current, "ESPAÑOL"))
+	await _settle(main)
+	await _frames(3)
+	_check(Lang.current == "es" and GameManager.settings.language == "es", "ESPAÑOL troca o idioma e salva a escolha")
+	_check(main._current_name == "title" and main._current._options_overlay.visible, "tela remontada com as Opções reabertas")
+	var art: Array = main._current.find_children("*", "TextureRect", true, false).map(func(t): return t.texture.resource_path if t.texture else "")
+	_check(art.has(main._current.art_path("es", Responsive.is_portrait())), "título com a arte em espanhol")
+
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 23
+	GameManager.case = CaseGenerator.generate(rng, {"route_len": 4})
+	var case: CaseState = GameManager.case
+	case.investigate(case.locations_here()[0])
+	var actions := case.actions.size()
+	GameManager.go_to_city()
+	await _settle(main)
+	main._current._open_pause()
+	main._current._pause._open_options()
+	await _frames(3)
+	_click(_find_button(main._current, "ENGLISH"))
+	await _settle(main)
+	await _frames(3)
+	_check(Lang.current == "en" and main._current_name == "city", "trocar no meio do caso fica na cidade")
+	_check(GameManager.case == case and case.actions.size() == actions, "trocar o idioma não mexe no caso")
+	_check(main._current._pause.visible and main._current._pause._options.visible, "pausa e Opções reabertas depois de trocar")
+	main.queue_free()
+	await _frames(3)
+	Lang.apply("pt")
+	get_window().content_scale_size = Responsive.LANDSCAPE_SIZE
+	GameManager.settings = Settings.new()
+	GameManager.settings.tips_enabled = false
+
 ## --- Spec 007 (T68): reentrada e macaco -------------------------------------------------
 
 ## Clique de mouse de verdade no centro do controle (passa pelos overlays e
@@ -971,6 +1169,8 @@ func _test_monkey() -> void:
 		SaveService.clear_case()
 		GameManager.settings = Settings.new()
 		GameManager.settings.text_speed = "instantanea"
+		GameManager.settings.language = {101: "pt", 202: "en", 303: "es"}[run[0]]
+		Lang.apply(GameManager.settings.language)
 		GameManager.career = Career.from_dict({"player_name": "Macaco", "cases_solved": run[0] % 7, "cases_played": 9})
 		var main: Control = load("res://scenes/Main.tscn").instantiate()
 		add_child(main)

@@ -148,7 +148,9 @@ async function leaderboard(url: URL, deps: Deps, origin: string | null): Promise
   const device = url.searchParams.get("device");
   const rows = await deps.store.top(since, LEADERBOARD_SIZE);
   const entries = rows.map((r, i) => ({
-    position: i + 1, nickname: r.nickname, rank_title: r.rank_title, score: r.score,
+    // rank: índice do cargo, pro jogo mostrar o título no idioma do jogador
+    // (spec 008); rank_title (português) fica pra versões antigas
+    position: i + 1, nickname: r.nickname, rank_title: r.rank_title, rank: flavor.ranks.findIndex((k) => k.title === r.rank_title), score: r.score,
     hours: r.hours, wrong_cities: r.wrong_cities, city: r.city, created_at: r.created_at,
     is_you: isId(device) && r.device === device,
   }));

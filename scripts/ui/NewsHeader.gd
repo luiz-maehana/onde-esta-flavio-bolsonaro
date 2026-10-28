@@ -53,4 +53,4 @@ func show_clock(clock: GameClock) -> void:
 	var fill := StyleBoxFlat.new()
 	fill.bg_color = Palette.RED if clock.hours_left() < 24 else Palette.INK
 	_deadline.add_theme_stylebox_override("fill", fill)
-	_deadline.tooltip_text = "%dh até o fechamento da edição de domingo" % clock.hours_left()
+	_deadline.tooltip_text = Lang.t("%dh até o fechamento da edição de domingo") % clock.hours_left()

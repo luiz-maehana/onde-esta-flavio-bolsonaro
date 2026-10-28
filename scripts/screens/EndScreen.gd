@@ -32,23 +32,23 @@ func _ready() -> void:
 
 	var page := NewspaperPage.new()
 	add_child(page)
-	page.set_texts("EDIÇÃO ESPECIAL · %s" % case.clock.time_text(), headline.to_upper())
+	page.set_texts(Lang.t("EDIÇÃO ESPECIAL · %s") % case.clock.time_text(), headline.to_upper())
 	for p in _story(case, career, city):
 		page.add_paragraph(p, 25)
 
 	if won and Career.rank_for(career.cases_solved - 1)["title"] != career.rank()["title"]:
-		var promo := page.add_paragraph("PROMOÇÃO! A redação te nomeou %s." % career.rank()["title"].to_upper(), 30)
+		var promo := page.add_paragraph(Lang.t("PROMOÇÃO! A redação te nomeou %s.") % career.rank()["title"].to_upper(), 30)
 		promo.add_theme_color_override("font_color", Palette.GREEN)
 	for id in GameManager.last_unlocked:
 		var info := Achievements.info(id)
-		var badge := page.add_paragraph("CONQUISTA: %s — %s" % [info.get("title", id).to_upper(), info.get("description", "")], 23)
+		var badge := page.add_paragraph(Lang.t("CONQUISTA: %s — %s") % [info.get("title", id).to_upper(), info.get("description", "")], 23)
 		badge.add_theme_color_override("font_color", Palette.RED_DARK)
 
 	if case.outcome == CaseState.Outcome.TIMEOUT:
 		page.add_photo(PixelPortrait.flavio_official(), "Flávio Bolsonaro — paradeiro desconhecido")
 	else:
 		page.add_photo_pair(
-			PixelPortrait.flavio_disguised(case.disguise["id"]), "FLAGRANTE: " + case.disguise["name"],
+			PixelPortrait.flavio_disguised(case.disguise["id"]), Lang.t("FLAGRANTE: %s") % case.disguise["name"],
 			PixelPortrait.flavio_official(), "FOTO OFICIAL: o senador")
 	page.photo_column.add_child(UiTheme.stamp("FURO!" if won else "ESCAPOU", 26, Palette.GREEN if won else Palette.RED))
 	_online_label = UiTheme.body("", 22, Palette.RED_DARK)
@@ -88,9 +88,9 @@ func _show_online(r: Dictionary) -> void:
 			_online_label.text = "Ranking: o resultado não conferiu no servidor."
 		"done":
 			if r.get("published", false) and r.get("position") != null:
-				_online_label.text = "RANKING: %d pontos · %dº lugar na semana" % [int(r.get("score", 0)), int(r["position"])]
+				_online_label.text = Lang.t("RANKING: %d pontos · %dº lugar na semana") % [int(r.get("score", 0)), int(r["position"])]
 			elif won:
-				_online_label.text = "Pontuação: %d (fora do ranking)" % int(r.get("score", 0))
+				_online_label.text = Lang.t("Pontuação: %d (fora do ranking)") % int(r.get("score", 0))
 			else:
 				_online_label.text = ""
 		_:
@@ -107,9 +107,10 @@ func _ask_ranking(focus_after: Button) -> void:
 	col.add_theme_constant_override("separation", 14)
 	card.add_child(col)
 	col.add_child(UiTheme.headline("ENTRAR NO RANKING?", 20, Palette.RED))
-	col.add_child(UiTheme.body("Seus casos vencidos podem aparecer no ranking online como \"%s\". Dá pra mudar depois em Opções." % GameManager.career.player_name))
+	col.add_child(UiTheme.body(Lang.t("Seus casos vencidos podem aparecer no ranking online como \"%s\". Dá pra mudar depois em Opções.") % GameManager.career.player_name))
 	col.add_child(UiTheme.body(OptionsPanel.RANKING_NOTE, 22, Palette.GREY))
 	var row := HBoxContainer.new()
+	Responsive.fill_row(row)
 	row.alignment = BoxContainer.ALIGNMENT_END
 	row.add_theme_constant_override("separation", 12)
 	col.add_child(row)
@@ -128,24 +129,24 @@ func _ask_ranking(focus_after: Button) -> void:
 
 func _story(case: CaseState, career: Career, city: Dictionary) -> Array:
 	var lines: Array = []
-	var pauta_name: String = GameData.disguise(case.pauta).get("name", "nenhuma")
+	var pauta_name: String = GameData.disguise(case.pauta).get("name", Lang.t("nenhuma"))
 	match case.outcome:
 		CaseState.Outcome.WIN:
-			lines.append("%s, %s — Após uma semana de perseguição, %s encontrou o senador %s, disfarçado de %s. Questionado, ele respondeu: \"Sem comentários.\" Mas a foto já estava tirada." % [
+			lines.append(Lang.t("%s, %s — Após uma semana de perseguição, %s encontrou o senador %s, disfarçado de %s. Questionado, ele respondeu: \"Sem comentários.\" Mas a foto já estava tirada.") % [
 				city["name"].to_upper(), city["country"], career.player_name, case.found_spot, case.disguise["name"]])
 		CaseState.Outcome.NO_PAUTA:
-			lines.append("%s — O senador foi encontrado %s, mas sem pauta aprovada a redação não liberou a entrevista. Enquanto o editor ligava de volta, ele escapuliu — %s." % [
+			lines.append(Lang.t("%s — O senador foi encontrado %s, mas sem pauta aprovada a redação não liberou a entrevista. Enquanto o editor ligava de volta, ele escapuliu — %s.") % [
 				city["name"].to_upper(), case.found_spot, case.disguise["reveal"]])
 		CaseState.Outcome.WRONG_PAUTA:
-			lines.append("%s — A pauta dizia \"%s\", mas o senador estava disfarçado de %s. A matéria caiu e ele aproveitou a confusão para sumir de novo." % [
+			lines.append(Lang.t("%s — A pauta dizia \"%s\", mas o senador estava disfarçado de %s. A matéria caiu e ele aproveitou a confusão para sumir de novo.") % [
 				city["name"].to_upper(), pauta_name, case.disguise["name"]])
 		CaseState.Outcome.TIMEOUT:
-			lines.append("A edição de domingo fechou às 17h sem o furo. O último paradeiro conhecido do senador era %s. Fontes dizem que ele usava um disfarce de %s." % [
+			lines.append(Lang.t("A edição de domingo fechou às 17h sem o furo. O último paradeiro conhecido do senador era %s. Fontes dizem que ele usava um disfarce de %s.") % [
 				GameData.city(case.route[case.stop_index])["name"], case.disguise["name"]])
 	var visited := case.visited.size()
-	lines.append("Ficha do caso: %d cidade(s) investigada(s) de %d na rota · %d anotações · pauta: %s." % [
+	lines.append(Lang.t("Ficha do caso: %d cidade(s) investigada(s) de %d na rota · %d anotações · pauta: %s.") % [
 		visited, case.route.size(), case.notes.size(), pauta_name])
-	lines.append("Sobre %s, na vida real: %s" % [case.scandal["title"].to_lower(), case.scandal["status"]])
-	lines.append("%s %s — %d caso(s) resolvido(s) em %d." % [
+	lines.append(Lang.t("Sobre %s, na vida real: %s") % [Lang.lower_first(case.scandal["title"]), case.scandal["status"]])
+	lines.append(Lang.t("%s %s — %d caso(s) resolvido(s) em %d.") % [
 		career.rank()["title"], career.player_name, career.cases_solved, career.cases_played])
 	return lines

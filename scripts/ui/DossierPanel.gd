@@ -89,6 +89,7 @@ func _build() -> void:
 	col.add_child(_pauta_label)
 
 	var actions := HBoxContainer.new()
+	Responsive.fill_row(actions)
 	actions.alignment = BoxContainer.ALIGNMENT_END
 	actions.add_theme_constant_override("separation", 12)
 	col.add_child(actions)
@@ -104,13 +105,13 @@ func _build() -> void:
 func _refresh() -> void:
 	var matches := Dossier.matching(_case.dossier)
 	var names: Array = matches.map(func(d): return d["name"])
-	_matches_label.text = "Compatíveis (%d): %s" % [matches.size(), ", ".join(names)]
+	_matches_label.text = Lang.t("Compatíveis (%d): %s") % [matches.size(), ", ".join(names)]
 	_issue.disabled = matches.size() != 1
 	if _case.pauta == "":
 		_pauta_label.text = "PAUTA: nenhuma emitida"
 		_pauta_label.add_theme_color_override("font_color", Palette.GREY)
 	else:
-		_pauta_label.text = "PAUTA APROVADA: %s" % GameData.disguise(_case.pauta)["name"].to_upper()
+		_pauta_label.text = Lang.t("PAUTA APROVADA: %s") % GameData.disguise(_case.pauta)["name"].to_upper()
 		_pauta_label.add_theme_color_override("font_color", Palette.GREEN)
 
 func _on_issue() -> void:
