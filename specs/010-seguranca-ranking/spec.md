@@ -97,7 +97,11 @@ conta está no **Free** (no Paid, o que passar da cota é cobrado).
 - `wrangler` 4.154.0: a correção do `undici` só existe a partir da
   4.153.0 (versões de out/2026); a 4.154.0 tem procedência SLSA verificada
   (`npm audit signatures`), que o CI passa a exigir antes do deploy.
-- O limite por IP usa o rate limiting nativo do Workers (60 req/min);
+- Limite por IP: o rate limiting nativo do Workers foi aceito no plano
+  grátis, mas no teste em produção deixou passar ~170 req/min por IP (é
+  "permissivo" por desenho). Somado a ele, um limitador em memória por
+  instância (`limiter.ts`, 60 req/min), exato pra quem martela da mesma
+  região. Antes: o limite por IP usava só o nativo (60 req/min);
   sem domínio próprio não há como barrar requisições antes do Worker.
 
 ## Testes

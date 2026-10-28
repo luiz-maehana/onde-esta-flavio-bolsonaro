@@ -6,6 +6,11 @@ import { DurableObject } from "cloudflare:workers";
 import { handle, newSeed } from "./api.ts";
 import { PresenceCounter } from "./presence.ts";
 import { D1Store } from "./store.ts";
+import { IsolateLimiter } from "./limiter.ts";
+
+// Vive enquanto a instância do Worker viver (spec 010): limite por IP exato
+// pra quem martela da mesma região, somado ao rate limiting nativo.
+const isolateLimiter = new IsolateLimiter();
 
 export interface Env {
   DB: D1Database;
@@ -43,7 +48,11 @@ export default {
       now: () => Date.now(),
       randomSeed: () => newSeed(() => crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000),
       newId: () => hex(crypto.getRandomValues(new Uint8Array(16))),
-      limit: env.LIMITER ? async (key) => (await (env.LIMITER as NonNullable<Env["LIMITER"]>).limit({ key })).success : undefined,
+      // os dois limites valem: qualquer um que negar barra a requisição
+      limit: async (key) => {
+        if (!isolateLimiter.allow(key, Date.now())) return false;
+        return env.LIMITER ? (await env.LIMITER.limit({ key })).success : true;
+      },
       // Sal muda por dia: o mesmo IP não é ligável entre dias.
       ipHash: async (ip) => {
         const day = new Date().toISOString().slice(0, 10);

@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { handle, deviceHash, rankForWins, MAX_RUNS_PER_DEVICE, RUN_TTL_MS, WEEK_MS, type Deps } from "../src/api.ts";
 import { MIN_RUN_SECONDS } from "../src/plausibility.ts";
 import { MAX_SESSIONS_PER_IP } from "../src/presence.ts";
+import { IsolateLimiter, LIMIT_PER_MINUTE } from "../src/limiter.ts";
 import { MemoryStore } from "../src/store.ts";
 import { PresenceCounter, BEAT_BUDGET, MIN_INTERVAL_S } from "../src/presence.ts";
 import { generate, Outcome, type Config } from "../src/engine/case.ts";
@@ -435,4 +436,13 @@ test("ranking marca você pelo hash do aparelho (e ainda pelo id antigo)", async
   assert.equal(byId.data.entries[0].is_you, true);
   const other = await call("GET", "/leaderboard?you=" + (await deviceHash(DEV_B)));
   assert.equal(other.data.entries[0].is_you, false);
+});
+
+test("limitador em memória: 60 por minuto por IP, janela renova", () => {
+  const l = new IsolateLimiter();
+  const t0 = 1_000_000;
+  for (let i = 0; i < LIMIT_PER_MINUTE; i++) assert.ok(l.allow("ip-a", t0 + i));
+  assert.equal(l.allow("ip-a", t0 + 100), false, "61ª no mesmo minuto barrada");
+  assert.ok(l.allow("ip-b", t0 + 100), "outro IP passa");
+  assert.ok(l.allow("ip-a", t0 + 60_001), "minuto seguinte libera");
 });
